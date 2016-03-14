@@ -22,6 +22,9 @@ func init() {
 	beego.Router("/sdt/sdtBdiSetForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiSetForList")         //列出所有的指标集-用于下拉列表
 	beego.Router("/sdt/sdtBdiSecrecyForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiSecrecyForList") //列出所有的保密级别-用于下拉列表
 	beego.Router("/sdt/sdtTypeSetForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiTypeForList")       //列出所有的指标类型-用于下拉列表
+	beego.Router("/sdt/datasourceForList", &controllers.SdtPublicDisplayDataController{}, "*:DatasourceTypeForList")       //列出所有的指标类型-用于下拉列表
+
+
 
 	//指标库
 	beego.Router("/sdtBdiBase/index", &controllers.SdtBdiBaseController{}, "*:Index")               //列表首页
@@ -55,5 +58,15 @@ func init() {
 	beego.Router("/sdtBdi/update", &controllers.SdtBdiController{}, "*:Update")         //更新内容
 	beego.Router("/sdtBdi/addPage", &controllers.SdtBdiController{}, "*:AddPage")       //新增页面
 	beego.Router("/sdtBdi/add", &controllers.SdtBdiController{}, "*:Add")               //新增内容
+
+	//指标项
+	beego.Router("/datasource/index", &controllers.DatasourceController{}, "*:Index")           //列表首页
+	beego.Router("/datasource/all", &controllers.DatasourceController{}, "*:All")               //列出所有数据
+	//beego.Router("/datasource/updatePage", &controllers.DatasourceController{}, "*:UpdatePage") //更新页面
+	//beego.Router("/datasource/update", &controllers.DatasourceController{}, "*:Update")         //更新内容
+	beego.Router("/datasource/addPage", &controllers.DatasourceController{}, "*:AddPage")       //新增页面
+	beego.Router("/datasource/add", &controllers.DatasourceController{}, "*:Add")               //新增内容
+
+	beego.Router("/datasource/check", &controllers.DatasourceController{}, "*:Check")       //检测数据源有效性校验
 
 }

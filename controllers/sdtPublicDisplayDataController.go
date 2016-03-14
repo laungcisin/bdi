@@ -167,3 +167,37 @@ func (this *SdtPublicDisplayDataController) SdtBdiTypeForList() {
 	this.ServeJSON()
 	return
 }
+
+//列出所有的数据源类型-用于下拉列表
+func (this *SdtPublicDisplayDataController) DatasourceTypeForList() {
+	type DataType struct {
+		Id   int    `json:"id"`
+		Text string `json:"text"`
+	}
+
+	returnData := []DataType{}
+
+	var o orm.Ormer
+	o = orm.NewOrm()
+
+	var maps []orm.Params
+	_, err := o.Raw(" select t.bdi_datasource_type_id as Id, t.bdi_datasource_type_name as Text from sdt_bdi_datasource_type t ").Values(&maps)
+
+	if err != nil {
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	for _, v := range maps {
+		dataType := new(DataType)
+		id, _ := strconv.Atoi(v["Id"].(string))
+		dataType.Id = id
+		dataType.Text = v["Text"].(string)
+		returnData = append(returnData, *dataType)
+	}
+
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
