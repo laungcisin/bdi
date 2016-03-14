@@ -80,6 +80,20 @@
                     $("input[type='radio']")[index].checked = false;
                 }
             },
+            onDblClickRow: function (index, row) {
+                //加载完毕后获取所有的checkbox遍历
+                var radio = $("input[type='radio']")[index].disabled;
+                //如果当前的单选框不可选，则不让其选中
+                if (radio != true) {
+                    //让点击的行单选按钮选中
+                    $("input[type='radio']")[index].checked = true;
+                }
+                else {
+                    $("input[type='radio']")[index].checked = false;
+                }
+
+                updateSdtBdiSetDialog();
+            }
         });
 
     })
