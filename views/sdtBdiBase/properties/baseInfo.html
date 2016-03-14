@@ -1,0 +1,194 @@
+<div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+
+<form id="sdtBdiBaseModifyForm_Temp" method="post">
+    <input type="hidden" id="Id" name="Id" value=""/>
+    <table>
+        <tr>
+            <th>指标库代码</th>
+            <td><input name="BdiBaseCode" id="BdiBaseCode"/></td>
+            <th>指标库名称</th>
+            <td><input name="BdiBaseName" id="BdiBaseName"/></td>
+        </tr>
+        <tr>
+            <th>指标库年度</th>
+            <td><input name="BdiBaseYear" id="BdiBaseYear"/></td>
+            <th>业务日期</th>
+            <td><input id="BusDate" name="BusDate"/></td>
+        </tr>
+        <tr>
+            <th>中文全称</th>
+            <td><input id="TotName" name="TotName"/></td>
+        </tr>
+        <tr>
+            <th>中文简称</th>
+            <td><input id="AbbName" name="AbbName"/></td>
+            <th>中文别名</th>
+            <td><input id="SynName" name="SynName"/></td>
+        </tr>
+        <tr>
+            <th>英文全称</th>
+            <td><input id="EnTotName" name="EnTotName"/></td>
+        </tr>
+        <tr>
+            <th>英文名称</th>
+            <td><input id="EnName" name="EnName"/></td>
+            <th>英文简称</th>
+            <td><input id="EnAbbName" name="EnAbbName"/></td>
+        </tr>
+        <tr>
+            <th>简码</th>
+            <td><input id="AbbCode" name="AbbCode"/></td>
+            <th>标准码</th>
+            <td><input id="StdId" name="StdId"/></td>
+        </tr>
+        <tr>
+            <th>说明</th>
+            <td><input id="Explains" name="Explains"/></td>
+        </tr>
+        <tr>
+            <th>备注</th>
+            <td><input id="Remarks" name="Remarks"/></td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+    function show() {
+        $("#loading").fadeOut("normal", function () {
+            $(this).remove();
+        });
+    }
+    var delayTime;
+    $.parser.onComplete = function () {
+        if (delayTime) {
+            clearTimeout(delayTime);
+        }
+
+        delayTime = setTimeout(show, 100);
+    }
+
+    $(function () {
+        //指标库代码
+        $('#BdiBaseCode').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: false,
+            readonly: false,
+            value: '{{.sdtBdiBase.BdiBaseCode}}'
+        });
+
+        //指标库名称
+        $('#BdiBaseName').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.BdiBaseName}}'
+        });
+
+        //指标库年度
+        $('#BdiBaseYear').datetimebox({
+            value: '{{.sdtBdiBase.BdiBaseYear}}',
+            required: true,
+            showSeconds: true
+        });
+
+        //当前业务日期
+        $('#BusDate').datetimebox({
+            value: '{{.sdtBdiBase.BusDate}}',
+            required: true,
+            showSeconds: true
+        });
+
+        //中文全称
+        $('#TotName').validatebox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdiBase.TotName}}'
+        });
+
+        //中文简称
+        $('#AbbName').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.AbbName}}'
+        });
+
+        //中文别名
+        $('#SynName').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.SynName}}'
+        });
+
+        //英文全称
+        $('#EnTotName').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.EnTotName}}'
+        });
+
+        //英文名称
+        $('#EnName').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.EnName}}'
+        });
+
+        //英文简称
+        $('#EnAbbName').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.EnAbbName}}'
+        });
+
+        //简码
+        $('#AbbCode').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.AbbCode}}'
+        });
+
+        //标准码
+        $('#StdId').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.StdId}}'
+        });
+
+        //说明
+        $('#Explains').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.Explains}}'
+        });
+
+        //备注
+        $('#Remarks').textbox({
+            iconCls: 'icon-man',
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.Remarks}}'
+        });
+    })
+</script>

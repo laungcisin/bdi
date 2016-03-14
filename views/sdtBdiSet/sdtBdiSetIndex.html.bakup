@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/demo.css">
+</head>
+<body>
+
+<table id="bdiSetDataGrid"></table>
+<div id="addBdiSetWindow">
+    <form id="addBdiSetForm" method="post">
+        <input type="hidden" id="bdiDomainIds" name="bdiDomainIds"/>
+        <table>
+            <tr>
+                <th>指标集名称：</th>
+                <td>
+                    <input name="bdiSetName" id="bdiSetName"/>
+                </td>
+            </tr>
+            <tr>
+                <th>指标域：</th>
+                <td>
+                    <input name="bdiDomainIdsCombobox" id="bdiDomainIdsCombobox"/>
+                </td>
+            </tr>
+            <tr>
+                <th>指标库备注：</th>
+                <td>
+                    <input name="remarks" id="remarks">
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/static/js/easyui/utils/utils.js"></script>
+
+<script type="text/javascript">
+    var editIndex = undefined;
+
+    $(function () {
+        $('#bdiSetDataGrid').datagrid({
+            method: 'GET',
+            selectOnCheck: true,
+            checkOnSelect: true,
+            singleSelect: true,
+            autoRowHeight: false,
+            pageNumber: 1,
+            pageSize: 10,
+            idField: 'BdiSetId',
+            pagination: true,
+            url: '/sdtBdiSet/all',
+            height: '390px',
+            toolbar: [{
+                text: '新增',
+                iconCls: 'icon-add',
+                handler: function () {
+                    $("#addBdiSetForm").form("clear");
+                    $("#addBdiSetWindow").dialog('open');
+                }
+            }, '-', {
+                iconCls: 'icon-edit',
+                text: '编辑',
+                plain: 'true',
+                onClick: function () {
+                    editSdtBdiSetContent();
+                }
+            }, '-', {
+                text: '保存',
+                iconCls: 'icon-save',
+                handler: function () {
+                    //保存前，先将每行记录‘提交’，easyui才知道哪行的记录有更新。
+                    endEdit();
+                    editIndex = undefined;
+                    var rows = $("#bdiSetDataGrid").datagrid('getChanges');
+                    if (rows.length < 1) {
+                        $.messager.alert('提示信息', "数据无更新，无需保存！");
+                        return;
+                    }
+
+                    $.messager.confirm('确认信息', '您确认提交所有修改？', function (r) {
+                        if (r) {
+                            $("#bdiSetDataGrid").datagrid('endEdit', editIndex);
+                            editIndex = undefined;
+
+                            console.info(JSON.stringify(rows));
+
+                            //如果调用 acceptChanges(),使用getChanges()则获取不到编辑和新增的数据。
+                            //使用JSON序列化datarow对象，发送到后台。
+                            $.ajax({
+                                url: "/sdtBdiSet/update",
+                                async: false,
+                                cache: false,
+                                type: 'POST',
+                                data: JSON.stringify(rows),
+                                dataType: 'json',
+                                error: function (data) {
+                                    debugger;
+                                    $.messager.alert('提示信息', data.message);
+                                },
+                                success: function (data) {
+                                    debugger;
+                                    if (data.success) {
+                                        $.messager.alert('提示信息', data.message);
+                                    } else {
+                                        $.messager.alert('提示信息', data.message);
+                                    }
+                                    $('#bdiSetDataGrid').datagrid('reload');
+                                }
+                            });
+
+                        }
+                    });
+                }
+            }, '-', {
+                text: '撤销',
+                iconCls: 'icon-redo',
+                handler: function () {
+                    editIndex = undefined;
+                    $("#bdiSetDataGrid").datagrid('rejectChanges');
+                    $("#bdiSetDataGrid").datagrid('unselectAll');
+                }
+            }],
+            columns: [[
+                {
+                    field: 'oid',
+                    title: '选择',
+                    width: '50px',
+                    formatter: function (value, row, index) {
+                        return '<input type="radio" name="selectRadio" id="selectRadio"' + index + ' value="' + row.Id + '" />';
+                    }
+                },
+                {
+                    field: 'BdiSetId', title: '指标集Id', width: '200px', align: 'center'
+                },
+                {
+                    field: 'BdiSetName', title: '指标集名称', width: '200px', align: 'center'
+                },
+                {
+                    field: 'BdiDomainName', title: '所属指标域', width: '200px', align: 'left'
+                },
+                {
+                    field: 'Remarks', title: '指标集备注', width: '250px', align: 'center'
+                }
+            ]],
+            onClickRow: function (index, row) {
+                //加载完毕后获取所有的checkbox遍历
+                var radio = $("input[type='radio']")[index].disabled;
+                //如果当前的单选框不可选，则不让其选中
+                if (radio != true) {
+                    //让点击的行单选按钮选中
+                    $("input[type='radio']")[index].checked = true;
+                }
+                else {
+                    $("input[type='radio']")[index].checked = false;
+                }
+            },
+        });
+
+        initAddBdiDomainWindow();
+    })
+
+    function editSdtBdiSetContent() {
+        var row = $("#bdiSetDataGrid").datagrid("getSelected");
+        if (row) {
+            $('#contentWindow').dialog({
+                title: '编辑内容',
+                width: '900px',
+                height: '500px',
+                closed: false,
+                cache: false,
+                href: '/sdtBdiBase/content?id=' + row.Id + "&time=" + new Date(),
+                buttons: [{
+                    text: '保存',
+                    iconCls: 'icon-ok',
+                    handler: function () {
+                    }
+                }, {
+                    text: '取消',
+                    iconCls: 'icon-cancel',
+                    handler: function () {
+                    }
+                }]
+            });
+        } else {
+            $.messager.show({
+                title: '提示信息',
+                msg: '请选择一条记录进行编辑！',
+                timeout: 1000,
+                showType: 'slide'
+            });
+        }
+    }
+
+    /**
+     * 初始化新增窗口。
+     */
+    function initAddBdiDomainWindow() {
+        //指标集名称
+        $('#bdiSetName').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: ''
+        });
+
+        //指标域
+        $('#bdiDomainIdsCombobox').combobox({
+            url: '/sdt/sdtBdiDomainForList',
+            editable: false,
+            required: true,
+            method: 'get',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            multiple: true//,
+//            formatter: function (row) {
+//                var opts = $(this).combobox('options');
+//                return '<input type="checkbox" class="combobox-checkbox">' + row[opts.textField]
+//            },
+//            onLoadSuccess: function () {
+//                var opts = $(this).combobox('options');
+//                var target = this;
+//                var values = $(target).combobox('getValues');
+//                $.map(values, function (value) {
+//                    var el = opts.finder.getEl(target, value);
+//                    el.find('input.combobox-checkbox')._propAttr('checked', true);
+//                })
+//            },
+//            onSelect: function (row) {
+//                var opts = $(this).combobox('options');
+//                var el = opts.finder.getEl(this, row[opts.valueField]);
+//                el.find('input.combobox-checkbox')._propAttr('checked', true);
+//            },
+//            onUnselect: function (row) {
+//                var opts = $(this).combobox('options');
+//                var el = opts.finder.getEl(this, row[opts.valueField]);
+//                el.find('input.combobox-checkbox')._propAttr('checked', false);
+//            }
+        });
+
+        //指标库备注
+        $('#remarks').textbox({
+            editable: true,
+            required: true,
+            readonly: false,
+            value: ''
+        });
+
+        $('#addBdiSetWindow').dialog({
+            iconCls: 'icon-add',
+            title: '新增指标集',
+            width: '500px',
+            height: '300px',
+            closed: true,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            closable: true,
+            cache: false,
+            draggable: false,
+            resizable: false,
+            modal: true,
+            buttons: [{
+                id: 'chooseOk',
+                text: '保存',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    debugger;
+                    $('#addBdiSetForm').form('submit', {
+                        url: '/sdtBdiSet/add',
+                        onSubmit: function () {
+                            if($("#addBdiSetForm").form("validate")) {
+                                var res = $("#bdiDomainIdsCombobox").combobox('getValues');
+                                $("#bdiDomainIds").val(res.toString());
+                                return true;
+                            }else {
+                                return false;
+                            }
+                        },
+                        //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
+                        success: function (data) {
+                            //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
+                            var obj = jQuery.parseJSON(data);
+                            if (obj.success) {
+                                $.messager.alert('提示消息', obj.message);
+                                $('#bdiSetDataGrid').datagrid('reload');
+                            } else {
+                                $.messager.alert('提示消息', obj.message);
+                            }
+
+                            $("#addBdiSetForm").form("clear");
+                            $("#addBdiSetWindow").dialog('close');
+                        }
+                    });
+                }
+            }, {
+                id: 'chooseNo',
+                text: '取消',
+                iconCls: 'icon-no',
+                handler: function () {
+                    $("#addBdiSetForm").form("clear");
+                    $('#addBdiSetWindow').dialog("close");
+                }
+            }]
+        });
+    }
+
+    /**
+     * 删除BdiDomain。
+     */
+    //    function deleteBdiDomain(bdiDomainId) {
+    //        debugger;
+    //        $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
+    //            if (r) {
+    //                $.ajax({
+    //                    url: "/sdtBdiSet/delete",
+    //                    async: false,
+    //                    cache: false,
+    //                    type: 'POST',
+    //                    data: {bdiDomainId: bdiDomainId},
+    //                    dataType: 'json',
+    //                    error: function (data) {
+    //                        $.messager.alert('提示信息', data.message);
+    //                    },
+    //                    success: function (data) {
+    //                        if (data.success) {
+    //                            $.messager.alert('提示信息', data.message);
+    //                        } else {
+    //                            $.messager.alert('提示信息', data.message);
+    //                        }
+    //                        $('#bdiSetDataGrid').datagrid('reload');
+    //                    }
+    //                });
+    //            }
+    //        });
+    //    }
+</script>
+
+</body>
+</html>

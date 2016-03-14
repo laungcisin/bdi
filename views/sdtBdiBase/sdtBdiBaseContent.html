@@ -1,0 +1,171 @@
+<form id="sdtBdiBaseModifyForm" method="post">
+    <div id="modifiedTab">
+        <div title="基础信息" style="padding:10px;" cache="false">
+            <table>
+                <tr>
+                    <th>指标库代码</th>
+                    <td><input name="bdiBaseId" id="bdiBaseId"/></td>
+                    <th>指标库名称</th>
+                    <td><input name="bdiBaseName" id="bdiBaseName"/></td>
+                </tr>
+                <tr>
+                    <th>统计年</th>
+                    <td><input name="bdiBaseYear" id="bdiBaseYear"/></td>
+                    <th>统计行政区域代码</th>
+                    <td><input id="admCode" name="admCode"/></td>
+                </tr>
+                <tr>
+                    <th>是否使用</th>
+                    <td><input id="adtFlag" name="adtFlag"/></td>
+                    <th>管理员ID</th>
+                    <td><input id="managerId" name="managerId"/></td>
+                </tr>
+                <tr>
+                    <th>创建人ID</th>
+                    <td><input id="createUserId" name="createUserId"/></td>
+                    <th>创建时间</th>
+                    <td><input id="createTime" name="createTime"/></td>
+                </tr>
+                <tr>
+                    <th>修改人ID</th>
+                    <td><input id="modifyUserId" name="modifyUserId"/></td>
+                    <th>修改时间</th>
+                    <td><input id="modifyTime" name="modifyTime"/></td>
+                </tr>
+                <tr>
+                    <th>备注</th>
+                    <td><input id="Remarks" name="Remarks"/></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(window).resize(function () {
+        $('#modifiedTab').tabs({
+            width: $("#modifiedTab").parent().width(),
+            height: "auto"
+        });
+    })
+
+    $(function () {
+        $('#modifiedTab').tabs({
+            width: $("#modifiedTab").parent().width(),
+            height: "auto",
+            narrow: true,
+            pill: true
+        });
+
+        //方式1：采用js方式初始化tab页面。
+//        $('#modifiedTab').tabs('add', {
+//            title: '基础信息',
+//            href: '/sdtBdiBase/content/baseInfo?id=' + $("#sdtBdiBaseId").val() + "&t=" + new Date(),
+//            cache: false,
+//            iconCls: 'icon-ok',
+//            closable: false
+//        });
+
+        //方式2：采用html方式初始化tab页面。
+        //页面基础信息初始化
+        //指标库代码
+
+        $('#bdiBaseId').textbox({
+            iconAlign: 'left',
+            editable: false,
+            readonly: false,
+            value: '{{.sdtBdiBase.BdiBaseId}}'
+        });
+
+        //指标库名称
+        $('#bdiBaseName').textbox({
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.BdiBaseName}}'
+        });
+
+        //统计年
+        $('#bdiBaseYear').textbox({
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.BdiBaseYear}}'
+        });
+
+//        $('#admCode').textbox({
+//            iconAlign: 'left',
+//            editable: true,
+//            readonly: false,
+//            required: true,
+//            value: '{{.sdtBdiBase.AdmCode}}'
+//        });
+        //统计行政区域代码
+        $('#admCode').textbox({
+            value: '{{.sdtBdiBase.AdmCode}}',
+            editable: true,
+            readonly: true
+        });
+
+        //是否使用
+        $('#adtFlag').combobox({
+            value: '{{.sdtBdiBase.AdtFlag}}',
+            valueField: 'id',
+            textField: 'text',
+            data: [{
+                "id": 0,
+                "text": "停用"
+            }, {
+                "id": 1,
+                "text": "启用"
+            }]
+        });
+
+        //管理员ID
+        $('#managerId').textbox({
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.ManagerId}}'
+        });
+
+        //创建人ID
+        $('#createUserId').textbox({
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.CreateUserId}}'
+        });
+
+        //创建时间
+        $('#createTime').datetimebox({
+            value: '{{.sdtBdiBase.CreateTime}}',
+            required: true,
+            showSeconds: true
+        });
+
+        //修改人ID
+        $('#modifyUserId').textbox({
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.ModifyUserId}}'
+        });
+
+        //修改时间
+        $('#modifyTime').datetimebox({
+            value: '{{.sdtBdiBase.ModifyTime}}',
+            required: true,
+            showSeconds: true
+        });
+
+        //指标库备注
+        $('#Remarks').textbox({
+            iconAlign: 'left',
+            editable: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.Remarks}}'
+        });
+    });
+
+</script>

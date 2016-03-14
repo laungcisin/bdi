@@ -1,0 +1,14 @@
+<div id="admCodeTree"></div>
+<script type="text/javascript">
+    $(function () {
+        $('#admCodeTree').tree({
+            parentField: 'pid',
+            lines: true,
+            onlyLeafCheck: true,
+            url: '/bdi/adtBdiAdmTree?id=0',
+            onBeforeExpand: function (node, param) {
+                $('#admCodeTree').tree('options').url = "/bdi/adtBdiAdmTree?id=" + node.id;
+            }
+        });
+    })
+</script>

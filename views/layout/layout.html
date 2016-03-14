@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{.pageTitle}} - {{.siteName}} v{{.version}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="/static/css/font-awesome.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <link href="/static/css/pages/dashboard.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/demo.css">
+</head>
+
+<body class="easyui-layout">
+<div data-options="region:'north',border:false" style="height:40px;background:#B3DFDA;padding:10px">
+    系统登录信息
+</div>
+<div data-options="region:'west',split:true,title:'指标列表'" style="width:200px;padding:10px;">
+    <ul id="tree"></ul>
+</div>
+
+<div data-options="region:'east',split:false,collapsed:true,title:'East'" style="width:100px;padding:10px;">
+</div>
+<div data-options="region:'south',border:true" style="height:40px;background:#A9FACD;padding:10px;">系统信息</div>
+<div data-options="region:'center',title:''">
+    <div id="tabs"></div>
+</div>
+
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        var treeJsonData = [{
+            id: 1,
+            text: "指标系统",
+            children: [{
+                id: 1100,
+                text: "通用指标",
+                state: "open",
+                children: [{
+                    id: 1101,
+                    text: "指标库",
+                    attributes: {
+                        "url": "/sdtBdiBase/index"
+                    }
+                }, {
+                    id: 1102,
+                    text: "指标域",
+                    attributes: {
+                        "url": "/sdtBdiDomain/index"
+                    }
+                }, {
+                    id: 1103,
+                    text: "指标集",
+                    attributes: {
+                        "url": "/sdtBdiSet/index"
+                    }
+                }, {
+                    id: 1104,
+                    text: "指标项",
+                    attributes: {
+                        "url": "/sdtBdi/index"
+                    }
+                }, {
+                    id: 1105,
+                    text: "统计维度",
+                    attributes: {
+                        "url": ""
+                    }
+                }]
+            }, {
+                id: 1200,
+                text: "指标应用",
+                children: [{
+                    id: 1201,
+                    text: "应用指标",
+                    attributes: {
+                        "url": ""
+                    }
+                }]
+            }, {
+                id: 1300,
+                text: "指标统计",
+                children: [{
+                    id: 1301,
+                    text: "统计计划",
+                    attributes: {
+                        "url": ""
+                    }
+                }, {
+                    id: 1302,
+                    text: "统计计划类型",
+                    attributes: {
+                        "url": ""
+                    }
+                }]
+            }, {
+                id: 1400,
+                text: "基础数据",
+                children: [{
+                    id: 1401,
+                    text: "指标类型",
+                    attributes: {
+                        "url": ""
+                    }
+                }, {
+                    id: 1402,
+                    text: "指标频率",
+                    attributes: {
+                        "url": ""
+                    }
+                }, {
+                    id: 1403,
+                    text: "指标密级",
+                    attributes: {
+                        "url": ""
+                    }
+                }, {
+                    id: 1404,
+                    text: "维度取值方式",
+                    attributes: {
+                        "url": ""
+                    }
+                }, {
+                    id: 1405,
+                    text: "维度类型",
+                    attributes: {
+                        "url": ""
+                    }
+                }, {
+                    id: 1406,
+                    text: "指标项数值标准",
+                    attributes: {
+                        "url": ""
+                    }
+                }, {
+                    id: 1407,
+                    text: "指标取值方式",
+                    attributes: {
+                        "url": ""
+                    }
+                }, {
+                    id: 1408,
+                    text: "指标值类型",
+                    attributes: {
+                        "url": ""
+                    }
+                }]
+            }]
+        }];
+
+        $('#tree').tree({
+            lines: true,
+            checkbox: false,
+            data: treeJsonData,
+            onClick: function (node) {
+                if (node.attributes.url == "") {
+                    $(this).tree("toggle", node.target);
+                    return false;
+                }
+                var href = node.attributes.url;
+
+                if (href) {
+                    var content = '<iframe scrolling="auto" frameborder="0"  src="' + href + '" style="width:100%;height:100%;"></iframe>';
+                } else {
+                    var content = '未实现';
+                }
+
+                //已经存在tabs则选中它
+                if ($("#tabs").tabs('exists', node.text)) {
+                    $("#tabs").tabs('select', node.text);//选中
+
+                    // tab刷新内容
+                    var tab = $('#tabs').tabs('getSelected');
+                    $("#tabs").tabs('update', {
+                        tab: tab,
+                        options: {
+                            title: node.text,
+                            content: '<iframe scrolling="auto" frameborder="0"  src="' + href + '" style="width:100%;height:100%;"></iframe>',
+                            closable: true,
+                            selected: true
+                        }
+                    });
+                } else {
+                    //添加
+//                    $("#tabs").tabs('add', {
+//                        title: node.text,
+//                        content: content,
+//                        closable: true,
+//                        cache: false,
+//                        fit: 'true'
+//                    });
+
+                    $('#tabs').tabs('add', {});
+
+                    // tab刷新内容 fix 自适应高度
+                    var tab = $('#tabs').tabs('getSelected');
+                    $("#tabs").tabs('update', {
+                        tab: tab,
+                        options: {
+                            title: node.text,
+                            content: '<iframe scrolling="auto" frameborder="0"  src="' + href + '" style="width:100%;height:100%;"></iframe>',
+                            closable: true,
+                            selected: true
+                        }
+                    });
+                }
+            }
+        });
+
+        $("#tabs").tabs({
+            width: $("#tabs").parent().width(),
+            height: "auto",
+            fit: true,
+            border: false,
+            onContextMenu: function (e, title) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    function undo() {
+        $('#tree').tree('expandAll');
+    }
+
+    function redo() {
+        $('#tree').tree('collapseAll');
+    }
+</script>
+
+</body>
+</html>
