@@ -5,6 +5,7 @@
 *.a
 *.so
 *.exe
+*.exe~
 
 # Folders
 _obj

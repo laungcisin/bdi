@@ -53,7 +53,6 @@
                 <input name="remarks" id="remarks">
             </td>
         </tr>
-
     </table>
 </form>
 
@@ -176,11 +175,11 @@
                     type: "GET",
                     data: dataInfo,
                     success: function (data) {
+                        $('#schemata').combobox("clear");
+
                         if (data.success == "true" || data.success) {
-                            $('#schemata').combobox("clear");
                             $('#schemata').combobox('loadData', data.databaseInfo);
                         } else {
-                            $('#schemata').combobox("clear");
                             $('#schemata').combobox('loadData', '');
                             $.messager.alert('提示信息', data.message);
                         }

@@ -87,8 +87,6 @@ func (this *DatasourceController) Add() {
 		return
 	}
 
-	fmt.Println("datasource: ", datasource)
-
 	err = datasource.Add()
 	if err != nil {
 		returnData.Success = false
@@ -134,6 +132,7 @@ func (this *DatasourceController) Update() {
 
 	datasource := new(models.Datasource)
 	err := this.ParseForm(datasource)
+
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "解析参数出错！"

@@ -62,11 +62,10 @@ func init() {
 	//指标项
 	beego.Router("/datasource/index", &controllers.DatasourceController{}, "*:Index")           //列表首页
 	beego.Router("/datasource/all", &controllers.DatasourceController{}, "*:All")               //列出所有数据
-	//beego.Router("/datasource/updatePage", &controllers.DatasourceController{}, "*:UpdatePage") //更新页面
-	//beego.Router("/datasource/update", &controllers.DatasourceController{}, "*:Update")         //更新内容
+	beego.Router("/datasource/updatePage", &controllers.DatasourceController{}, "*:UpdatePage") //更新页面
+	beego.Router("/datasource/update", &controllers.DatasourceController{}, "*:Update")         //更新内容
 	beego.Router("/datasource/addPage", &controllers.DatasourceController{}, "*:AddPage")       //新增页面
 	beego.Router("/datasource/add", &controllers.DatasourceController{}, "*:Add")               //新增内容
-
 	beego.Router("/datasource/check", &controllers.DatasourceController{}, "*:Check")       //检测数据源有效性校验
 
 }

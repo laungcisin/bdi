@@ -6,8 +6,7 @@ import (
 //"strconv"
 //"strings"
 	"time"
-	"fmt"
-	"encoding/json"
+	//"encoding/json"
 )
 
 type Datasource struct {
@@ -24,13 +23,6 @@ type Datasource struct {
 
 								  //以下字段为datagrid展示
 	BdiDatasourceTypeName string                              //数据源类型名称
-
-	//以下字段接收后，以json格式存储在DatasourceConnect字段中
-	Ip string `form:"ip"`             //ip地址
-	Port string `form:"port"`             //端口号
-	Username string `form:"username"`             //数据库用户名
-	Password string `form:"password"`             //数据库密码
-	Schemata string `form:"schemata"`             //数据库库名
 }
 
 func (this *Datasource) TableName() string {
@@ -82,6 +74,7 @@ func (this *Datasource) GetDatasourceById() error {
 	" where d.bdi_datasource_id = ? "
 
 	err := o.Raw(querySql, this.BdiDatasourceId).QueryRow(this)
+
 	if err != nil {
 		log.Fatal("查询表：" + this.TableName() + "出错！")
 		return err
@@ -91,35 +84,12 @@ func (this *Datasource) GetDatasourceById() error {
 }
 
 func (this *Datasource) Add() error {
-	type Config struct {
-		Ip string `form:"ip"`             //ip地址
-		Port string `form:"port"`             //端口号
-		Username string `form:"username"`             //数据库用户名
-		Password string `form:"password"`             //数据库密码
-		Schemata string `form:"schemata"`             //数据库库名
-	}
-
-	var config Config = Config{}
-	config.Ip = this.Ip
-	config.Port = this.Port
-	config.Username = this.Username
-	config.Password = this.Password
-	config.Schemata = this.Schemata
-
-	result, err := json.Marshal(config)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(result))
-	this.DatasourceConnect = string(result)
-
 	o := orm.NewOrm()
 	o.Begin()
 
 	var insertSdtBdiSql = " insert into sdt_bdi_datasource(bdi_datasource_name, bdi_datasource_type_id, datasource_connect, remarks, create_user_id, create_time)values(?, ?, ?, ?, ?, ?) "
 
-	_, err = o.Raw(insertSdtBdiSql, this.BdiDatasourceName, this.BdiDatasourceTypeId, this.DatasourceConnect, this.Remarks, 0, time.Now()).Exec()
+	_, err := o.Raw(insertSdtBdiSql, this.BdiDatasourceName, this.BdiDatasourceTypeId, this.DatasourceConnect, this.Remarks, 0, time.Now()).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -130,48 +100,26 @@ func (this *Datasource) Add() error {
 }
 
 func (this *Datasource) Update() error {
-	//o := orm.NewOrm()
-	//o.Begin()
-	//
-	//var deleteSdtBdiSetRelBdiSql = " delete from sdt_bdi_set_rel_bdi where bdi_id = ? "
-	//var updateSdtBdiSql = "update sdt_bdi " +
-	//	"set  " +
-	//	" bdi_name = ?, " +
-	//	" bdi_type_id = ?, " +
-	//	" bdi_secrecy_id = ?, " +
-	//	" remarks = ?, " +
-	//	//" modify_user_id = ?, " + //暂时没有修改人
-	//	" modify_time = ? " +
-	//	"where bdi_id = ?"
-	//var insertSdtBdiSetRelBdiSql = " insert into sdt_bdi_set_rel_bdi(bdi_set_id, bdi_id) values (?, ?) "
-	//
-	//_, err := o.Raw(updateSdtBdiSql, this.BdiName, this.BdiTypeId, this.BdiSecrecyId, this.Remarks, time.Now(), this.BdiId).Exec()
-	//if err != nil {
-	//	o.Rollback()
-	//	return err
-	//}
-	//
-	//_, err = o.Raw(deleteSdtBdiSetRelBdiSql, this.BdiId).Exec()
-	//if err != nil {
-	//	o.Rollback()
-	//	return err
-	//}
-	//
-	//bdiSetIds := strings.Split(this.BdiSetIds, ",")
-	//
-	//for _, v := range bdiSetIds {
-	//	bdiSetId, err := strconv.Atoi(v)
-	//	if err != nil {
-	//		o.Rollback()
-	//		return err
-	//	}
-	//	_, err = o.Raw(insertSdtBdiSetRelBdiSql, bdiSetId, this.BdiId).Exec()
-	//	if err != nil {
-	//		o.Rollback()
-	//		return err
-	//	}
-	//}
-	//
-	//o.Commit()
+	o := orm.NewOrm()
+	o.Begin()
+
+	var updateSdtBdiSql =
+		"update sdt_bdi_datasource " +
+		"set  " +
+		" bdi_datasource_name = ?, " +
+		" bdi_datasource_type_id = ?, " +
+		" datasource_connect = ?, " +
+		" remarks = ?, " +
+		//" modify_user_id = ?, " +//暂时没有修改人
+		" modify_time = ? " +
+		"where bdi_datasource_id = ?"
+
+	_, err := o.Raw(updateSdtBdiSql, this.BdiDatasourceName, this.BdiDatasourceTypeId, this.DatasourceConnect, this.Remarks, time.Now(), this.BdiDatasourceId).Exec()
+	if err != nil {
+		o.Rollback()
+		return err
+	}
+
+	o.Commit()
 	return nil
 }

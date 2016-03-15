@@ -65,7 +65,7 @@
                 {
                     field: 'DatasourceConnect', title: '数据源连接详情', width: '150px', align: 'center',
                     formatter: function (value, row, index) {
-                        return value.replace(/\"/g, "");
+                        return value.replace(/#0F01/g, "{").replace(/#0F02/g, "\"").replace(/#0F03/g, "}");
                     }
                 },
                 {
@@ -127,16 +127,21 @@
                         url: '/datasource/add',
                         onSubmit: function () {
                             if ($("#addDatasourceForm").form("validate")) {
-//                                var dataInfo = {
-//                                    ip: $("#addDatasourceForm_ip").val(),
-//                                    port: $("#addDatasourceForm_port").val(),
-//                                    username: $("#addDatasourceForm_username").val(),
-//                                    password: $("#addDatasourceForm_password").val(),
-//                                    schemata: $("#addDatasourceForm_schemata").combobox('getValue')
-//                                };
-//
-//                                console.info(JSON.stringify(dataInfo))
-//                                $("#datasourceConnect").val(JSON.stringify(dataInfo));
+                                var dataInfo = {
+                                    ip: $("#ip").val(),
+                                    port: $("#port").val(),
+                                    username: $("#username").val(),
+                                    password: $("#password").val(),
+                                    schemata: $("#schemata").combobox('getValue')
+                                };
+
+                                var stringJSON = JSON.stringify(dataInfo);
+                                //替换指定字符，后台以字符串形式保存
+                                // { -> #0F01
+                                // " -> #0F02
+                                // } -> #0F03
+                                stringJSON = stringJSON.replace("{", "#0F01").replace(/"/g, "#0F02").replace("}", "#0F03");
+                                $("#datasourceConnect").val(stringJSON);
                                 return true;
                             } else {
                                 return false;
@@ -144,7 +149,6 @@
                         },
                         //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                         success: function (data) {
-                            debugger;
                             //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
                             var obj = jQuery.parseJSON(data);
                             if (obj.success) {
@@ -175,7 +179,7 @@
                 id: 'updateDatasourceDialog',
                 title: '修改数据源内容',
                 width: '500px',
-                height: '300px',
+                height: '350px',
                 closed: false,
                 cache: false,
                 draggable: false,
@@ -192,15 +196,26 @@
                     text: '保存',
                     iconCls: 'icon-ok',
                     handler: function () {
-                        debugger;
                         //提交表单
-                        $('#updateBdiForm').form('submit', {
+                        $('#updateDatasourceForm').form('submit', {
                             url: '/datasource/update',
                             onSubmit: function () {
-                                debugger;
-                                if ($("#updateBdiForm").form("validate")) {
-                                    var res = $("#bdiSetIdsCombobox").combobox('getValues');
-                                    $("#bdiSetIds").val(res.toString());
+                                if ($("#updateDatasourceForm").form("validate")) {
+                                    var dataInfo = {
+                                        ip: $("#ip").val(),
+                                        port: $("#port").val(),
+                                        username: $("#username").val(),
+                                        password: $("#password").val(),
+                                        schemata: $("#schemata").combobox('getValue')
+                                    };
+
+                                    var stringJSON = JSON.stringify(dataInfo);
+                                    //替换指定字符，后台以字符串形式保存
+                                    // { -> #0F01
+                                    // " -> #0F02
+                                    // } -> #0F03
+                                    stringJSON = stringJSON.replace("{", "#0F01").replace(/"/g, "#0F02").replace("}", "#0F03");
+                                    $("#datasourceConnect").val(stringJSON);
                                     return true;
                                 } else {
                                     return false;
@@ -208,7 +223,6 @@
                             },
                             //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                             success: function (data) {
-                                debugger;
                                 //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
                                 var obj = jQuery.parseJSON(data);
                                 if (obj.success) {
