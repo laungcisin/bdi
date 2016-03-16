@@ -68,4 +68,9 @@ func init() {
 	beego.Router("/datasource/add", &controllers.DatasourceController{}, "*:Add")               //新增内容
 	beego.Router("/datasource/check", &controllers.DatasourceController{}, "*:Check")       //检测数据源有效性校验
 
+	//规则集
+	beego.Router("/sdtBdiRuleSet/index", &controllers.SdtBdiRuleSetController{}, "*:Index")           //列表首页
+	beego.Router("/sdtBdiRuleSet/all", &controllers.SdtBdiRuleSetController{}, "*:All")               //列出所有数据
+	beego.Router("/sdtBdiRuleSet/add", &controllers.SdtBdiRuleSetController{}, "*:Add")           //列表首页
+
 }

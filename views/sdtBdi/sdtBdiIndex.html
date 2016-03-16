@@ -23,7 +23,7 @@
             selectOnCheck: true,
             checkOnSelect: true,
             singleSelect: true,
-            autoRowHeight: false,
+            autoRowHeight: true,
             pageNumber: 1,
             pageSize: 10,
             idField: 'BdiId',
@@ -54,24 +54,34 @@
                     }
                 },
                 {
-                    field: 'BdiId', title: '指标Id', width: '100px', align: 'center'
+                    field: 'BdiId', title: '指标Id', width: '80px', align: 'center'
                 },
                 {
                     field: 'BdiName', title: '指标名称', width: '150px', align: 'center'
                 },
                 {
-                    field: 'BdiTypeName', title: '指标类型', width: '180px', align: 'center'
+                    field: 'BdiTypeName', title: '指标类型', width: '130px', align: 'center'
                 },
                 {
-                    field: 'BdiSecrecyName', title: '指标加密级别', width: '200px', align: 'center'
+                    field: 'BdiSecrecyName', title: '指标加密级别', width: '100px', align: 'center'
                 },
                 {
-                    field: 'BdiSetNames', title: '所属指标集名称', width: '200px', align: 'center'
+                    field: 'BdiSetNames', title: '所属指标集名称', width: '150px', align: 'center'
                 },
                 {
-                    field: 'Remarks', title: '备注', width: '250px', align: 'center'
+                    field: 'Remarks', title: '备注', width: '150px', align: 'center'
+                },
+                {
+                    field: 'opt', title: '操作', width: '150px', align: 'center',
+                    formatter: function (value, rowData, rowIndex) {
+                        debugger;
+                        return '<a id="btn" href="#" class="easyui-linkbutton" onclick="addSdtBdiRelRuleSetDialog(' + rowData.BdiId + ')">添加/修改规则集</a>';
+                    }
                 }
             ]],
+            onLoadSuccess: function (data) {
+                $('.easyui-linkbutton').linkbutton({text: '添加/修改规则集', plain: true, iconCls: 'icon-add'});
+            },
             onClickRow: function (index, row) {
                 //加载完毕后获取所有的checkbox遍历
                 var radio = $("input[type='radio']")[index].disabled;
@@ -84,7 +94,7 @@
                     $("input[type='radio']")[index].checked = false;
                 }
             },
-            onDblClickRow: function(index, row) {
+            onDblClickRow: function (index, row) {
                 //加载完毕后获取所有的checkbox遍历
                 var radio = $("input[type='radio']")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
@@ -101,6 +111,26 @@
         });
 
     })
+
+    //指标项添加规则集
+    function addSdtBdiRelRuleSetDialog(bdiId) {
+        $('<div></div>').dialog({
+            id: 'addSdtBdiRelRuleSet',
+            title: '新增规则集',
+            width: '1000px',
+            height: '500px',
+            closed: false,
+            cache: false,
+            href: '/sdtBdiRuleSet/index?bdiId=' + bdiId,
+            modal: true,
+            onLoad: function () {
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            }
+        });
+    }
+
 
     function addSdtBdiDialog() {
         $('<div></div>').dialog({
