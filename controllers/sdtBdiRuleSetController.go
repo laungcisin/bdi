@@ -73,8 +73,189 @@ func (this *SdtBdiRuleSetController) All() {
 	return
 }
 
-//批量更新/新增/删除
+//新增
 func (this *SdtBdiRuleSetController) Add() {
+	var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiRuleSet := new(models.SdtBdiRuleSet)
+	inserted := this.GetString("inserted")
+
+	if err = json.Unmarshal([]byte(inserted), sdtBdiRuleSet); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	if err = sdtBdiRuleSet.Add(); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "数据保存失败"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据保存成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+
+}
+
+//更新
+func (this *SdtBdiRuleSetController) Update() {
+	var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiRuleSet := new(models.SdtBdiRuleSet)
+	updated := this.GetString("updated")
+
+	if err = json.Unmarshal([]byte(updated), sdtBdiRuleSet); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	if err = sdtBdiRuleSet.Update(); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "数据更新失败"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据更新成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
+//行上移
+func (this *SdtBdiRuleSetController) RowMoveUp() {
+	var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiRuleSet := new(models.SdtBdiRuleSet)
+	updated := this.GetString("updated")
+
+	if err = json.Unmarshal([]byte(updated), sdtBdiRuleSet); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	if err = sdtBdiRuleSet.RowMoveUp(); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "数据更新失败"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据更新成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
+//行上移
+func (this *SdtBdiRuleSetController) RowMoveDown() {
+	var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiRuleSet := new(models.SdtBdiRuleSet)
+	updated := this.GetString("updated")
+
+	if err = json.Unmarshal([]byte(updated), sdtBdiRuleSet); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	if err = sdtBdiRuleSet.RowMoveDown(); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "数据更新失败"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据更新成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+
+}
+
+//删除
+func (this *SdtBdiRuleSetController) Delete() {
+	var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiRuleSet := new(models.SdtBdiRuleSet)
+	err = this.ParseForm(sdtBdiRuleSet)
+	if err != nil {
+		fmt.Println("解析参数出错")
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	if err = sdtBdiRuleSet.Delete(); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "数据更新失败"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据删除成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
+//批量更新/新增/删除
+func (this *SdtBdiRuleSetController) BatchAdd() {
 	var err error
 	returnData := struct {
 		Success bool   `json:"success"`
@@ -89,7 +270,6 @@ func (this *SdtBdiRuleSetController) Add() {
 	var deletedRuleSetSlice []models.SdtBdiRuleSet
 	var updatedRuleSetSlice []models.SdtBdiRuleSet
 
-	fmt.Println("inserted: ", inserted)
 	if len(inserted) > 0 || inserted != "" {
 		if err = json.Unmarshal([]byte(inserted), &insertedRuleSetSlice); err != nil {
 			fmt.Println(err)
@@ -150,77 +330,7 @@ func (this *SdtBdiRuleSetController) UpdatePage() {
 		return
 	}
 
-	fmt.Println("sdtBdiSet: ", sdtBdiSet)
 	this.Data["sdtBdiSet"] = sdtBdiSet
 	this.TplName = "sdtBdiSet/updateDialog.html"
 }
 
-//更新信息
-func (this *SdtBdiRuleSetController) Update() {
-	returnData := struct {
-		Success bool   `json:"success"`
-		Message string `json:"message"`
-	}{}
-
-	var sdtBdiSet models.SdtBdiSet
-	err := this.ParseForm(&sdtBdiSet)
-	if err != nil {
-		returnData.Success = false
-		returnData.Message = "解析参数出错！"
-		this.Data[JSON_STRING] = returnData
-		this.ServeJSON()
-		return
-	}
-
-	fmt.Println("SdtBdiSet: ", sdtBdiSet)
-
-	err = sdtBdiSet.Update()
-	if err != nil {
-		returnData.Success = false
-		returnData.Message = "数据更新出错！"
-		this.Data[JSON_STRING] = returnData
-		this.ServeJSON()
-		return
-	}
-
-	returnData.Success = true
-	returnData.Message = "数据更新成功！"
-	this.Data[JSON_STRING] = returnData
-	this.ServeJSON()
-	return
-}
-
-//删除
-func (this *SdtBdiRuleSetController) Delete() {
-	returnData := struct {
-		Success bool   `json:"success"`
-		Message string `json:"message"`
-	}{}
-
-	//	bdiDomainId, err := this.GetInt("bdiDomainId")
-	//	fmt.Println("bdiDomainId: ", bdiDomainId)
-	//	if err != nil {
-	//		fmt.Println("解析参数出错")
-	//		returnData.Success = false
-	//		returnData.Message = "解析参数出错"
-	//		this.Data[JSON_STRING] = returnData
-	//		this.ServeJSON()
-	//		return
-	//	}
-	//
-	//	o := orm.NewOrm()
-	//	if _, err := o.Delete(&models.SdtBdiDomain{BdiDomainId: bdiDomainId}); err != nil {
-	//		fmt.Println("数据删除失败")
-	//		returnData.Success = false
-	//		returnData.Message = "数据删除失败"
-	//		this.Data[JSON_STRING] = returnData
-	//		this.ServeJSON()
-	//		return
-	//	}
-
-	returnData.Success = true
-	returnData.Message = "数据删除成功！"
-	this.Data[JSON_STRING] = returnData
-	this.ServeJSON()
-	return
-}

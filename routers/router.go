@@ -22,9 +22,7 @@ func init() {
 	beego.Router("/sdt/sdtBdiSetForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiSetForList")         //列出所有的指标集-用于下拉列表
 	beego.Router("/sdt/sdtBdiSecrecyForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiSecrecyForList") //列出所有的保密级别-用于下拉列表
 	beego.Router("/sdt/sdtTypeSetForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiTypeForList")       //列出所有的指标类型-用于下拉列表
-	beego.Router("/sdt/datasourceForList", &controllers.SdtPublicDisplayDataController{}, "*:DatasourceTypeForList")       //列出所有的指标类型-用于下拉列表
-
-
+	beego.Router("/sdt/datasourceForList", &controllers.SdtPublicDisplayDataController{}, "*:DatasourceTypeForList")   //列出所有的指标类型-用于下拉列表
 
 	//指标库
 	beego.Router("/sdtBdiBase/index", &controllers.SdtBdiBaseController{}, "*:Index")               //列表首页
@@ -66,11 +64,16 @@ func init() {
 	beego.Router("/datasource/update", &controllers.DatasourceController{}, "*:Update")         //更新内容
 	beego.Router("/datasource/addPage", &controllers.DatasourceController{}, "*:AddPage")       //新增页面
 	beego.Router("/datasource/add", &controllers.DatasourceController{}, "*:Add")               //新增内容
-	beego.Router("/datasource/check", &controllers.DatasourceController{}, "*:Check")       //检测数据源有效性校验
+	beego.Router("/datasource/check", &controllers.DatasourceController{}, "*:Check")           //检测数据源有效性校验
 
 	//规则集
-	beego.Router("/sdtBdiRuleSet/index", &controllers.SdtBdiRuleSetController{}, "*:Index")           //列表首页
-	beego.Router("/sdtBdiRuleSet/all", &controllers.SdtBdiRuleSetController{}, "*:All")               //列出所有数据
-	beego.Router("/sdtBdiRuleSet/add", &controllers.SdtBdiRuleSetController{}, "*:Add")           //列表首页
+	beego.Router("/sdtBdiRuleSet/index", &controllers.SdtBdiRuleSetController{}, "*:Index")             //列表首页
+	beego.Router("/sdtBdiRuleSet/all", &controllers.SdtBdiRuleSetController{}, "*:All")                 //列出所有数据
+	beego.Router("/sdtBdiRuleSet/add", &controllers.SdtBdiRuleSetController{}, "*:Add")                 //新增内容
+	beego.Router("/sdtBdiRuleSet/update", &controllers.SdtBdiRuleSetController{}, "*:Update")           //更新内容
+	beego.Router("/sdtBdiRuleSet/rowMoveUp", &controllers.SdtBdiRuleSetController{}, "*:RowMoveUp")     //行上移
+	beego.Router("/sdtBdiRuleSet/rowMoveDown", &controllers.SdtBdiRuleSetController{}, "*:RowMoveDown") //行下移
+	beego.Router("/sdtBdiRuleSet/delete", &controllers.SdtBdiRuleSetController{}, "*:Delete")         //删除
+
 
 }

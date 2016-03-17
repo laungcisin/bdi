@@ -32,15 +32,15 @@
                 text: "删除",
                 iconCls: "icon-remove",
                 handler: remove
-            }, {
-                text: "结束编辑",
-                iconCls: "icon-cancel",
-                handler: endEdit
-            }, {
-                text: "保存",
-                iconCls: "icon-save",
-                handler: save
-            }],
+            }/*, {
+             text: "结束编辑",
+             iconCls: "icon-cancel",
+             handler: endEdit
+             }, {
+             text: "保存",
+             iconCls: "icon-save",
+             handler: save
+             }*/],
             columns: [[
                 {
                     field: 'BdiRuleSetId', title: '规则集Id', width: '60px', align: 'center', hidden: true
@@ -84,8 +84,8 @@
                     formatter: function (value, row, index) {
                         debugger;
                         if (row.editing) {
-                            var s = '<a href="javascript:void(0)" onclick="saveRow(this)">保存</a> ';
-                            var c = '<a href="javascript:void(0)" onclick="cancelRow(this)">取消</a>';
+                            var s = '<button onclick="saveRow(this)">保存</button> ';
+                            var c = '<button onclick="cancelRow(this)">取消</button>';
                             return s + c;
                         } else {
                             var e = '<button onclick="move(event, this, true)">上</button>';
@@ -105,129 +105,147 @@
 
     function saveRow(target) {
         debugger;
-        $('#sdtBdiRuleSetDataGrid').datagrid('endEdit', getRowIndex(target));
+        var index = getRowIndex(target);
 
-        var row = $('#sdtBdiRuleSetDataGrid').datagrid('getData').rows[getRowIndex(target)];
+        //如果校验未通过，返回编辑
+        if (!$('#sdtBdiRuleSetDataGrid').datagrid('validateRow', index)) {
+            return;
+        }
 
-        var res = JSON.stringify(row);
-        console.info(res);
+        $('#sdtBdiRuleSetDataGrid').datagrid('endEdit', index);
+        var row = $('#sdtBdiRuleSetDataGrid').datagrid('getData').rows[index];
 
-//        $.post(
-//                "/sdtBdiRuleSet/add",
-//                effectRow,
-//                function (rsp) {
-//                    if (rsp.success) {
-//                        $.messager.alert("提示", "提交成功！");
-//                        $('#sdtBdiRuleSetDataGrid').datagrid('reload');
-//                    }
-//                },
-//                "JSON"
-//        ).error(function () {
-//            $.messager.alert("提示", "提交错误了！");
-//        });
+        var effectRow = new Object();
+        var url = "";
+        var bdiRuleSetId = row.BdiRuleSetId;
+        if (bdiRuleSetId == null || bdiRuleSetId == undefined || bdiRuleSetId < 1) {
+            url = "/sdtBdiRuleSet/add";
+            effectRow["inserted"] = JSON.stringify(row);
+        } else {
+            url = "/sdtBdiRuleSet/update";
+            effectRow["updated"] = JSON.stringify(row);
+        }
+
+        $.post(
+                url,
+                effectRow,
+                function (rsp) {
+                    if (rsp.success) {
+                        $.messager.alert("提示信息", rsp.message);
+                        $('#sdtBdiRuleSetDataGrid').datagrid('reload');
+                        editIndex = undefined;
+                    }
+                },
+                "JSON"
+        ).error(function () {
+            $.messager.alert("提示", "提交错误了！");
+        });
     }
     function cancelRow(target) {
         debugger;
-        $('#sdtBdiRuleSetDataGrid').datagrid('cancelEdit', getRowIndex(target));
-    }
+        var index = getRowIndex(target);
+        var row = $('#sdtBdiRuleSetDataGrid').datagrid('getData').rows[index];
+        var bdiRuleSetId = row.BdiRuleSetId;
+        if (bdiRuleSetId == null || bdiRuleSetId == undefined || bdiRuleSetId < 1) {
+            $('#sdtBdiRuleSetDataGrid').datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+        } else {
+            $('#sdtBdiRuleSetDataGrid').datagrid('cancelEdit', editIndex);
+        }
 
+        $('#sdtBdiRuleSetDataGrid').datagrid('reload');
+        editIndex = undefined;
+    }
 
     //上下行移动
     function move(e, target, isUp) {
         debugger;
         var rows = $('#sdtBdiRuleSetDataGrid').datagrid('getRows');
+
+        //另一种方式取DataGrid索引
         var $view = $(target).closest('div.datagrid-view');
         var index = $(target).closest('tr.datagrid-row').attr('datagrid-row-index');
         var $row = $view.find('tr[datagrid-row-index=' + index + ']');
 
-        //上移
-        if (isUp) {
-            //第一行不上移
-            if (index == 0) {
+        if (isUp) {//上移
+            if (index == 0) {//第一行不上移
+                $('#sdtBdiRuleSetDataGrid').datagrid('refreshRow', 0);
+                editIndex = undefined;
             } else {
-                var srcRow = {
-                    BdiRuleSetId: rows[index].BdiRuleSetId,
-                    BdiId: rows[index].BdiId,
-                    BdiName: rows[index].BdiName,
-                    RuleSetName: rows[index].RuleSetName,
-                    RuleSetLevel: rows[index].RuleSetLevel,
-                    Remarks: rows[index].Remarks
-                };
+                var effectRow = new Object();
+                effectRow["updated"] = JSON.stringify(rows[index]);
 
-                var descRow = {
-                    BdiRuleSetId: rows[index - 1].BdiRuleSetId,
-                    BdiId: rows[index - 1].BdiId,
-                    BdiName: rows[index - 1].BdiName,
-                    RuleSetName: rows[index - 1].RuleSetName,
-                    RuleSetLevel: rows[index - 1].RuleSetLevel,
-                    Remarks: rows[index - 1].Remarks
-                };
-
-                var srcRuleSetLevel = srcRow.RuleSetLevel;
-                var descRuleSetLevel = descRow.RuleSetLevel;
-                descRow.RuleSetLevel = srcRuleSetLevel;
-                srcRow.RuleSetLevel = descRuleSetLevel;
-
-                $('#sdtBdiRuleSetDataGrid').datagrid('updateRow', {
-                    index: index,
-                    row: {
-                        BdiRuleSetId: descRow.BdiRuleSetId,
-                        BdiId: descRow.BdiId,
-                        BdiName: descRow.BdiName,
-                        RuleSetName: descRow.RuleSetName,
-                        RuleSetLevel: descRow.RuleSetLevel,
-                        Remarks: descRow.Remarks + " "
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+                    cache: false,
+                    url: '/sdtBdiRuleSet/rowMoveUp',
+                    data: effectRow,
+                    dataType: 'JSON',
+                    success: function (rsp) {
+                        if (rsp.success) {
+//                            $.messager.alert("提示信息", rsp.message);
+                            $('#sdtBdiRuleSetDataGrid').datagrid('reload');
+                            editIndex = undefined;
+                        }
+                    },
+                    error: function () {
+                        $.messager.alert("提示", "提交错误了！");
+                        $('#sdtBdiRuleSetDataGrid').datagrid('reload');
+                        editIndex = undefined;
                     }
                 });
-
-                var lastIndex = index - 1;
-                $('#sdtBdiRuleSetDataGrid').datagrid('updateRow', {
-                    index: lastIndex,
-                    row: {
-                        BdiRuleSetId: srcRow.BdiRuleSetId,
-                        BdiId: srcRow.BdiId,
-                        BdiName: srcRow.BdiName,
-                        RuleSetName: srcRow.RuleSetName,
-                        RuleSetLevel: srcRow.RuleSetLevel,
-                        Remarks: srcRow.Remarks + " "
-                    }
-                });
-
-                $('#sdtBdiRuleSetDataGrid').datagrid('refreshRow', index);
-                $('#sdtBdiRuleSetDataGrid').datagrid('refreshRow', index - 1);
-//                $('#sdtBdiRuleSetDataGrid').datagrid('acceptChanges');
             }
         } else {//下移
+            if (index == (rows.length - 1)) {//最后一行不下移
+                $('#sdtBdiRuleSetDataGrid').datagrid('refreshRow', index);
+                editIndex = undefined;
+            } else {
+                var effectRow = new Object();
+                effectRow["updated"] = JSON.stringify(rows[index]);
+
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+                    cache: false,
+                    url: '/sdtBdiRuleSet/rowMoveDown',
+                    data: effectRow,
+                    dataType: 'JSON',
+                    success: function (rsp) {
+                        if (rsp.success) {
+//                            $.messager.alert("提示信息", rsp.message);
+                            $('#sdtBdiRuleSetDataGrid').datagrid('reload');
+                            editIndex = undefined;
+                        }
+                    },
+                    error: function () {
+                        $.messager.alert("提示", "提交错误了！");
+                        $('#sdtBdiRuleSetDataGrid').datagrid('reload');
+                        editIndex = undefined;
+                    }
+                });
+            }
         }
 
-//        //上移
-//        if (isUp) {
-//            $row.each(function () {
-//                $(this).prev().before($(this));
-//            });
-//        } else {//下移
-//            $row.each(function () {
-//                $(this).before($(this).next());
-//            });
-//        }
-//        $row.removeClass('datagrid-row-over');
-//        e.stopPropagation();
+        endEdit();
     }
 
     function endEditing() {
         if (editIndex == undefined) {
             return true
         }
+
+        //校验通过
         if ($('#sdtBdiRuleSetDataGrid').datagrid('validateRow', editIndex)) {
             $('#sdtBdiRuleSetDataGrid').datagrid('endEdit', editIndex);
             editIndex = undefined;
             return true;
-        } else {
+        } else {//校验未通过
             return false;
         }
     }
 
     function onClickCell(index, field) {
+        debugger;
         if (editIndex != index) {
             if (endEditing()) {
                 $('#sdtBdiRuleSetDataGrid').datagrid('selectRow', index).datagrid('beginEdit', index);
@@ -236,15 +254,22 @@
                     ($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
                 }
                 editIndex = index;
-            } else {
+            } else {//校验未通过，定位到要填写的行。
                 setTimeout(function () {
                     $('#sdtBdiRuleSetDataGrid').datagrid('selectRow', editIndex);
                 }, 0);
+            }
+        } else {
+            $('#sdtBdiRuleSetDataGrid').datagrid('selectRow', index).datagrid('beginEdit', index);
+            var ed = $('#sdtBdiRuleSetDataGrid').datagrid('getEditor', {index: index, field: field});
+            if (ed) {
+                ($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
             }
         }
     }
 
     function onBeforeEdit(index, row) {
+        debugger;
         row.editing = true;
         $(this).datagrid('refreshRow', index);
     }
@@ -258,21 +283,21 @@
     }
 
     function onAfterEdit(index, row, changes) {
+        debugger;
         row.editing = false;
         $(this).datagrid('refreshRow', index);
     }
 
     function onCancelEdit(index, row) {
+        debugger;
         row.editing = false;
         $(this).datagrid('refreshRow', index);
     }
 
     function onUnselect(index, row) {
-        debugger;
     }
 
     function onUncheck(index, row) {
-        debugger;
     }
 
     function onLoadSuccess(data) {
@@ -285,19 +310,8 @@
     //新增
     function append() {
         if (endEditing()) {
-            debugger;
             var rows = $('#sdtBdiRuleSetDataGrid').datagrid('getRows');
-            var rowIndex = 0;
-            if (rows == null || rows == undefined || rows.length == null || rows.length == undefined) {
-                rowIndex = 0;
-                $('#sdtBdiRuleSetDataGrid').datagrid('insertRow', {index: 0, row: {BdiId: parseInt(sdtBdiId), BdiName: sdtBdiName, RuleSetLevel: rowIndex + 1}});
-
-            } else {
-                rowIndex = rows.length;
-                $('#sdtBdiRuleSetDataGrid').datagrid('appendRow', {BdiId: parseInt(sdtBdiId), BdiName: sdtBdiName, RuleSetLevel: rowIndex + 1});
-
-            }
-
+            $('#sdtBdiRuleSetDataGrid').datagrid('appendRow', {BdiId: parseInt(sdtBdiId), BdiName: sdtBdiName, RuleSetLevel: rows.length + 1});
             editIndex = $('#sdtBdiRuleSetDataGrid').datagrid('getRows').length - 1;
             $('#sdtBdiRuleSetDataGrid').datagrid('selectRow', editIndex).datagrid('beginEdit', editIndex);
         }
@@ -305,10 +319,31 @@
 
     //删除
     function remove() {
+        debugger;
         if (editIndex == undefined) {
             return
         }
-        $('#sdtBdiRuleSetDataGrid').datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+
+        var rows = $('#sdtBdiRuleSetDataGrid').datagrid('getRows');
+        $.ajax({
+            type: 'POST',
+            async: false,
+            cache: false,
+            url: '/sdtBdiRuleSet/delete',
+            data: rows[editIndex],
+            dataType: 'JSON',
+            success: function (rsp) {
+                if (rsp.success) {
+                    $('#sdtBdiRuleSetDataGrid').datagrid('reload');
+                    editIndex = undefined;
+                }
+            },
+            error: function () {
+                $.messager.alert("提示", "删除出错！");
+                $('#sdtBdiRuleSetDataGrid').datagrid('reload');
+                editIndex = undefined;
+            }
+        });
         editIndex = undefined;
     }
 

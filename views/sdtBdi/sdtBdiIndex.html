@@ -74,8 +74,7 @@
                 {
                     field: 'opt', title: '操作', width: '150px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
-                        debugger;
-                        return '<a id="btn" href="#" class="easyui-linkbutton" onclick="addSdtBdiRelRuleSetDialog(' + rowData.BdiId + ')">添加/修改规则集</a>';
+                        return'<button onclick="addSdtBdiRelRuleSetDialog((' + rowData.BdiId + '))">添加/修改规则集</button> ';
                     }
                 }
             ]],
@@ -121,8 +120,14 @@
             height: '500px',
             closed: false,
             cache: false,
-            href: '/sdtBdiRuleSet/index?bdiId=' + bdiId,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            closable: true,
+            draggable: false,
+            resizable: false,
             modal: true,
+            href: '/sdtBdiRuleSet/index?bdiId=' + bdiId,
             onLoad: function () {
             },
             onClose: function () {
@@ -130,7 +135,6 @@
             }
         });
     }
-
 
     function addSdtBdiDialog() {
         $('<div></div>').dialog({
