@@ -1,81 +1,34 @@
-<!DOCTYPE html>
-<html lang="zh-cn">
-
-<head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/easyui/demo.css">
-
-    <link rel="stylesheet" type="text/css" href="/static/css/tagEditor/jquery.tag-editor.css">
-
-    <!--bootstrap-tagsinput-->
- <!--   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-tagsinput/bootstrap-tagsinput.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-tagsinput/app.css">-->
-
-    <style>
-        html, body {
-            overflow-y: scroll;
-        }
-
-        html, body {
-            overflow: scroll;
-            min-height: 101%;
-        }
-
-        html {
-            overflow: -moz-scrollbars-vertical;
-        }
-    </style>
-
-</head>
-<body>
-
-<table id="sdtBdiDataGrid"></table>
-
-<script type="text/javascript" src="/static/js/jquery.min.js"></script>
-<script type="text/javascript" src="/static/js/easyui/jquery.easyui.min.js"></script>
-<script type="text/javascript" src="/static/js/easyui/locale/easyui-lang-zh_CN.js"></script>
-<script type="text/javascript" src="/static/js/easyui/utils/utils.js"></script>
-
-<script type="text/javascript" src="/static/js/caret/jquery.caret.min.js"></script>
-<script type="text/javascript" src="/static/js/tagEditor/jquery.tag-editor.js"></script>
-
-<!--bootstrap-tagsinput-->
-<!--
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="/static/js/bootstrap-tagsinput/bootstrap-tagsinput.min.js"></script>
-
--->
+<table id="sdtBdiRuleDataGrid"></table>
 
 <script type="text/javascript">
+    var editIndex = undefined;
+    var bdiRuleSetId = "{{.bdiRuleSetId}}";
+
     $(function () {
-        $('#sdtBdiDataGrid').datagrid({
+        $('#sdtBdiRuleDataGrid').datagrid({
             method: 'GET',
             selectOnCheck: true,
             checkOnSelect: true,
             singleSelect: true,
-            autoRowHeight: true,
+            autoRowHeight: false,
             pageNumber: 1,
-            pageSize: 10,
-            idField: 'BdiId',
+            pageSize: 100,
+            idField: 'BdiRuleId',
             pagination: true,
-            url: '/sdtBdi/all',
+            url: '/sdtBdiRule/all?bdiRuleSetId' + bdiRuleSetId,
             height: '390px',
             toolbar: [{
                 text: '新增',
                 iconCls: 'icon-add',
                 handler: function () {
-                    addSdtBdiDialog();
+                    addSdtBdiRuleDialog();
                 }
             }, '-', {
                 iconCls: 'icon-edit',
                 text: '编辑',
                 plain: 'true',
                 onClick: function () {
-                    updateSdtBdiDialog();
+                    updateSdtBdiRuleDialog();
                 }
             }],
             columns: [[
@@ -84,38 +37,31 @@
                     title: '选择',
                     width: '50px',
                     formatter: function (value, row, index) {
-                        return '<input type="radio" name="selectRadio" id="selectRadio"' + index + ' value="' + row.Id + '" />';
+                        return '<input type="radio" name="selectRadio" id="selectRadio' + index + '" value="' + row.Id + '" />';
                     }
                 },
                 {
-                    field: 'BdiId', title: '指标Id', width: '80px', align: 'center'
+                    field: 'BdiRuleId', title: '规则Id', width: '10px', align: 'center', hidden: true
                 },
                 {
-                    field: 'BdiName', title: '指标名称', width: '150px', align: 'center'
+                    field: 'BdiRuleSetId', title: '规则集Id', width: '100px', align: 'center'
                 },
                 {
-                    field: 'BdiTypeName', title: '指标类型', width: '130px', align: 'center'
+                    field: 'Condition', title: '条件', width: '150px', align: 'center'
                 },
                 {
-                    field: 'BdiSecrecyName', title: '指标加密级别', width: '100px', align: 'center'
+                    field: 'ConditionExpression', title: '条件表达式', width: '150px', align: 'left'
                 },
                 {
-                    field: 'BdiSetNames', title: '所属指标集名称', width: '150px', align: 'center'
+                    field: 'Operation', title: '操作', width: '150px', align: 'left'
                 },
                 {
-                    field: 'Remarks', title: '备注', width: '150px', align: 'center'
+                    field: 'OperationExpression', title: '操作表达式', width: '150px', align: 'left'
                 },
                 {
-                    field: 'opt', title: '操作', width: '150px', align: 'center',
-                    formatter: function (value, rowData, rowIndex) {
-//                        return '<a href="#" style="padding:0 5px 0 5px;" class="easyui-linkbutton" onclick="addSdtBdiRelRuleSetDialog((' + rowData.BdiId + '))" data-options="width:\'60px\'">添加/修改规则集</a>';
-                        return '<button onclick="addSdtBdiRelRuleSetDialog((' + rowData.BdiId + '))">添加/修改规则集</button> ';
-                    }
+                    field: 'Remarks', title: '备注', width: '250px', align: 'center'
                 }
             ]],
-            onLoadSuccess: function (data) {
-//                $('.easyui-linkbutton').linkbutton({text: '添加/修改规则集', plain: true, iconCls: 'icon-add'});
-            },
             onClickRow: function (index, row) {
                 //加载完毕后获取所有的checkbox遍历
                 var radio = $("input[type='radio']")[index].disabled;
@@ -123,8 +69,7 @@
                 if (radio != true) {
                     //让点击的行单选按钮选中
                     $("input[type='radio']")[index].checked = true;
-                }
-                else {
+                }else {
                     $("input[type='radio']")[index].checked = false;
                 }
             },
@@ -140,46 +85,23 @@
                     $("input[type='radio']")[index].checked = false;
                 }
 
-                updateSdtBdiDialog();
+                updateSdtBdiRuleDialog();
             }
         });
 
     })
 
-    //指标项添加规则集
-    function addSdtBdiRelRuleSetDialog(bdiId) {
+    function addSdtBdiRuleDialog() {
         $('<div></div>').dialog({
-            id: 'addSdtBdiRelRuleSet',
-            title: '新增（修改）规则集',
+            id: 'addBidSetDialog',
+            title: '新增规则',
             width: '1000px',
             height: '500px',
             closed: false,
             cache: false,
-            collapsible: false,
-            minimizable: false,
-            maximizable: false,
-            closable: true,
-            draggable: false,
+            draggable: true,
             resizable: false,
-            modal: true,
-            href: '/sdtBdiRuleSet/index?bdiId=' + bdiId,
-            onLoad: function () {
-            },
-            onClose: function () {
-                $(this).dialog('destroy');
-            }
-        });
-    }
-
-    function addSdtBdiDialog() {
-        $('<div></div>').dialog({
-            id: 'addSdtBidDialog',
-            title: '新增指标',
-            width: '500px',
-            height: '300px',
-            closed: false,
-            cache: false,
-            href: '/sdtBdi/addPage',
+            href: '/sdtBdiRule/addPage',
             modal: true,
             onLoad: function () {
                 //初始化表单数据
@@ -192,12 +114,12 @@
                 iconCls: 'icon-ok',
                 handler: function () {
                     //提交表单
-                    $('#addSdtBdiForm').form('submit', {
-                        url: '/sdtBdi/add',
+                    $('#addBdiSetForm').form('submit', {
+                        url: '/sdtBdiSet/add',
                         onSubmit: function () {
-                            if ($("#addSdtBdiForm").form("validate")) {
+                            if ($("#addBdiSetForm").form("validate")) {
                                 var res = $("#bdiSetIdsCombobox").combobox('getValues');
-                                $("#bdiSetIds").val(res.toString());
+                                $("#bdiDomainIds").val(res.toString());
                                 return true;
                             } else {
                                 return false;
@@ -209,12 +131,12 @@
                             var obj = jQuery.parseJSON(data);
                             if (obj.success) {
                                 $.messager.alert('提示消息', obj.message);
-                                $('#sdtBdiDataGrid').datagrid('reload');
+                                $('#sdtBdiRuleDataGrid').datagrid('reload');
                             } else {
                                 $.messager.alert('提示消息', obj.message);
                             }
-                            $("#addSdtBidDialog").dialog('destroy');
-                            $('#sdtBdiDataGrid').datagrid('reload');
+                            $("#addBidSetDialog").dialog('destroy');
+                            $('#sdtBdiRuleDataGrid').datagrid('reload');
                         }
                     });
                 }
@@ -222,25 +144,25 @@
                 text: '取消',
                 iconCls: 'icon-cancel',
                 handler: function () {
-                    $("#addSdtBidDialog").dialog('destroy');
+                    $("#addBidSetDialog").dialog('destroy');
                 }
             }]
         });
     }
 
-    function updateSdtBdiDialog() {
-        var row = $("#sdtBdiDataGrid").datagrid("getSelected");
+    function updateSdtBdiRuleDialog() {
+        var row = $("#sdtBdiRuleDataGrid").datagrid("getSelected");
         if (row) {
             $('<div></div>').dialog({
-                id: 'updateBidDialog',
-                title: '修改指标内容',
+                id: 'updateBidSetDialog',
+                title: '修改指标集内容',
                 width: '500px',
                 height: '300px',
                 closed: false,
                 cache: false,
                 draggable: false,
                 resizable: false,
-                href: '/sdtBdi/updatePage?bdiId=' + row.BdiId,
+                href: '/sdtBdiSet/updatePage?bdiSetId=' + row.BdiRuleId,
                 modal: true,
                 onLoad: function () {
                     //初始化表单数据
@@ -254,13 +176,13 @@
                     handler: function () {
                         debugger;
                         //提交表单
-                        $('#updateBdiForm').form('submit', {
-                            url: '/sdtBdi/update',
+                        $('#updateBdiSetForm').form('submit', {
+                            url: '/sdtBdiSet/update',
                             onSubmit: function () {
                                 debugger;
-                                if ($("#updateBdiForm").form("validate")) {
-                                    var res = $("#bdiSetIdsCombobox").combobox('getValues');
-                                    $("#bdiSetIds").val(res.toString());
+                                if ($("#updateBdiSetForm").form("validate")) {
+                                    var res = $("#bdiDomainIdsCombobox").combobox('getValues');
+                                    $("#bdiDomainIds").val(res.toString());
                                     return true;
                                 } else {
                                     return false;
@@ -273,13 +195,13 @@
                                 var obj = jQuery.parseJSON(data);
                                 if (obj.success) {
                                     $.messager.alert('提示消息', obj.message);
-                                    $('#sdtBdiDataGrid').datagrid('reload');
+                                    $('#sdtBdiRuleDataGrid').datagrid('reload');
                                 } else {
                                     $.messager.alert('提示消息', obj.message);
                                 }
 
-                                $("#updateBidDialog").dialog('destroy');
-                                $('#sdtBdiDataGrid').datagrid('reload');
+                                $("#updateBidSetDialog").dialog('destroy');
+                                $('#sdtBdiRuleDataGrid').datagrid('reload');
                             }
                         });
                     }
@@ -287,7 +209,7 @@
                     text: '取消',
                     iconCls: 'icon-cancel',
                     handler: function () {
-                        $("#updateBidDialog").dialog('destroy');
+                        $("#updateBidSetDialog").dialog('destroy');
                     }
                 }]
             });
@@ -304,15 +226,15 @@
     /**
      * 删除BdiSet。
      */
-    function deleteBdiSet(bdiId) {
+    function deleteBdiSet(bdiSetId) {
         $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
             if (r) {
                 $.ajax({
-                    url: "/sdtBdi/delete",
+                    url: "/sdtBdiSet/delete",
                     async: false,
                     cache: false,
                     type: 'POST',
-                    data: {bdiId: bdiId},
+                    data: {bdiSetId: bdiSetId},
                     dataType: 'json',
                     error: function (data) {
                         $.messager.alert('提示信息', data.message);
@@ -323,13 +245,10 @@
                         } else {
                             $.messager.alert('提示信息', data.message);
                         }
-                        $('#sdtBdiDataGrid').datagrid('reload');
+                        $('#sdtBdiRuleDataGrid').datagrid('reload');
                     }
                 });
             }
         });
     }
 </script>
-
-</body>
-</html>

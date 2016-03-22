@@ -66,7 +66,7 @@
                     field: 'RuleSetLevel', title: '顺序编号', width: '100px', align: 'center'
                 },
                 {
-                    field: 'Remarks', title: '备注', width: '250px', align: 'left',
+                    field: 'Remarks', title: '备注', width: '200px', align: 'left',
                     editor: {
                         type: 'textbox',
                         options: {
@@ -79,18 +79,23 @@
                 {
                     field: 'ctr',
                     title: '操作',
-                    width: 100,
+                    width: '190px',
                     align: 'center',
                     formatter: function (value, row, index) {
-                        debugger;
                         if (row.editing) {
                             var s = '<button onclick="saveRow(this)">保存</button> ';
                             var c = '<button onclick="cancelRow(this)">取消</button>';
+//                            var s = '<a href="#" style="padding:0 5px 0 5px;" class="easyui-linkbutton" onclick="saveRow(this)" data-options="width:\'60px\'">保存</a>';
+//                            var c = '<a href="#" style="padding:0 5px 0 5px;" class="easyui-linkbutton" onclick="cancelRow(this)" data-options="width:\'60px\'">取消</a>';
                             return s + c;
                         } else {
-                            var e = '<button onclick="move(event, this, true)">上</button>';
-                            var d = '<button  onclick="move(event, this, false)">下</button>';
-                            return e + d;
+                            var e = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, true)">上</button>';
+                            var d = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, false)">下</button>';
+                            var f = '<button style="padding:0 5px 0 5px;" onclick="addOrUpdateRuleDataGrid(event, this, true)">添加规则</button>';
+//                            var e = '<a href="#" style="padding:0 5px 0 5px;" class="easyui-linkbutton" onclick="move(event, this, true)" data-options="width:\'60px\'">上</a>';
+//                            var d = '<a href="#" style="padding:0 5px 0 5px;" class="easyui-linkbutton" onclick="move(event, this, false)" data-options="width:\'60px\'">下</a>';
+//                            var f = '<a href="#" style="padding:0 5px 0 5px;" class="easyui-linkbutton" onclick="addOrUpdateRuleDataGrid(event, this, true)" data-options="width:\'60px\'">添加规则</a>';
+                            return e + d + f;
                         }
                     }
                 }
@@ -104,7 +109,6 @@
     }
 
     function saveRow(target) {
-        debugger;
         var index = getRowIndex(target);
 
         //如果校验未通过，返回编辑
@@ -142,7 +146,6 @@
         });
     }
     function cancelRow(target) {
-        debugger;
         var index = getRowIndex(target);
         var row = $('#sdtBdiRuleSetDataGrid').datagrid('getData').rows[index];
         var bdiRuleSetId = row.BdiRuleSetId;
@@ -158,7 +161,6 @@
 
     //上下行移动
     function move(e, target, isUp) {
-        debugger;
         var rows = $('#sdtBdiRuleSetDataGrid').datagrid('getRows');
 
         //另一种方式取DataGrid索引
@@ -229,6 +231,37 @@
         endEdit();
     }
 
+    //规则集添加规则
+    function addOrUpdateRuleDataGrid(e, target) {
+        var rows = $('#sdtBdiRuleSetDataGrid').datagrid('getRows');
+        var index = $(target).closest('tr.datagrid-row').attr('datagrid-row-index');
+        $('#sdtBdiRuleSetDataGrid').datagrid('cancelEdit', editIndex);
+        $('#sdtBdiRuleSetDataGrid').datagrid('refreshRow', index);
+        editIndex = undefined;
+
+        $('<div></div>').dialog({
+            id: 'addOrUpdateRuleDataGrid',
+            title: '新增（修改）规则',
+            width: '900px',
+            height: '450px',
+            closed: false,
+            cache: false,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            closable: true,
+            draggable: false,
+            resizable: false,
+            modal: true,
+            href: '/sdtBdiRule/index?bdiRuleSetId=' + rows[index].BdiRuleSetId,
+            onLoad: function () {
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            }
+        });
+    }
+
     function endEditing() {
         if (editIndex == undefined) {
             return true
@@ -245,7 +278,6 @@
     }
 
     function onClickCell(index, field) {
-        debugger;
         if (editIndex != index) {
             if (endEditing()) {
                 $('#sdtBdiRuleSetDataGrid').datagrid('selectRow', index).datagrid('beginEdit', index);
@@ -269,27 +301,22 @@
     }
 
     function onBeforeEdit(index, row) {
-        debugger;
         row.editing = true;
         $(this).datagrid('refreshRow', index);
     }
 
     function onBeginEdit(index, row) {
-        debugger;
     }
 
     function onEndEdit(ndex, row, changes) {
-        debugger;
     }
 
     function onAfterEdit(index, row, changes) {
-        debugger;
         row.editing = false;
         $(this).datagrid('refreshRow', index);
     }
 
     function onCancelEdit(index, row) {
-        debugger;
         row.editing = false;
         $(this).datagrid('refreshRow', index);
     }
@@ -319,7 +346,6 @@
 
     //删除
     function remove() {
-        debugger;
         if (editIndex == undefined) {
             return
         }
@@ -358,7 +384,6 @@
 
     //保存
     function save() {
-        debugger;
         editIndex = undefined;
         endEdit();
 
@@ -400,5 +425,4 @@
             });
         }
     }
-
 </script>

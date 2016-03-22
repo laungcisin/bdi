@@ -1,0 +1,118 @@
+<div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+
+<form id="updateBdiSetForm" method="post">
+    <input type="hidden" id="bdiSetId" name="bdiSetId"/>
+    <input type="hidden" id="bdiDomainIds" name="bdiDomainIds"/>
+    <table>
+        <tr>
+            <th>指标集名称：</th>
+            <td>
+                <input name="bdiSetName" id="bdiSetName"/>
+            </td>
+        </tr>
+        <tr>
+            <th>指标域：</th>
+            <td>
+                <input name="bdiDomainIdsCombobox" id="bdiDomainIdsCombobox"/>
+            </td>
+        </tr>
+        <tr>
+            <th>指标库备注：</th>
+            <td>
+                <input name="remarks" id="remarks">
+            </td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+    function show() {
+        $("#loading").fadeOut("normal", function () {
+            $(this).remove();
+        });
+    }
+    var delayTime;
+    $.parser.onComplete = function () {
+        if (delayTime) {
+            clearTimeout(delayTime);
+        }
+
+        delayTime = setTimeout(show, 100);
+    }
+
+    $(function () {
+        initUpdateBdiSetWindow();
+    })
+
+
+    /**
+     * 初始化修改窗口。
+     */
+    function initUpdateBdiSetWindow() {
+        $("#bdiSetId").val('{{.sdtBdiSet.BdiSetId}}');
+        //指标集名称
+        $('#bdiSetName').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdiSet.BdiSetName}}'
+        });
+
+        //指标域
+        $('#bdiDomainIdsCombobox').combobox({
+            url: '/sdt/sdtBdiDomainForList',
+            editable: false,
+            required: true,
+            method: 'get',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            multiple: true,
+            formatter: function (row) {
+                var opts = $(this).combobox('options');
+                return '<input type="checkbox" class="combobox-checkbox">' + row[opts.textField]
+            },
+
+            onShowPanel: function () {
+                var opts = $(this).combobox('options');
+                var target = this;
+                var values = $(target).combobox('getValues');
+                $.map(values, function (value) {
+                    var el = opts.finder.getEl(target, value);
+                    el.find('input.combobox-checkbox')._propAttr('checked', true);
+                })
+            },
+            onLoadSuccess: function () {
+                var opts = $(this).combobox('options');
+                var target = this;
+                var values = $(target).combobox('getValues');
+                $.map(values, function (value) {
+                    var el = opts.finder.getEl(target, value);
+                    el.find('input.combobox-checkbox')._propAttr('checked', true);
+                })
+            },
+            onSelect: function (row) {
+                //console.log(row);
+                var opts = $(this).combobox('options');
+                var el = opts.finder.getEl(this, row[opts.valueField]);
+                el.find('input.combobox-checkbox')._propAttr('checked', true);
+            },
+            onUnselect: function (row) {
+                var opts = $(this).combobox('options');
+                var el = opts.finder.getEl(this, row[opts.valueField]);
+                el.find('input.combobox-checkbox')._propAttr('checked', false);
+            }
+        });
+
+        var bdiDomainIds = "{{.sdtBdiSet.BdiDomainId}}";
+        $("#bdiDomainIdsCombobox").combobox('setValues', bdiDomainIds.split(","));
+
+        //指标库备注
+        $('#remarks').textbox({
+            editable: true,
+            required: true,
+            readonly: false,
+            value: '{{.sdtBdiSet.Remarks}}'
+        });
+    }
+</script>

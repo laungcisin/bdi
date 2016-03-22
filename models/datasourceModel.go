@@ -3,26 +3,35 @@ package models
 import (
 	"github.com/astaxie/beego/orm"
 	"log"
+	"database/sql"
 //"strconv"
 //"strings"
 	"time"
-	//"encoding/json"
+//"encoding/json"
+	"strconv"
+)
+
+const (
+	UrlForDatasource = "/datasource/datasourceNode"
+	UrlForSchema = "/datasource/schemaNode"
+	UrlForTable = "/datasource/tableNode"
+	UrlForColumn = "/datasource/columnNode"
 )
 
 type Datasource struct {
-	BdiDatasourceId       int    `form:"bdiDatasourceId"`     //主键
-	BdiDatasourceName     string `form:"bdiDatasourceName"`   //数据源名称
-	BdiDatasourceTypeId   int    `form:"bdiDatasourceTypeId"` //数据源类型Id
-	DatasourceConnect     string    `form:"datasourceConnect"`   //数据源连接详情
-	Remarks               string `form:"remarks"`             //数据源备注
+	BdiDatasourceId       int    `form:"bdiDatasourceId"`      //主键
+	BdiDatasourceName     string `form:"bdiDatasourceName"`    //数据源名称
+	BdiDatasourceTypeId   int    `form:"bdiDatasourceTypeId"`  //数据源类型Id
+	DatasourceConnect     string    `form:"datasourceConnect"` //数据源连接详情
+	Remarks               string `form:"remarks"`              //数据源备注
 
-	CreateUserId          int                                 //创建人ID
-	CreateTime            time.Time                           //创建时间
-	ModifyUserId          int                                 //修改人ID
-	ModifyTime            time.Time                           //修改时间
+	CreateUserId          int                                  //创建人ID
+	CreateTime            time.Time                            //创建时间
+	ModifyUserId          int                                  //修改人ID
+	ModifyTime            time.Time                            //修改时间
 
-								  //以下字段为datagrid展示
-	BdiDatasourceTypeName string                              //数据源类型名称
+								   //以下字段为datagrid展示
+	BdiDatasourceTypeName string                               //数据源类型名称
 }
 
 func (this *Datasource) TableName() string {
@@ -104,15 +113,15 @@ func (this *Datasource) Update() error {
 	o.Begin()
 
 	var updateSdtBdiSql =
-		"update sdt_bdi_datasource " +
-		"set  " +
-		" bdi_datasource_name = ?, " +
-		" bdi_datasource_type_id = ?, " +
-		" datasource_connect = ?, " +
-		" remarks = ?, " +
-		//" modify_user_id = ?, " +//暂时没有修改人
-		" modify_time = ? " +
-		"where bdi_datasource_id = ?"
+	"update sdt_bdi_datasource " +
+	"set  " +
+	" bdi_datasource_name = ?, " +
+	" bdi_datasource_type_id = ?, " +
+	" datasource_connect = ?, " +
+	" remarks = ?, " +
+	//" modify_user_id = ?, " +//暂时没有修改人
+	" modify_time = ? " +
+	"where bdi_datasource_id = ?"
 
 	_, err := o.Raw(updateSdtBdiSql, this.BdiDatasourceName, this.BdiDatasourceTypeId, this.DatasourceConnect, this.Remarks, time.Now(), this.BdiDatasourceId).Exec()
 	if err != nil {
@@ -122,4 +131,175 @@ func (this *Datasource) Update() error {
 
 	o.Commit()
 	return nil
+}
+
+type DatasourceTreeAttributes struct {
+	Url string `json:"url"`
+}
+
+type DatasourceTree struct {
+	Id         string `json:"id"`
+	Pid        string `json:"pid"`
+	Text       string `json:"text"`
+	IconCls    string `json:"iconCls"`
+	Checked    string `json:"checked"`
+	State      string `json:"state"`
+
+	Attributes DatasourceTreeAttributes `json:"attributes"`
+	Children   []Tree `json:"children"`
+}
+
+/**
+获取所有数据源--用于tree。
+*/
+func (this *Datasource) GetAllDatasourceForTree() ([]DatasourceTree, error) {
+	var o orm.Ormer
+	o = orm.NewOrm()
+	sdtBdiDatasourceSlice := make([]Datasource, 0, 10)
+
+	var querySql = " select * from " + this.TableName()
+
+	_, err := o.Raw(querySql).QueryRows(&sdtBdiDatasourceSlice)
+	if err != nil {
+		log.Fatal("查询表：" + this.TableName() + "出错！")
+		return nil, err
+	}
+
+	newTreeDataSlice := make([]DatasourceTree, 0, 10)
+	for _, v := range sdtBdiDatasourceSlice {
+		treeNode := new(DatasourceTree)
+		treeNode.Id = strconv.Itoa(v.BdiDatasourceId)
+		treeNode.Text = v.BdiDatasourceName
+		treeNode.State = "closed"
+
+		datasourceTreeAttributes := new(DatasourceTreeAttributes)
+		datasourceTreeAttributes.Url = UrlForSchema
+		treeNode.Attributes = *datasourceTreeAttributes
+		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
+	}
+
+	return newTreeDataSlice, nil
+}
+
+func (this *Datasource) GetAllSchemaForTree() ([]DatasourceTree, error) {
+	newTreeDataSlice := make([]DatasourceTree, 0, 10)
+
+	connectionInfo := "gbdp:bdx123@tcp(172.16.0.103:3306)/mysql"
+	db, err := sql.Open("mysql", connectionInfo)
+	if err != nil {
+		return newTreeDataSlice, err
+	}
+
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		return newTreeDataSlice, err
+	}
+
+	rows, err := db.Query(" select s.schema_name as id, s.schema_name as text from information_schema.schemata s ")
+	if err != nil {
+		return newTreeDataSlice, err
+	}
+
+	for rows.Next() {
+		var id string
+		var text string
+		err := rows.Scan(&id, &text)
+		if err != nil {
+			return newTreeDataSlice, err
+		}
+		treeNode := new(DatasourceTree)
+		treeNode.Id = id
+		treeNode.Text = text
+		treeNode.State = "closed"
+		datasourceTreeAttributes := new(DatasourceTreeAttributes)
+		datasourceTreeAttributes.Url = UrlForTable
+		treeNode.Attributes = *datasourceTreeAttributes
+		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
+	}
+	defer rows.Close()
+	return newTreeDataSlice, nil
+}
+
+func (this *Datasource) GetAllTableForTree(schema string) ([]DatasourceTree, error) {
+	newTreeDataSlice := make([]DatasourceTree, 0, 10)
+
+	connectionInfo := "gbdp:bdx123@tcp(172.16.0.103:3306)/mysql"
+	db, err := sql.Open("mysql", connectionInfo)
+	if err != nil {
+		return newTreeDataSlice, err
+	}
+
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		return newTreeDataSlice, err
+	}
+
+	rows, err := db.Query(" select table_name as id, table_name as text from information_schema.tables where table_schema = ? ", schema)
+	if err != nil {
+		return newTreeDataSlice, err
+	}
+
+	for rows.Next() {
+		var id string
+		var text string
+		err := rows.Scan(&id, &text)
+		if err != nil {
+			return newTreeDataSlice, err
+		}
+		treeNode := new(DatasourceTree)
+		treeNode.Id = id
+		treeNode.Text = text
+		treeNode.State = "closed"
+		datasourceTreeAttributes := new(DatasourceTreeAttributes)
+		datasourceTreeAttributes.Url = UrlForColumn
+		treeNode.Attributes = *datasourceTreeAttributes
+		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
+	}
+	defer rows.Close()
+	return newTreeDataSlice, nil
+}
+
+func (this *Datasource) GetAllColumnForTree(table string) ([]DatasourceTree, error) {
+	newTreeDataSlice := make([]DatasourceTree, 0, 10)
+
+	connectionInfo := "gbdp:bdx123@tcp(172.16.0.103:3306)/mysql"
+	db, err := sql.Open("mysql", connectionInfo)
+	if err != nil {
+		return newTreeDataSlice, err
+	}
+
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		return newTreeDataSlice, err
+	}
+
+	rows, err := db.Query(" select c.column_name as id , c.column_name as text from information_schema.columns c where c.table_name = ? ", table)
+	if err != nil {
+		return newTreeDataSlice, err
+	}
+
+	for rows.Next() {
+		var id string
+		var text string
+		err := rows.Scan(&id, &text)
+		if err != nil {
+			return newTreeDataSlice, err
+		}
+		treeNode := new(DatasourceTree)
+		treeNode.Id = id
+		treeNode.Text = text
+		treeNode.State = "open"
+		datasourceTreeAttributes := new(DatasourceTreeAttributes)
+		datasourceTreeAttributes.Url = ""
+		treeNode.Attributes = *datasourceTreeAttributes
+		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
+	}
+	defer rows.Close()
+	return newTreeDataSlice, nil
 }

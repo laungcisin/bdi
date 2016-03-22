@@ -286,3 +286,39 @@ func (this *DatasourceController) Check() {
 	this.ServeJSON()
 	return
 }
+
+func (this *DatasourceController) GetAllDatasourceForTree() {
+	datasource := new(models.Datasource)
+	datasourceSlice, _ := datasource.GetAllDatasourceForTree()
+	this.Data[JSON_STRING] = datasourceSlice
+	this.ServeJSON()
+	return
+}
+
+func (this *DatasourceController) GetAllSchemaForTree() {
+	datasource := new(models.Datasource)
+	schemaSlice, _ := datasource.GetAllSchemaForTree()
+	this.Data[JSON_STRING] = schemaSlice
+	this.ServeJSON()
+	return
+}
+
+func (this *DatasourceController) GetAllTableForTree() {
+	schema := this.GetString("param")
+	datasource := new(models.Datasource)
+	schemaSlice, _ := datasource.GetAllTableForTree(schema)
+	this.Data[JSON_STRING] = schemaSlice
+	this.ServeJSON()
+	return
+}
+
+
+func (this *DatasourceController) GetAllColumnForTree() {
+	table := this.GetString("param")
+
+	datasource := new(models.Datasource)
+	schemaSlice, _ := datasource.GetAllColumnForTree(table)
+	this.Data[JSON_STRING] = schemaSlice
+	this.ServeJSON()
+	return
+}

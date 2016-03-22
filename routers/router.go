@@ -3,6 +3,7 @@ package routers
 import (
 	"bdi/controllers"
 	"github.com/astaxie/beego"
+	"bdi/models"
 )
 
 func init() {
@@ -57,7 +58,7 @@ func init() {
 	beego.Router("/sdtBdi/addPage", &controllers.SdtBdiController{}, "*:AddPage")       //新增页面
 	beego.Router("/sdtBdi/add", &controllers.SdtBdiController{}, "*:Add")               //新增内容
 
-	//指标项
+	//数据源
 	beego.Router("/datasource/index", &controllers.DatasourceController{}, "*:Index")           //列表首页
 	beego.Router("/datasource/all", &controllers.DatasourceController{}, "*:All")               //列出所有数据
 	beego.Router("/datasource/updatePage", &controllers.DatasourceController{}, "*:UpdatePage") //更新页面
@@ -65,6 +66,12 @@ func init() {
 	beego.Router("/datasource/addPage", &controllers.DatasourceController{}, "*:AddPage")       //新增页面
 	beego.Router("/datasource/add", &controllers.DatasourceController{}, "*:Add")               //新增内容
 	beego.Router("/datasource/check", &controllers.DatasourceController{}, "*:Check")           //检测数据源有效性校验
+	beego.Router(models.UrlForDatasource, &controllers.DatasourceController{}, "*:GetAllDatasourceForTree")
+	beego.Router(models.UrlForSchema, &controllers.DatasourceController{}, "*:GetAllSchemaForTree")
+	beego.Router(models.UrlForTable, &controllers.DatasourceController{}, "*:GetAllTableForTree")
+	beego.Router(models.UrlForColumn, &controllers.DatasourceController{}, "*:GetAllColumnForTree")
+
+
 
 	//规则集
 	beego.Router("/sdtBdiRuleSet/index", &controllers.SdtBdiRuleSetController{}, "*:Index")             //列表首页
@@ -75,5 +82,12 @@ func init() {
 	beego.Router("/sdtBdiRuleSet/rowMoveDown", &controllers.SdtBdiRuleSetController{}, "*:RowMoveDown") //行下移
 	beego.Router("/sdtBdiRuleSet/delete", &controllers.SdtBdiRuleSetController{}, "*:Delete")         //删除
 
+	//规则
+	beego.Router("/sdtBdiRule/index", &controllers.SdtBdiRuleController{}, "*:Index")             //列表首页
+	beego.Router("/sdtBdiRule/all", &controllers.SdtBdiRuleController{}, "*:All")                 //列出所有数据
+	beego.Router("/sdtBdiRule/addPage", &controllers.SdtBdiRuleController{}, "*:AddPage")       //新增页面
+	beego.Router("/sdtBdiRule/add", &controllers.SdtBdiRuleController{}, "*:Add")               //新增内容
+	beego.Router("/sdtBdiRule/updatePage", &controllers.SdtBdiRuleController{}, "*:UpdatePage") //更新页面
+	beego.Router("/sdtBdiRule/update", &controllers.SdtBdiRuleController{}, "*:Update")         //更新内容
 
 }

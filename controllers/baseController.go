@@ -123,18 +123,4 @@ func (this *BaseController) getClientIp() string {
 	return s[0]
 }
 
-func (this *BaseController) GetTree() *[]models.Tree {
-	id := this.GetString("id")
 
-	var pid string
-	if len(id) <= 0 {
-		pid = "0"
-	} else {
-		pid = id
-	}
-
-	tree := models.GetSubAdtBdiAdmNode(pid)
-
-	//	fmt.Println("tree: " ,tree)
-	return tree
-}
