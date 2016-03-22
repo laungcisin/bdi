@@ -1,5 +1,15 @@
 <div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
+<style>
+    .
+</style>
+
+<style>
+    .tag-editor {
+        height: 60px;
+    }
+</style>
+
 <form id="addBdiRuleForm" method="post">
     <table style="margin-top: 15px;">
         <tr>
@@ -15,15 +25,15 @@
             </td>
         </tr>
         <tr rowspan="2">
-            <th style="width:150px;text-align: right;">条件表达式：</th>
-            <td colspan="3" style="padding:10px 10px 10px 10px;">
-                <div><input name="demo1" id="demo1" style="height: 100px;"/></div>
+            <th style="width:150px;text-align: right;height: 60px;">条件表达式：</th>
+            <td colspan="3" style="padding:10px 10px 10px 10px;height: 60px;">
+                <div><input name="demo1" id="demo1" style="height: 60px;"/></div>
             </td>
         </tr>
         <tr rowspan="2">
-            <th style="width:150px;text-align: right;">操作表达式：</th>
-            <td colspan="3" style="padding:10px 10px 10px 10px;">
-                <div><input name="demo2" id="demo2" style="height: 100px;"/></div>
+            <th style="width:150px;text-align: right;height: 60px;">操作表达式：</th>
+            <td colspan="3" style="padding:10px 10px 10px 10px;height: 60px;">
+                <div><input name="demo2" id="demo2" style="height: 60px;"/></div>
             </td>
         </tr>
         <tr>
@@ -38,24 +48,27 @@
         <tr>
             <th style="width:100px;text-align: right;"></th>
             <td style="padding:10px 10px 10px 10px;">
-                <a id="btn01" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">+</a>
-                <a id="btn02" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">-</a>
-                <a id="btn03" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">*</a>
-                <a id="btn04" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">/</a>
-                <a id="btn05" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">></a>
-                <a id="btn06" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'"><</a>
-                <a id="btn07" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">=</a>
-                <a id="btn08" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">>=</a>
-                <a id="btn09" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'"><=</a>
-                <a id="btn10" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">and</a>
-                <a id="btn11" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">or</a>
-                <a id="btn12" href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">!</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">+</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">-</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">*</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">/</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">></a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'"><</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">=</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">>=</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'"><=</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">and</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">or</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">!</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">!=</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">(</a>
+                <a href="#" style="padding:5px 0 5px 0;" class="easyui-linkbutton conditionExpress" data-options="width:'60px'">)</a>
             </td>
             <th style="width:100px;text-align: right;"></th>
             <td style="padding:10px 10px 10px 10px;">
-                <a id="btn_1" href="#" class="easyui-linkbutton operationExpress" data-options="width:'80px'">sum</a>
-                <a id="btn_2" href="#" class="easyui-linkbutton operationExpress" data-options="width:'80px'">count</a>
-                <a id="btn_3" href="#" class="easyui-linkbutton operationExpress" data-options="width:'80px'">group by</a>
+                <a href="#" class="easyui-linkbutton operationExpress" data-options="width:'80px'">sum</a>
+                <a href="#" class="easyui-linkbutton operationExpress" data-options="width:'80px'">count</a>
+                <a href="#" class="easyui-linkbutton operationExpress" data-options="width:'80px'">group by</a>
             </td>
         </tr>
     </table>
