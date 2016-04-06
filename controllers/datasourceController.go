@@ -296,17 +296,30 @@ func (this *DatasourceController) GetAllDatasourceForTree() {
 }
 
 func (this *DatasourceController) GetAllSchemaForTree() {
+	ip := this.GetString("ip")
+	port := this.GetString("port")
+	username := this.GetString("username")
+	password := this.GetString("password")
+	tableName := this.GetString("tableName")
+	schemaName:= this.GetString("schemaName")
+
 	datasource := new(models.Datasource)
-	schemaSlice, _ := datasource.GetAllSchemaForTree()
+	schemaSlice, _ := datasource.GetAllSchemaForTree(ip, port, username, password, tableName, schemaName)
 	this.Data[JSON_STRING] = schemaSlice
 	this.ServeJSON()
 	return
 }
 
 func (this *DatasourceController) GetAllTableForTree() {
-	schema := this.GetString("param")
+	schemaName := this.GetString("param")
+	ip := this.GetString("ip")
+	port := this.GetString("port")
+	username := this.GetString("username")
+	password := this.GetString("password")
+	tableName := this.GetString("tableName")
+
 	datasource := new(models.Datasource)
-	schemaSlice, _ := datasource.GetAllTableForTree(schema)
+	schemaSlice, _ := datasource.GetAllTableForTree(ip, port, username, password, tableName, schemaName)
 	this.Data[JSON_STRING] = schemaSlice
 	this.ServeJSON()
 	return
@@ -314,10 +327,15 @@ func (this *DatasourceController) GetAllTableForTree() {
 
 
 func (this *DatasourceController) GetAllColumnForTree() {
-	table := this.GetString("param")
+	tableName := this.GetString("param")
+	ip := this.GetString("ip")
+	port := this.GetString("port")
+	username := this.GetString("username")
+	password := this.GetString("password")
+	schemaName:= this.GetString("schemaName")
 
 	datasource := new(models.Datasource)
-	schemaSlice, _ := datasource.GetAllColumnForTree(table)
+	schemaSlice, _ := datasource.GetAllColumnForTree(ip, port, username, password, tableName, schemaName)
 	this.Data[JSON_STRING] = schemaSlice
 	this.ServeJSON()
 	return

@@ -92,13 +92,13 @@
                 {
                     field: 'opt', title: '操作', width: '150px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
-//                        return '<a href="#" style="padding:0 5px 0 5px;" class="easyui-linkbutton" onclick="addSdtBdiRelRuleSetDialog((' + rowData.BdiId + '))" data-options="width:\'60px\'">添加/修改规则集</a>';
-                        return '<button onclick="addSdtBdiRelRuleSetDialog((' + rowData.BdiId + '))">添加/修改规则集</button> ';
+                        return '<a href="#" class="easyui-linkbutton" onclick="addSdtBdiRelRuleSetDialog((' + rowData.BdiId + '))">添加/修改规则集</a>';
+//                        return '<button onclick="addSdtBdiRelRuleSetDialog((' + rowData.BdiId + '))">添加/修改规则集</button> ';
                     }
                 }
             ]],
             onLoadSuccess: function (data) {
-//                $('.easyui-linkbutton').linkbutton({text: '添加/修改规则集', plain: true, iconCls: 'icon-add'});
+                $('.easyui-linkbutton').linkbutton({plain: true, iconCls: 'icon-add'});
             },
             onClickRow: function (index, row) {
                 //加载完毕后获取所有的checkbox遍历

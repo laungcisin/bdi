@@ -90,4 +90,9 @@ func init() {
 	beego.Router("/sdtBdiRule/updatePage", &controllers.SdtBdiRuleController{}, "*:UpdatePage") //更新页面
 	beego.Router("/sdtBdiRule/update", &controllers.SdtBdiRuleController{}, "*:Update")         //更新内容
 
+	//规则语言
+	beego.Router("/sdtBdiRuleLanguage/all", &controllers.SdtBdiRuleLanguageController{}, "*:All")                 //列出所有数据
+	beego.Router("/sdtBdiRuleLanguage/addPage", &controllers.SdtBdiRuleLanguageController{}, "*:AddPage")       //新增页面
+	beego.Router("/sdtBdiRuleLanguage/add", &controllers.SdtBdiRuleLanguageController{}, "*:Add")               //新增内容
+
 }

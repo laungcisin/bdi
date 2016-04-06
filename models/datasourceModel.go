@@ -9,6 +9,9 @@ import (
 	"time"
 //"encoding/json"
 	"strconv"
+	"strings"
+	//"fmt"
+	"encoding/json"
 )
 
 const (
@@ -135,6 +138,12 @@ func (this *Datasource) Update() error {
 
 type DatasourceTreeAttributes struct {
 	Url string `json:"url"`
+	Ip string `json:"ip"`
+	Port string `json:"port"`
+	Username string `json:"username"`
+	Password string  `json:"password"`
+	TableName string `json:"tableName"`
+	SchemaName string `json:"schemaName"`
 }
 
 type DatasourceTree struct {
@@ -172,7 +181,12 @@ func (this *Datasource) GetAllDatasourceForTree() ([]DatasourceTree, error) {
 		treeNode.Text = v.BdiDatasourceName
 		treeNode.State = "closed"
 
+		var connectionInfo string
+		connectionInfo = strings.Replace(v.DatasourceConnect, "#0F01", "{", -1)
+		connectionInfo = strings.Replace(connectionInfo, "#0F02", "\"", -1)
+		connectionInfo = strings.Replace(connectionInfo, "#0F03", "}", -1)
 		datasourceTreeAttributes := new(DatasourceTreeAttributes)
+		json.Unmarshal([]byte(connectionInfo), datasourceTreeAttributes)
 		datasourceTreeAttributes.Url = UrlForSchema
 		treeNode.Attributes = *datasourceTreeAttributes
 		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
@@ -181,10 +195,10 @@ func (this *Datasource) GetAllDatasourceForTree() ([]DatasourceTree, error) {
 	return newTreeDataSlice, nil
 }
 
-func (this *Datasource) GetAllSchemaForTree() ([]DatasourceTree, error) {
+func (this *Datasource) GetAllSchemaForTree(ip string, port string, username string, password string, tableName string, schemaName string) ([]DatasourceTree, error) {
 	newTreeDataSlice := make([]DatasourceTree, 0, 10)
+	connectionInfo := username + ":" + password + "@tcp(" + ip + ":" + port + ")/mysql"
 
-	connectionInfo := "gbdp:bdx123@tcp(172.16.0.103:3306)/mysql"
 	db, err := sql.Open("mysql", connectionInfo)
 	if err != nil {
 		return newTreeDataSlice, err
@@ -214,6 +228,10 @@ func (this *Datasource) GetAllSchemaForTree() ([]DatasourceTree, error) {
 		treeNode.Text = text
 		treeNode.State = "closed"
 		datasourceTreeAttributes := new(DatasourceTreeAttributes)
+		datasourceTreeAttributes.Ip = ip
+		datasourceTreeAttributes.Port = port
+		datasourceTreeAttributes.Username = username
+		datasourceTreeAttributes.Password = password
 		datasourceTreeAttributes.Url = UrlForTable
 		treeNode.Attributes = *datasourceTreeAttributes
 		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
@@ -222,10 +240,10 @@ func (this *Datasource) GetAllSchemaForTree() ([]DatasourceTree, error) {
 	return newTreeDataSlice, nil
 }
 
-func (this *Datasource) GetAllTableForTree(schema string) ([]DatasourceTree, error) {
+func (this *Datasource) GetAllTableForTree(ip string, port string, username string, password string, tableName string, schemaName string) ([]DatasourceTree, error) {
 	newTreeDataSlice := make([]DatasourceTree, 0, 10)
 
-	connectionInfo := "gbdp:bdx123@tcp(172.16.0.103:3306)/mysql"
+	connectionInfo := username + ":" + password + "@tcp(" + ip + ":" + port + ")/mysql"
 	db, err := sql.Open("mysql", connectionInfo)
 	if err != nil {
 		return newTreeDataSlice, err
@@ -238,7 +256,7 @@ func (this *Datasource) GetAllTableForTree(schema string) ([]DatasourceTree, err
 		return newTreeDataSlice, err
 	}
 
-	rows, err := db.Query(" select table_name as id, table_name as text from information_schema.tables where table_schema = ? ", schema)
+	rows, err := db.Query(" select table_name as id, table_name as text from information_schema.tables where table_schema = ? ", schemaName)
 	if err != nil {
 		return newTreeDataSlice, err
 	}
@@ -255,7 +273,12 @@ func (this *Datasource) GetAllTableForTree(schema string) ([]DatasourceTree, err
 		treeNode.Text = text
 		treeNode.State = "closed"
 		datasourceTreeAttributes := new(DatasourceTreeAttributes)
+		datasourceTreeAttributes.Ip = ip
+		datasourceTreeAttributes.Port = port
+		datasourceTreeAttributes.Username = username
+		datasourceTreeAttributes.Password = password
 		datasourceTreeAttributes.Url = UrlForColumn
+		datasourceTreeAttributes.SchemaName = schemaName
 		treeNode.Attributes = *datasourceTreeAttributes
 		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
 	}
@@ -263,10 +286,11 @@ func (this *Datasource) GetAllTableForTree(schema string) ([]DatasourceTree, err
 	return newTreeDataSlice, nil
 }
 
-func (this *Datasource) GetAllColumnForTree(table string) ([]DatasourceTree, error) {
+func (this *Datasource) GetAllColumnForTree(ip string, port string, username string, password string, tableName string, schemaName string) ([]DatasourceTree, error) {
 	newTreeDataSlice := make([]DatasourceTree, 0, 10)
 
-	connectionInfo := "gbdp:bdx123@tcp(172.16.0.103:3306)/mysql"
+	connectionInfo := username + ":" + password + "@tcp(" + ip + ":" + port + ")/mysql"
+
 	db, err := sql.Open("mysql", connectionInfo)
 	if err != nil {
 		return newTreeDataSlice, err
@@ -279,7 +303,7 @@ func (this *Datasource) GetAllColumnForTree(table string) ([]DatasourceTree, err
 		return newTreeDataSlice, err
 	}
 
-	rows, err := db.Query(" select c.column_name as id , c.column_name as text from information_schema.columns c where c.table_name = ? ", table)
+	rows, err := db.Query(" select c.column_name as id , c.column_name as text from information_schema.columns c where c.table_schema = ? and c.table_name = ? ", schemaName, tableName)
 	if err != nil {
 		return newTreeDataSlice, err
 	}
@@ -297,6 +321,12 @@ func (this *Datasource) GetAllColumnForTree(table string) ([]DatasourceTree, err
 		treeNode.State = "open"
 		datasourceTreeAttributes := new(DatasourceTreeAttributes)
 		datasourceTreeAttributes.Url = ""
+		datasourceTreeAttributes.Ip = ip
+		datasourceTreeAttributes.Port = port
+		datasourceTreeAttributes.Username = username
+		datasourceTreeAttributes.Password = password
+		datasourceTreeAttributes.SchemaName = schemaName
+		datasourceTreeAttributes.TableName = tableName
 		treeNode.Attributes = *datasourceTreeAttributes
 		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
 	}

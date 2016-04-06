@@ -3,6 +3,7 @@
 <script type="text/javascript">
     var editIndex = undefined;
     var bdiRuleSetId = "{{.bdiRuleSetId}}";
+    var bdiId = "{{.bdiId}}";
 
     $(function () {
         $('#sdtBdiRuleDataGrid').datagrid({
@@ -12,10 +13,11 @@
             singleSelect: true,
             autoRowHeight: false,
             pageNumber: 1,
-            pageSize: 100,
+            pageSize: 30,
+            pageList: [30, 60, 90, 120],
             idField: 'BdiRuleId',
             pagination: true,
-            url: '/sdtBdiRule/all?bdiRuleSetId' + bdiRuleSetId,
+            url: '/sdtBdiRule/all?bdiRuleSetId=' + bdiRuleSetId,
             height: '390px',
             toolbar: [{
                 text: '新增',
@@ -37,7 +39,8 @@
                     title: '选择',
                     width: '50px',
                     formatter: function (value, row, index) {
-                        return '<input type="radio" name="selectRadio" id="selectRadio' + index + '" value="' + row.Id + '" />';
+                        debugger;
+                        return '<input type="radio" class="bdiRuleIdRadio" id="bdiRuleIdRadio"' + index + ' value="' + row.Id + '" />';
                     }
                 },
                 {
@@ -47,49 +50,51 @@
                     field: 'BdiRuleSetId', title: '规则集Id', width: '100px', align: 'center'
                 },
                 {
-                    field: 'Condition', title: '条件', width: '150px', align: 'center'
+                    field: 'Conditions', title: '条件', width: '150px', align: 'center'
                 },
                 {
-                    field: 'ConditionExpression', title: '条件表达式', width: '150px', align: 'left'
+                    field: 'ConditionsExpression', title: '条件表达式', width: '150px', align: 'left'
                 },
                 {
-                    field: 'Operation', title: '操作', width: '150px', align: 'left'
+                    field: 'Operations', title: '操作', width: '150px', align: 'left'
                 },
                 {
-                    field: 'OperationExpression', title: '操作表达式', width: '150px', align: 'left'
+                    field: 'OperationsExpression', title: '操作表达式', width: '150px', align: 'left'
                 },
                 {
                     field: 'Remarks', title: '备注', width: '250px', align: 'center'
                 }
             ]],
             onClickRow: function (index, row) {
+                debugger;
                 //加载完毕后获取所有的checkbox遍历
-                var radio = $("input[type='radio']")[index].disabled;
+                var radio = $("input[type='radio'].bdiRuleIdRadio")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
                 if (radio != true) {
                     //让点击的行单选按钮选中
-                    $("input[type='radio']")[index].checked = true;
-                }else {
-                    $("input[type='radio']")[index].checked = false;
+                    $("input[type='radio'].bdiRuleIdRadio")[index].checked = true;
+                }
+                else {
+                    $("input[type='radio'].bdiRuleIdRadio")[index].checked = false;
                 }
             },
             onDblClickRow: function (index, row) {
                 //加载完毕后获取所有的checkbox遍历
-                var radio = $("input[type='radio']")[index].disabled;
+                var radio = $("input[type='radio'].bdiRuleIdRadio")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
                 if (radio != true) {
                     //让点击的行单选按钮选中
-                    $("input[type='radio']")[index].checked = true;
+                    $("input[type='radio'].bdiRuleIdRadio")[index].checked = true;
                 }
                 else {
-                    $("input[type='radio']")[index].checked = false;
+                    $("input[type='radio'].bdiRuleIdRadio")[index].checked = false;
                 }
 
-                updateSdtBdiRuleDialog();
+//                updateSdtBdiRuleDialog();
             }
         });
 
-    })
+    });
 
     function addSdtBdiRuleDialog() {
         $('<div></div>').dialog({
@@ -99,10 +104,14 @@
             height: '500px',
             closed: false,
             cache: false,
-            draggable: true,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            closable: true,
+            draggable: false,
             resizable: false,
-            href: '/sdtBdiRule/addPage',
             modal: true,
+            href: '/sdtBdiRule/addPage?bdiId=' + bdiId + '&bdiRuleSetId=' + bdiRuleSetId,
             onLoad: function () {
                 //初始化表单数据
             },
@@ -114,12 +123,15 @@
                 iconCls: 'icon-ok',
                 handler: function () {
                     //提交表单
-                    $('#addBdiSetForm').form('submit', {
-                        url: '/sdtBdiSet/add',
+                    $('#addBdiRuleForm').form('submit', {
+                        url: '/sdtBdiRule/add',
                         onSubmit: function () {
-                            if ($("#addBdiSetForm").form("validate")) {
-                                var res = $("#bdiSetIdsCombobox").combobox('getValues');
-                                $("#bdiDomainIds").val(res.toString());
+                            if ($("#addBdiRuleForm").form("validate")) {
+                                debugger;
+                                var conditionTagsArray = $('#demo1').tagEditor('getTags')[0].tags;
+                                var operationTagsArray = $('#demo2').tagEditor('getTags')[0].tags;
+                                $("#conditions").val(conditionTagsArray.join(' '));
+                                $("#operations").val(operationTagsArray.join(' '));
                                 return true;
                             } else {
                                 return false;
@@ -131,12 +143,11 @@
                             var obj = jQuery.parseJSON(data);
                             if (obj.success) {
                                 $.messager.alert('提示消息', obj.message);
+                                $("#addBidSetDialog").dialog('destroy');
                                 $('#sdtBdiRuleDataGrid').datagrid('reload');
                             } else {
                                 $.messager.alert('提示消息', obj.message);
                             }
-                            $("#addBidSetDialog").dialog('destroy');
-                            $('#sdtBdiRuleDataGrid').datagrid('reload');
                         }
                     });
                 }

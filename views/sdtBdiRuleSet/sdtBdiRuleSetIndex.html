@@ -13,7 +13,10 @@
             method: 'get',
             url: '/sdtBdiRuleSet/all?bdiId=' + sdtBdiId,
             pageNumber: 1,
-            pageSize: 100,
+            pageSize: 30,
+            pageList: [30, 60, 90, 120],
+            idField: 'BdiRuleSetId',
+            pagination: true,
             onClickCell: onClickCell,
             onLoadSuccess: onLoadSuccess,
             onBeforeEdit: onBeforeEdit,
@@ -253,7 +256,7 @@
             draggable: false,
             resizable: false,
             modal: true,
-            href: '/sdtBdiRule/index?bdiRuleSetId=' + rows[index].BdiRuleSetId,
+            href: '/sdtBdiRule/index?bdiRuleSetId=' + rows[index].BdiRuleSetId + "&bdiId=" + sdtBdiId,
             onLoad: function () {
             },
             onClose: function () {

@@ -4,6 +4,7 @@ import (
 	"bdi/models"
 	"log"
 	"strconv"
+	"fmt"
 )
 
 type SdtBdiRuleController struct {
@@ -13,7 +14,9 @@ type SdtBdiRuleController struct {
 // 首页
 func (this *SdtBdiRuleController) Index() {
 	bdiRuleSetId, _ := this.GetInt("bdiRuleSetId")
+	bdiId, _ := this.GetInt("bdiId")
 	this.Data["bdiRuleSetId"] = bdiRuleSetId
+	this.Data["bdiId"] = bdiId
 	this.TplName = "sdtBdiRule/sdtBdiRuleIndex.html"
 }
 
@@ -66,6 +69,10 @@ func (this *SdtBdiRuleController) All() {
 
 // 新增Dialog
 func (this *SdtBdiRuleController) AddPage() {
+	bdiId, _ := this.GetInt("bdiId")
+	bdiRuleSetId, _ := this.GetInt("bdiRuleSetId")
+	this.Data["bdiId"] = bdiId
+	this.Data["bdiRuleSetId"] = bdiRuleSetId
 	this.TplName = "sdtBdiRule/addDialog.html"
 }
 //新增
@@ -75,8 +82,8 @@ func (this *SdtBdiRuleController) Add() {
 		Message string `json:"message"`
 	}{}
 
-	sdtBdi := new(models.SdtBdiRule)
-	err := this.ParseForm(sdtBdi)
+	sdtBdiRule := new(models.SdtBdiRule)
+	err := this.ParseForm(sdtBdiRule)
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "解析参数出错"
@@ -84,9 +91,12 @@ func (this *SdtBdiRuleController) Add() {
 		this.ServeJSON()
 		return
 	}
+	
+	fmt.Println("sdtBdiRule: ", sdtBdiRule)
 
-	err = sdtBdi.Add()
+	err = sdtBdiRule.Add()
 	if err != nil {
+		fmt.Println("err: ", err)
 		returnData.Success = false
 		returnData.Message = "新增数据出错"
 		this.Data[JSON_STRING] = returnData
@@ -108,16 +118,16 @@ func (this *SdtBdiRuleController) UpdatePage() {
 		log.Fatal("解析参数出错！")
 		return
 	}
-	sdtBdi := new(models.SdtBdi)
-	sdtBdi.BdiId = bdiId
-	err = sdtBdi.GetSdtBdiById()
+	sdtBdiRule := new(models.SdtBdi)
+	sdtBdiRule.BdiId = bdiId
+	err = sdtBdiRule.GetSdtBdiById()
 
 	if err != nil {
 		log.Fatal("解析参数出错！")
 		return
 	}
 
-	this.Data["sdtBdi"] = sdtBdi
+	this.Data["sdtBdiRule"] = sdtBdiRule
 	this.TplName = "sdtBdiRule/updateDialog.html"
 }
 
@@ -128,8 +138,8 @@ func (this *SdtBdiRuleController) Update() {
 		Message string `json:"message"`
 	}{}
 
-	sdtBdi := new(models.SdtBdi)
-	err := this.ParseForm(sdtBdi)
+	sdtBdiRule := new(models.SdtBdi)
+	err := this.ParseForm(sdtBdiRule)
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "解析参数出错！"
@@ -138,7 +148,7 @@ func (this *SdtBdiRuleController) Update() {
 		return
 	}
 
-	err = sdtBdi.Update()
+	err = sdtBdiRule.Update()
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "数据更新出错！"
