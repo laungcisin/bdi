@@ -37,7 +37,9 @@ func init() {
 	//指标域
 	beego.Router("/sdtBdiDomain/index", &controllers.SdtBdiDomainController{}, "*:Index")   //列表首页
 	beego.Router("/sdtBdiDomain/all", &controllers.SdtBdiDomainController{}, "*:All")       //列出所有数据
+	beego.Router("/sdtBdiDomain/updatePage", &controllers.SdtBdiDomainController{}, "*:UpdatePage") //更新页面
 	beego.Router("/sdtBdiDomain/update", &controllers.SdtBdiDomainController{}, "*:Update") //更新
+	beego.Router("/sdtBdiDomain/addPage", &controllers.SdtBdiDomainController{}, "*:AddPage")       //新增页面
 	beego.Router("/sdtBdiDomain/add", &controllers.SdtBdiDomainController{}, "*:Add")       //新增
 	beego.Router("/sdtBdiDomain/delete", &controllers.SdtBdiDomainController{}, "*:Delete") //删除
 

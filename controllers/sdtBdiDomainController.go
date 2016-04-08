@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"bdi/models"
-	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	"log"
@@ -44,7 +43,8 @@ func (this *SdtBdiDomainController) All() {
 		page = 1
 	}
 
-	sdtBdiDomainSlice, num, err := models.GetAllSdtBdiDomain(rows, page) //查询指标域所有记录
+	sdtBdiDomain := new(models.SdtBdiDomain)
+	sdtBdiDomainSlice, num, err := sdtBdiDomain.GetAllSdtBdiDomain(rows, page) //查询指标域所有记录
 
 	if err != nil {
 		log.Fatal("查询数据失败！")
@@ -62,58 +62,9 @@ func (this *SdtBdiDomainController) All() {
 	return
 }
 
-//更新信息
-func (this *SdtBdiDomainController) Update() {
-	returnData := struct {
-		Success bool   `json:"success"`
-		Message string `json:"message"`
-	}{}
-
-	var sdtBdiDomainSlice []models.SdtBdiDomain
-	err := json.Unmarshal(this.Ctx.Input.RequestBody, &sdtBdiDomainSlice)
-
-	if err != nil {
-		fmt.Println("参数解析出错: ", err)
-		returnData.Success = false
-		returnData.Message = "参数解析出错！"
-		this.Data[JSON_STRING] = returnData
-		this.ServeJSON()
-		return
-	}
-
-	o := orm.NewOrm()
-	err = o.Begin()
-
-	if err != nil {
-		fmt.Println("数据库连接出错！")
-		returnData.Success = false
-		returnData.Message = "数据库连接出错！"
-		this.Data[JSON_STRING] = returnData
-		this.ServeJSON()
-		return
-	}
-
-	// 事务处理过程
-	for _, v := range sdtBdiDomainSlice {
-		v.BdiBaseName = "" //置空，ORM框架使用的问题
-		if _, err = o.Update(&v); err != nil {
-			o.Rollback()
-			fmt.Println("数据库更新出错！")
-			returnData.Success = false
-			returnData.Message = "数据库更新出错！"
-			this.Data[JSON_STRING] = returnData
-			this.ServeJSON()
-			return
-		}
-	}
-	// 此过程中的所有使用 o Ormer 对象的查询都在事务处理范围内
-	err = o.Commit()
-
-	returnData.Success = true
-	returnData.Message = "数据更新成功！"
-	this.Data[JSON_STRING] = returnData
-	this.ServeJSON()
-	return
+// 新增Dialog
+func (this *SdtBdiDomainController) AddPage() {
+	this.TplName = "sdtBdiDomain/addDialog.html"
 }
 
 //新增
@@ -123,7 +74,9 @@ func (this *SdtBdiDomainController) Add() {
 		Message string `json:"message"`
 	}{}
 
-	bdiBaseId, err := this.GetInt("bdiBaseId")
+	sdtBdiDomain := new(models.SdtBdiDomain)
+	err := this.ParseForm(sdtBdiDomain)
+
 	if err != nil {
 		fmt.Println("参数解析出错！")
 		returnData.Success = false
@@ -133,16 +86,7 @@ func (this *SdtBdiDomainController) Add() {
 		return
 	}
 
-	bdiDomainName := this.GetString("bdiDomainName")
-	adtFlag := this.GetString("adtFlag")
-	remarks := this.GetString("remarks")
-
-	sdtBdiDomain := new(models.SdtBdiDomain)
-	sdtBdiDomain.BdiBaseId = bdiBaseId
-	sdtBdiDomain.BdiBaseName = bdiDomainName
-	sdtBdiDomain.AdtFlag = adtFlag
-	sdtBdiDomain.Remarks = remarks
-	err = models.AddSdtBdiDomain(sdtBdiDomain)//新增
+	err = sdtBdiDomain.Add()//新增
 
 	if err != nil {
 		fmt.Println("新增数据出错！")
@@ -160,6 +104,62 @@ func (this *SdtBdiDomainController) Add() {
 	return
 }
 
+// 更新Dialog
+func (this *SdtBdiDomainController) UpdatePage() {
+	bdiDomainId, err := this.GetInt("bdiDomainId")
+	if err != nil {
+		log.Fatal("解析参数出错！")
+		return
+	}
+
+	sdtBdiDomain := new(models.SdtBdiDomain)
+	sdtBdiDomain.BdiDomainId = bdiDomainId
+
+	err = sdtBdiDomain.GetSdtBdiDomainById()
+
+	if err != nil {
+		log.Fatal("解析参数出错！")
+		return
+	}
+
+	this.Data["sdtBdiDomain"] = sdtBdiDomain
+	this.TplName = "sdtBdiDomain/updateDialog.html"
+}
+
+//更新信息
+func (this *SdtBdiDomainController) Update() {
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiDomain := new(models.SdtBdiDomain)
+	err := this.ParseForm(sdtBdiDomain)
+
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "解析参数出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	err = sdtBdiDomain.Update()
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "数据更新出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据更新成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
 //删除
 func (this *SdtBdiDomainController) Delete() {
 	returnData := struct {
@@ -168,7 +168,6 @@ func (this *SdtBdiDomainController) Delete() {
 	}{}
 
 	bdiDomainId, err := this.GetInt("bdiDomainId")
-	fmt.Println("bdiDomainId: ", bdiDomainId)
 	if err != nil {
 		fmt.Println("解析参数出错")
 		returnData.Success = false

@@ -21,7 +21,7 @@ func Init() {
 	orm.RegisterModel(new(User))
 	orm.RegisterModel(new(SdtBdiBase))
 	orm.RegisterModel(new(AdtBdiAdm))
-	orm.RegisterModel(new(SdtBdiDomain))
+	//orm.RegisterModel(new(SdtBdiDomain))
 
 	//不注册此model，使用原生sql操作增删改查
 	//orm.RegisterModel(new(SdtBdiSet))
