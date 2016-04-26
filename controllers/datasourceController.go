@@ -2,12 +2,11 @@ package controllers
 
 import (
 	"bdi/models"
-	"strconv"
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"strconv"
 	//"encoding/json"
-
 )
 
 type DatasourceController struct {
@@ -68,6 +67,7 @@ func (this *DatasourceController) All() {
 func (this *DatasourceController) AddPage() {
 	this.TplName = "datasource/addDialog.html"
 }
+
 //新增
 func (this *DatasourceController) Add() {
 	returnData := struct {
@@ -77,7 +77,6 @@ func (this *DatasourceController) Add() {
 
 	datasource := new(models.Datasource)
 	err := this.ParseForm(datasource)
-	//err := json.Unmarshal(this.Ctx.Input.RequestBody, datasource)
 	if err != nil {
 		fmt.Println(err)
 		returnData.Success = false
@@ -105,13 +104,13 @@ func (this *DatasourceController) Add() {
 
 // 更新Dialog
 func (this *DatasourceController) UpdatePage() {
-	bdiDatasourceId, err := this.GetInt("bdiDatasourceId")
+	id, err := this.GetInt("id")
 	if err != nil {
 		fmt.Println("解析参数出错！")
 		return
 	}
 	datasource := new(models.Datasource)
-	datasource.BdiDatasourceId = bdiDatasourceId
+	datasource.Id = id
 	err = datasource.GetDatasourceById()
 
 	if err != nil {
@@ -195,13 +194,13 @@ func (this *DatasourceController) Delete() {
 //检测数据源有效性校验
 func (this *DatasourceController) Check() {
 	type DataType struct {
-		Id   string    `json:"id"`
+		Id   string `json:"id"`
 		Text string `json:"text"`
 	}
 
 	returnData := struct {
-		Success bool   `json:"success"`
-		Message string `json:"message"`
+		Success      bool       `json:"success"`
+		Message      string     `json:"message"`
 		DatabaseInfo []DataType `json:"databaseInfo"`
 	}{}
 
@@ -211,7 +210,7 @@ func (this *DatasourceController) Check() {
 	password := this.GetString("password")
 	databaseType := this.GetString("databaseType")
 
-	connectionInfo := username + ":" + password+ "@tcp(" + ip + ":" + port + ")/mysql"
+	connectionInfo := username + ":" + password + "@tcp(" + ip + ":" + port + ")/mysql"
 
 	db, err := sql.Open(databaseType, connectionInfo)
 	if err != nil {
@@ -301,7 +300,7 @@ func (this *DatasourceController) GetAllSchemaForTree() {
 	username := this.GetString("username")
 	password := this.GetString("password")
 	tableName := this.GetString("tableName")
-	schemaName:= this.GetString("schemaName")
+	schemaName := this.GetString("schemaName")
 
 	datasource := new(models.Datasource)
 	schemaSlice, _ := datasource.GetAllSchemaForTree(ip, port, username, password, tableName, schemaName)
@@ -325,14 +324,13 @@ func (this *DatasourceController) GetAllTableForTree() {
 	return
 }
 
-
 func (this *DatasourceController) GetAllColumnForTree() {
 	tableName := this.GetString("param")
 	ip := this.GetString("ip")
 	port := this.GetString("port")
 	username := this.GetString("username")
 	password := this.GetString("password")
-	schemaName:= this.GetString("schemaName")
+	schemaName := this.GetString("schemaName")
 
 	datasource := new(models.Datasource)
 	schemaSlice, _ := datasource.GetAllColumnForTree(ip, port, username, password, tableName, schemaName)

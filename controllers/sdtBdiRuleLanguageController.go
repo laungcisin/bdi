@@ -11,8 +11,8 @@ type SdtBdiRuleLanguageController struct {
 
 // 首页
 func (this *SdtBdiRuleLanguageController) Index() {
-	bdiId, _ := this.GetInt("bdiId")
-	this.Data["bdiId"] = bdiId
+	Id, _ := this.GetInt("Id")
+	this.Data["Id"] = Id
 	this.TplName = "sdtBdiRuleLanguage/sdtBdiRuleIndex.html"
 }
 
@@ -29,8 +29,8 @@ func (this *SdtBdiRuleLanguageController) All() {
 
 // 新增Dialog
 func (this *SdtBdiRuleLanguageController) AddPage() {
-	bdiId, _ := this.GetInt("bdiId")
-	this.Data["bdiId"] = bdiId
+	Id, _ := this.GetInt("Id")
+	this.Data["Id"] = Id
 	this.TplName = "sdtBdiRuleLanguage/addDialog.html"
 }
 
@@ -78,13 +78,13 @@ func (this *SdtBdiRuleLanguageController) Add() {
 
 // 更新Dialog
 func (this *SdtBdiRuleLanguageController) UpdatePage() {
-	bdiId, err := this.GetInt("bdiId")
+	Id, err := this.GetInt("Id")
 	if err != nil {
 		log.Fatal("解析参数出错！")
 		return
 	}
 	sdtBdi := new(models.SdtBdi)
-	sdtBdi.BdiId = bdiId
+	sdtBdi.Id = Id
 	err = sdtBdi.GetSdtBdiById()
 
 	if err != nil {

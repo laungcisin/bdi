@@ -1,24 +1,38 @@
-<div id="loading"
-     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+<div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
-<form id="updateSdtBdiSetForm" method="post">
-    <input type="hidden" id="id" name="id"/>
-    <input type="hidden" id="sdtBdiDomainIds" name="sdtBdiDomainIds"/>
+<form id="updateBdiForm" method="post">
+    <input type="hidden" id="bdiId" name="bdiId"/>
+    <input type="hidden" id="bdiSetIds" name="bdiSetIds"/>
     <table>
         <tr>
-            <th>指标集名称：</th>
+            <th>指标名称：</th>
             <td>
-                <input name="bdiSetName" id="bdiSetName"/>
+                <input name="bdiName" id="bdiName"/>
+            </td>
+        </tr>
+
+        <tr>
+            <th>指标加密级别：</th>
+            <td>
+                <input name="bdiSecrecyId" id="bdiSecrecyId"/>
+            </td>
+        </tr>
+
+        <tr>
+            <th>指标类型：</th>
+            <td>
+                <input name="bdiTypeId" id="bdiTypeId"/>
+            </td>
+        </tr>
+
+        <tr>
+            <th>所属指标集：</th>
+            <td>
+                <input name="bdiSetIdsCombobox" id="bdiSetIdsCombobox"/>
             </td>
         </tr>
         <tr>
-            <th>指标域：</th>
-            <td>
-                <input name="sdtBdiDomainIdsCombobox" id="sdtBdiDomainIdsCombobox"/>
-            </td>
-        </tr>
-        <tr>
-            <th>指标库备注：</th>
+            <th>指标备注：</th>
             <td>
                 <input name="remarks" id="remarks">
             </td>
@@ -39,29 +53,56 @@
         }
 
         delayTime = setTimeout(show, 100);
-    };
+    }
 
     $(function () {
-        initSdtUpdateBdiSetWindow();
-    });
+        initUpdateSdtBdiDialog();
+    })
+
 
     /**
      * 初始化修改窗口。
      */
-    function initSdtUpdateBdiSetWindow() {
-        $("#id").val('{{.sdtBdiSet.Id}}');
+    function initUpdateSdtBdiDialog() {
+        $("#bdiId").val('{{.sdtBdi.BdiId}}');
 
         //指标集名称
-        $('#bdiSetName').textbox({
+        $('#bdiName').textbox({
             editable: true,
             readonly: false,
             required: true,
-            value: '{{.sdtBdiSet.BdiSetName}}'
+            value: '{{.sdtBdi.BdiName}}'
         });
 
-        //指标域
-        $('#sdtBdiDomainIdsCombobox').combobox({
-            url: '/sdt/sdtBdiDomainForList',
+        //指标加密级别
+        $('#bdiSecrecyId').combobox({
+            url: '/sdt/sdtBdiSecrecyForList',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            editable: false,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdi.BdiSecrecyId}}'
+        });
+
+        //指标类型
+        $('#bdiTypeId').combobox({
+            url: '/sdt/sdtTypeSetForList',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            editable: false,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdi.BdiTypeId}}'
+        });
+
+        //指标集
+        $('#bdiSetIdsCombobox').combobox({
+            url: '/sdt/sdtBdiSetForList',
             editable: false,
             required: true,
             method: 'get',
@@ -73,6 +114,7 @@
                 var opts = $(this).combobox('options');
                 return '<input type="checkbox" class="combobox-checkbox">' + row[opts.textField]
             },
+
             onShowPanel: function () {
                 var opts = $(this).combobox('options');
                 var target = this;
@@ -104,15 +146,15 @@
             }
         });
 
-        var sdtBdiDomainIds = "{{.sdtBdiSet.BdiDomainId}}";
-        $("#sdtBdiDomainIdsCombobox").combobox('setValues', sdtBdiDomainIds.split(","));
+        var bdiIds = "{{.sdtBdi.BdiSetIds}}";
+        $("#bdiSetIdsCombobox").combobox('setValues', bdiIds.split(","));
 
         //指标库备注
         $('#remarks').textbox({
             editable: true,
             required: true,
             readonly: false,
-            value: '{{.sdtBdiSet.Remarks}}'
+            value: '{{.sdtBdi.Remarks}}'
         });
     }
 </script>

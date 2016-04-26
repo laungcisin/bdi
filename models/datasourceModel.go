@@ -1,13 +1,13 @@
 package models
 
 import (
+	"database/sql"
 	"github.com/astaxie/beego/orm"
 	"log"
-	"database/sql"
-//"strconv"
-//"strings"
+	//"strconv"
+	//"strings"
 	"time"
-//"encoding/json"
+	//"encoding/json"
 	"strconv"
 	"strings"
 	//"fmt"
@@ -16,25 +16,29 @@ import (
 
 const (
 	UrlForDatasource = "/datasource/datasourceNode"
-	UrlForSchema = "/datasource/schemaNode"
-	UrlForTable = "/datasource/tableNode"
-	UrlForColumn = "/datasource/columnNode"
+	UrlForSchema     = "/datasource/schemaNode"
+	UrlForTable      = "/datasource/tableNode"
+	UrlForColumn     = "/datasource/columnNode"
 )
 
 type Datasource struct {
-	BdiDatasourceId       int    `form:"bdiDatasourceId"`      //主键
-	BdiDatasourceName     string `form:"bdiDatasourceName"`    //数据源名称
-	BdiDatasourceTypeId   int    `form:"bdiDatasourceTypeId"`  //数据源类型Id
-	DatasourceConnect     string    `form:"datasourceConnect"` //数据源连接详情
-	Remarks               string `form:"remarks"`              //数据源备注
+	Id       int    `form:"id"`       //主键
+	TypeId   int    `form:"typeId"`   //数据源类型Id
+	Name     string `form:"name"`     //数据源名称
+	Ip       string `form:"ip"`       //ip地址
+	Port     int    `form:"port"`     //端口号
+	Dbname   string `form:"dbname"`   //数据库名
+	Username string `form:"username"` //用户名
+	Password string `form:"password"` //密码
+	Driver   string `form:"driver"`   //数据库驱动
+	Remarks  string `form:"remarks"`  //数据源备注
 
-	CreateUserId          int                                  //创建人ID
-	CreateTime            time.Time                            //创建时间
-	ModifyUserId          int                                  //修改人ID
-	ModifyTime            time.Time                            //修改时间
+	UserCode   int       `form:"userCode"`   //创建人ID
+	CreateTime time.Time `form:"createTime"` //创建时间
+	EditTime   time.Time `form:"editTime"`   //修改时间
 
-								   //以下字段为datagrid展示
-	BdiDatasourceTypeName string                               //数据源类型名称
+	//以下字段为datagrid展示
+	TypeName string //数据源类型名称
 }
 
 func (this *Datasource) TableName() string {
@@ -47,45 +51,46 @@ func (this *Datasource) TableName() string {
 func (this *Datasource) GetAllDatasource(rows int, page int) ([]Datasource, int, error) {
 	var o orm.Ormer
 	o = orm.NewOrm()
-	var datasourceSlice []Datasource
+	var datasourceSlice []Datasource = make([]Datasource, 0)
 
 	//查询的字段顺序最好和model的字段对应，方便解析并赋值。
-	var querySql =
-	" select d.*, t.bdi_datasource_type_name " +
-	" from  sdt_bdi_datasource d " +
-	" left join sdt_bdi_datasource_type t on d.bdi_datasource_type_id = t.bdi_datasource_type_id " +
-	" where d.bdi_datasource_id limit ?, ? "
+	var querySql = " select d.*, t.type_name " +
+		" from  sdt_bdi_datasource d " +
+		" left join sdt_bdi_datasource_type t on d.type_id = t.id " +
+		" limit ?, ? "
 
-	num, err := o.Raw(querySql, (page - 1) * rows, page * rows).QueryRows(&datasourceSlice)
+	_, err := o.Raw(querySql, (page-1)*rows, page*rows).QueryRows(&datasourceSlice)
 	if err != nil {
 		log.Fatal("查询表：" + this.TableName() + "出错！")
 		return nil, 0, err
 	}
 
-	var countSql = " select count(*) as counts from " + this.TableName()
+	num := new(int)
+	var countSql = " select count(*) as counts  " +
+		" from  sdt_bdi_datasource d " +
+		" left join sdt_bdi_datasource_type t on d.type_id = t.id "
+
 	err = o.Raw(countSql).QueryRow(&num)
 	if err != nil {
 		log.Fatal("查询表：" + this.TableName() + "出错！")
 		return nil, 0, err
 	}
 
-	return datasourceSlice, int(num), nil
+	return datasourceSlice, *num, nil
 }
 
 /**
 获取所有指标。
 */
 func (this *Datasource) GetDatasourceById() error {
-	var o orm.Ormer
-	o = orm.NewOrm()
+	o := orm.NewOrm()
 	//查询的字段顺序最好和model的字段对应，这样才方便解析并赋值。
-	var querySql =
-	" select d.*, t.bdi_datasource_type_name " +
-	" from sdt_bdi_datasource d " +
-	" left join sdt_bdi_datasource_type t on d.bdi_datasource_type_id = t.bdi_datasource_type_id " +
-	" where d.bdi_datasource_id = ? "
+	var querySql = " select d.*, t.type_name " +
+		" from sdt_bdi_datasource d " +
+		" left join sdt_bdi_datasource_type t on d.type_id = t.id " +
+		" where d.id = ? "
 
-	err := o.Raw(querySql, this.BdiDatasourceId).QueryRow(this)
+	err := o.Raw(querySql, this.Id).QueryRow(this)
 
 	if err != nil {
 		log.Fatal("查询表：" + this.TableName() + "出错！")
@@ -99,9 +104,10 @@ func (this *Datasource) Add() error {
 	o := orm.NewOrm()
 	o.Begin()
 
-	var insertSdtBdiSql = " insert into sdt_bdi_datasource(bdi_datasource_name, bdi_datasource_type_id, datasource_connect, remarks, create_user_id, create_time)values(?, ?, ?, ?, ?, ?) "
+	var insertSdtBdiSql = " insert into sdt_bdi_datasource(type_id, name, ip, port, dbname, username, password, driver, remarks, user_code, create_time)values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
 
-	_, err := o.Raw(insertSdtBdiSql, this.BdiDatasourceName, this.BdiDatasourceTypeId, this.DatasourceConnect, this.Remarks, 0, time.Now()).Exec()
+	_, err := o.Raw(insertSdtBdiSql, this.TypeId, this.Name, this.Ip, this.Port, this.Dbname, this.Username, this.Password,
+		this.Driver, this.Remarks, 0, time.Now()).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -116,17 +122,21 @@ func (this *Datasource) Update() error {
 	o.Begin()
 
 	var updateSdtBdiSql =
-	"update sdt_bdi_datasource " +
-	"set  " +
-	" bdi_datasource_name = ?, " +
-	" bdi_datasource_type_id = ?, " +
-	" datasource_connect = ?, " +
-	" remarks = ?, " +
-	//" modify_user_id = ?, " +//暂时没有修改人
-	" modify_time = ? " +
-	"where bdi_datasource_id = ?"
-
-	_, err := o.Raw(updateSdtBdiSql, this.BdiDatasourceName, this.BdiDatasourceTypeId, this.DatasourceConnect, this.Remarks, time.Now(), this.BdiDatasourceId).Exec()
+		" update sdt_bdi_datasource " +
+		" set type_id = ?, " +
+		" name = ?, " +
+		" ip = ?, " +
+		" port = ?, " +
+		" dbname = ?, " +
+		" username = ?, " +
+		" password = ?, " +
+		" driver = ?, " +
+		" remarks = ?, " +
+		//" user_code = '0', " +
+		" edit_time = ? " +
+		" where id = ? "
+	_, err := o.Raw(updateSdtBdiSql, this.TypeId, this.Name, this.Ip, this.Port, this.Dbname, this.Username, this.Password,
+		this.Driver, this.Remarks, time.Now(), this.Id).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -137,25 +147,25 @@ func (this *Datasource) Update() error {
 }
 
 type DatasourceTreeAttributes struct {
-	Url string `json:"url"`
-	Ip string `json:"ip"`
-	Port string `json:"port"`
-	Username string `json:"username"`
-	Password string  `json:"password"`
-	TableName string `json:"tableName"`
+	Url        string `json:"url"`
+	Ip         string `json:"ip"`
+	Port       string `json:"port"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	TableName  string `json:"tableName"`
 	SchemaName string `json:"schemaName"`
 }
 
 type DatasourceTree struct {
-	Id         string `json:"id"`
-	Pid        string `json:"pid"`
-	Text       string `json:"text"`
-	IconCls    string `json:"iconCls"`
-	Checked    string `json:"checked"`
-	State      string `json:"state"`
+	Id      string `json:"id"`
+	Pid     string `json:"pid"`
+	Text    string `json:"text"`
+	IconCls string `json:"iconCls"`
+	Checked string `json:"checked"`
+	State   string `json:"state"`
 
 	Attributes DatasourceTreeAttributes `json:"attributes"`
-	Children   []Tree `json:"children"`
+	Children   []Tree                   `json:"children"`
 }
 
 /**
@@ -174,15 +184,15 @@ func (this *Datasource) GetAllDatasourceForTree() ([]DatasourceTree, error) {
 		return nil, err
 	}
 
-	newTreeDataSlice := make([]DatasourceTree, 0, 10)
+	newTreeDataSlice := make([]DatasourceTree, 0)
 	for _, v := range sdtBdiDatasourceSlice {
 		treeNode := new(DatasourceTree)
-		treeNode.Id = strconv.Itoa(v.BdiDatasourceId)
-		treeNode.Text = v.BdiDatasourceName
+		treeNode.Id = strconv.Itoa(v.Id)
+		treeNode.Text = v.Name
 		treeNode.State = "closed"
 
 		var connectionInfo string
-		connectionInfo = strings.Replace(v.DatasourceConnect, "#0F01", "{", -1)
+		// connectionInfo = strings.Replace(v.DatasourceConnect, "#0F01", "{", -1)
 		connectionInfo = strings.Replace(connectionInfo, "#0F02", "\"", -1)
 		connectionInfo = strings.Replace(connectionInfo, "#0F03", "}", -1)
 		datasourceTreeAttributes := new(DatasourceTreeAttributes)

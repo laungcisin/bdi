@@ -5,36 +5,27 @@
     <input type="hidden" id="bdiSetIds" name="bdiSetIds"/>
     <table>
         <tr>
-            <th>指标名称：</th>
-            <td>
-                <input name="bdiName" id="bdiName"/>
-            </td>
-        </tr>
-
-        <tr>
-            <th>指标加密级别：</th>
-            <td>
-                <input name="bdiSecrecyId" id="bdiSecrecyId"/>
-            </td>
-        </tr>
-
-        <tr>
             <th>指标类型：</th>
             <td>
                 <input name="bdiTypeId" id="bdiTypeId"/>
             </td>
         </tr>
-
         <tr>
-            <th>所属指标集：</th>
+            <th>指标名称：</th>
             <td>
-                <input name="bdiSetIdsCombobox" id="bdiSetIdsCombobox"/>
+                <input name="bdiName" id="bdiName"/>
             </td>
         </tr>
         <tr>
             <th>指标备注：</th>
             <td>
                 <input name="remarks" id="remarks">
+            </td>
+        </tr>
+        <tr>
+            <th>所属指标集：</th>
+            <td>
+                <input name="bdiSetIdsCombobox" id="bdiSetIdsCombobox"/>
             </td>
         </tr>
     </table>
@@ -53,18 +44,17 @@
         }
 
         delayTime = setTimeout(show, 100);
-    }
+    };
 
     $(function () {
         initUpdateSdtBdiDialog();
-    })
-
+    });
 
     /**
      * 初始化修改窗口。
      */
     function initUpdateSdtBdiDialog() {
-        $("#bdiId").val('{{.sdtBdi.BdiId}}');
+        $("#bdiId").val('{{.sdtBdi.Id}}');
 
         //指标集名称
         $('#bdiName').textbox({
@@ -72,19 +62,6 @@
             readonly: false,
             required: true,
             value: '{{.sdtBdi.BdiName}}'
-        });
-
-        //指标加密级别
-        $('#bdiSecrecyId').combobox({
-            url: '/sdt/sdtBdiSecrecyForList',
-            valueField: 'id',
-            textField: 'text',
-            panelHeight: 'auto',
-            panelMaxHeight: '200px',
-            editable: false,
-            readonly: false,
-            required: true,
-            value: '{{.sdtBdi.BdiSecrecyId}}'
         });
 
         //指标类型

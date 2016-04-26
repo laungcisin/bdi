@@ -1,54 +1,55 @@
-<div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+<div id="loading"
+     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
 <form id="addDatasourceForm" method="post">
     <!--数据源连接详情-->
     <input type="hidden" name="datasourceConnect" id="datasourceConnect"/>
 
-    <table>
+    <table cellpadding="5">
         <tr>
-            <th>数据源名称：</th>
+            <td>数据源名称：</td>
             <td>
-                <input name="bdiDatasourceName" id="bdiDatasourceName"/>
+                <input name="name" id="name"/>
             </td>
         </tr>
         <tr>
-            <th>数据源类型：</th>
+            <td>数据源类型：</td>
             <td>
-                <input name="bdiDatasourceTypeId" id="bdiDatasourceTypeId"/>
+                <input name="typeId" id="typeId"/>
             </td>
         </tr>
         <tr>
-            <th>主机IP地址：</th>
+            <td>主机IP地址：</td>
             <td>
                 <input name="ip" id="ip">
             </td>
         </tr>
         <tr>
-            <th>端口号：</th>
+            <td>端口号：</td>
             <td>
                 <input name="port" id="port">
             </td>
         </tr>
         <tr>
-            <th>用户名：</th>
+            <td>用户名：</td>
             <td>
                 <input name="username" id="username">
             </td>
         </tr>
         <tr>
-            <th>密码：</th>
+            <td>密码：</td>
             <td>
                 <input name="password" id="password">
             </td>
         </tr>
         <tr>
-            <th>数据库：</th>
+            <td>数据库：</td>
             <td>
-                <input name="schemata" id="schemata">
+                <input name="dbname" id="dbname">
             </td>
         </tr>
         <tr>
-            <th>备注：</th>
+            <td>备注：</td>
             <td>
                 <input name="remarks" id="remarks">
             </td>
@@ -56,8 +57,18 @@
     </table>
 </form>
 
-
 <script type="text/javascript">
+    //自定义验证
+    $.extend($.fn.validatebox.defaults.rules, {
+        ipRex: {
+            validator: function (value) {
+                var re = /^([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.([0-9]|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])$/;
+                return re.test(value);
+            },
+            message: '请输入正确的ip地址'
+        }
+    });
+
     function show() {
         $("#loading").fadeOut("normal", function () {
             $(this).remove();
@@ -70,27 +81,70 @@
         }
 
         delayTime = setTimeout(show, 100);
-    }
+    };
 
     $(function () {
-        initAddSdtBdiDialog();
-    })
+        initAddDatasourceDialog();
 
+        $('input.easyui-validatebox').validatebox({
+            tipOptions: {    // the options to create tooltip
+                showEvent: 'mouseenter',
+                hideEvent: 'mouseleave',
+                showDelay: 0,
+                hideDelay: 0,
+                zIndex: '',
+                onShow: function () {
+                    if (!$(this).hasClass('validatebox-invalid')) {
+                        if ($(this).tooltip('options').prompt) {
+                            $(this).tooltip('update', $(this).tooltip('options').prompt);
+                        } else {
+                            $(this).tooltip('tip').hide();
+                        }
+                    } else {
+                        $(this).tooltip('tip').css({
+                            color: '#000',
+                            borderColor: '#CC9933',
+                            backgroundColor: '#FFFFCC'
+                        });
+                    }
+                },
+                onHide: function () {
+                    if (!$(this).tooltip('options').prompt) {
+                        $(this).tooltip('destroy');
+                    }
+                }
+            }
+        }).tooltip({
+            position: 'right',
+            content: function () {
+                var opts = $(this).validatebox('options');
+                return opts.prompt;
+            },
+            onShow: function () {
+                $(this).tooltip('tip').css({
+                    color: '#000',
+                    borderColor: '#CC9933',
+                    backgroundColor: '#FFFFCC'
+                });
+            }
+        });
+    });
 
     /**
      * 初始化新增窗口。
      */
-    function initAddSdtBdiDialog() {
+    function initAddDatasourceDialog() {
         //数据源名称
-        $('#bdiDatasourceName').textbox({
+        $('#name').textbox({
             editable: true,
             readonly: false,
             required: true,
-            value: '172.16.0.103-mysql数据源'
+            validType: 'length[1, 100]',
+            value: ''
         });
 
         //数据源类型
-        $('#bdiDatasourceTypeId').combobox({
+        $('#typeId').combobox({
             url: '/sdt/datasourceForList',
             editable: false,
             required: true,
@@ -99,7 +153,7 @@
             textField: 'text',
             panelHeight: 'auto',
             multiple: false,
-            value: '1'
+            value: ''
         });
 
         //指标库备注
@@ -109,16 +163,17 @@
             required: true,
             readonly: false,
             multiline: true,
-            value: '172.16.0.103-mysql数据源'
+            value: ''
         });
 
         //----以下信息保存以json格式保存，datasourceConnect字段存储这些配置信息
         //主机IP地址
-        $('#ip').textbox({
+        $('#ip').validatebox({
             editable: true,
             readonly: false,
             required: true,
-            value: '172.16.0.103'
+            validType: 'ipRex',
+            value: ''
         });
 
         //端口号
@@ -126,7 +181,7 @@
             editable: true,
             readonly: false,
             required: true,
-            value: '3306'
+            value: ''
         });
 
         //用户名
@@ -134,7 +189,7 @@
             editable: true,
             readonly: false,
             required: true,
-            value: 'gbdp'
+            value: ''
         });
 
         //密码
@@ -142,11 +197,11 @@
             editable: true,
             readonly: false,
             required: true,
-            value: 'bdx123'
+            value: ''
         });
 
         //数据源库
-        $('#schemata').combobox({
+        $('#dbname').combobox({
             url: '',
             editable: false,
             required: true,
@@ -158,14 +213,14 @@
             panelMaxHeight: '150px',
             multiple: false,
             onShowPanel: function () {
-                $('#schemata').combobox("clear");
+                $('#dbname').combobox("clear");
 
                 var dataInfo = {
                     ip: $("#ip").val(),
                     port: $("#port").val(),
                     username: $("#username").val(),
                     password: $("#password").val(),
-                    databaseType: $('#bdiDatasourceTypeId').combobox('getText')
+                    databaseType: $('#typeId').combobox('getText')
                 };
 
                 $.ajax({
@@ -175,12 +230,12 @@
                     type: "GET",
                     data: dataInfo,
                     success: function (data) {
-                        $('#schemata').combobox("clear");
+                        $('#dbname').combobox("clear");
 
                         if (data.success == "true" || data.success) {
-                            $('#schemata').combobox('loadData', data.databaseInfo);
+                            $('#dbname').combobox('loadData', data.databaseInfo);
                         } else {
-                            $('#schemata').combobox('loadData', '');
+                            $('#dbname').combobox('loadData', '');
                             $.messager.alert('提示信息', data.message);
                         }
                     },

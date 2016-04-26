@@ -1,0 +1,239 @@
+<div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+
+<form id="addSdtBdiCfgKpiForm" method="post">
+    <input type="hidden" id="bdiId" name="bdiId"/>
+    <input type="hidden" id="bdiCfgDimIds" name="bdiCfgDimIds"/>
+    <table>
+        <tr>
+            <th>Kpi名称：</th>
+            <td>
+                <input name="kpiName" id="kpiName"/>
+            </td>
+        </tr>
+        <tr>
+            <th>Kpi备注：</th>
+            <td>
+                <input name="remarks" id="remarks">
+            </td>
+        </tr>
+        <tr>
+            <th>配置维度：</th>
+            <td>
+                <input name="bdiCfgDimIdsCombobox" id="bdiCfgDimIdsCombobox"/>
+                <a id="addCfgDimButton" name="addCfgDimButton" href="#"></a>
+            </td>
+        </tr>
+        <tr>
+            <th>所属数据库：</th>
+            <td>
+                <input name="dataBase" id="dataBase"/>
+            </td>
+        </tr>
+        <tr>
+            <th>所属表：</th>
+            <td>
+                <input name="tableName" id="tableName"/>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+    var bdiId = "{{.bdiId}}";
+
+    function show() {
+        $("#loading").fadeOut("normal", function () {
+            $(this).remove();
+        });
+    }
+    var delayTime;
+    $.parser.onComplete = function () {
+        if (delayTime) {
+            clearTimeout(delayTime);
+        }
+
+        delayTime = setTimeout(show, 100);
+    };
+
+    $(function () {
+        initAddSdtBdiDialog();
+    });
+
+    /**
+     * 初始化新增窗口。
+     */
+    function initAddSdtBdiDialog() {
+        $("#bdiId").val(bdiId);
+
+        //kpiName
+        $('#kpiName').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: ''
+        });
+
+        //备注
+        $('#remarks').textbox({
+            editable: true,
+            readonly: false,
+            value: ''
+        });
+
+        //配置维度
+//        $('#bdiCfgDimIds').combotree({
+//            url: '/sdt/statDimForList',
+//            editable: false,
+//            required: true,
+//            method: 'get',
+//            valueField: 'id',
+//            textField: 'text',
+//            panelHeight: 'auto',
+//            panelMaxHeight: '100px',
+//            multiple: true
+//        });
+
+        $('#addCfgDimButton').linkbutton({
+            width: 'auto',
+            height: 'auto',
+            text: '添加',
+            iconCls: 'icon-add',
+            onClick: function () {
+//                addRuleLanguageDialog();
+            }
+        });
+
+        //配置维度
+        $('#bdiCfgDimIdsCombobox').combobox({
+            url: '/sdt/statDimForList',
+            editable: false,
+            required: true,
+            method: 'get',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '100px',
+            multiple: true,
+            formatter: function (row) {
+                var opts = $(this).combobox('options');
+                return '<input type="checkbox" class="combobox-checkbox">' + row[opts.textField]
+            },
+
+            onShowPanel: function () {
+                var opts = $(this).combobox('options');
+                var target = this;
+                var values = $(target).combobox('getValues');
+                $.map(values, function (value) {
+                    var el = opts.finder.getEl(target, value);
+                    el.find('input.combobox-checkbox')._propAttr('checked', true);
+                })
+            },
+            onLoadSuccess: function () {
+                var opts = $(this).combobox('options');
+                var target = this;
+                var values = $(target).combobox('getValues');
+                $.map(values, function (value) {
+                    var el = opts.finder.getEl(target, value);
+                    el.find('input.combobox-checkbox')._propAttr('checked', true);
+                })
+            },
+            onSelect: function (row) {
+                //console.log(row);
+                var opts = $(this).combobox('options');
+                var el = opts.finder.getEl(this, row[opts.valueField]);
+                el.find('input.combobox-checkbox')._propAttr('checked', true);
+            },
+            onUnselect: function (row) {
+                var opts = $(this).combobox('options');
+                var el = opts.finder.getEl(this, row[opts.valueField]);
+                el.find('input.combobox-checkbox')._propAttr('checked', false);
+            }
+        });
+
+        //所属数据库
+        $('#dataBase').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: ''
+        });
+
+        //所属表
+        $('#tableName').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: ''
+        });
+
+        //所属数据库
+//        $('#dataBase').combobox({
+//            url: '/sdt/sdtBdiSetForList',
+//            editable: false,
+//            required: true,
+//            method: 'get',
+//            valueField: 'id',
+//            textField: 'text',
+//            panelHeight: 'auto',
+//            multiple: true,
+//            formatter: function (row) {
+//                var opts = $(this).combobox('options');
+//                return '<input type="checkbox" class="combobox-checkbox">' + row[opts.textField]
+//            },
+//
+//            onShowPanel: function () {
+//                var opts = $(this).combobox('options');
+//                var target = this;
+//                var values = $(target).combobox('getValues');
+//                $.map(values, function (value) {
+//                    var el = opts.finder.getEl(target, value);
+//                    el.find('input.combobox-checkbox')._propAttr('checked', true);
+//                })
+//            },
+//            onLoadSuccess: function () {
+//                var opts = $(this).combobox('options');
+//                var target = this;
+//                var values = $(target).combobox('getValues');
+//                $.map(values, function (value) {
+//                    var el = opts.finder.getEl(target, value);
+//                    el.find('input.combobox-checkbox')._propAttr('checked', true);
+//                })
+//            },
+//            onSelect: function (row) {
+//                //console.log(row);
+//                var opts = $(this).combobox('options');
+//                var el = opts.finder.getEl(this, row[opts.valueField]);
+//                el.find('input.combobox-checkbox')._propAttr('checked', true);
+//            },
+//            onUnselect: function (row) {
+//                var opts = $(this).combobox('options');
+//                var el = opts.finder.getEl(this, row[opts.valueField]);
+//                el.find('input.combobox-checkbox')._propAttr('checked', false);
+//            }
+//        });
+
+//        //所属数据库
+//        $('#dataBase').combo({
+//            url: '/sdt/sdtBdiSetForList',
+//            editable: false,
+//            required: true,
+//            method: 'get',
+//            valueField: 'id',
+//            textField: 'text',
+//            panelHeight: 'auto',
+//            multiple: false
+//        });
+//
+//        //所属表
+//        $('#tableName').combo({
+//            url: '/sdt/sdtBdiSetForList',
+//            editable: false,
+//            required: true,
+//            method: 'get',
+//            valueField: 'id',
+//            textField: 'text',
+//            panelHeight: 'auto',
+//            multiple: false
+//        });
+    }
+</script>

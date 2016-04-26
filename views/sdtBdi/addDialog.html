@@ -4,36 +4,27 @@
     <input type="hidden" id="bdiSetIds" name="bdiSetIds"/>
     <table>
         <tr>
-            <th>指标名称：</th>
-            <td>
-                <input name="bdiName" id="bdiName"/>
-            </td>
-        </tr>
-
-        <tr>
-            <th>指标加密级别：</th>
-            <td>
-                <input name="bdiSecrecyId" id="bdiSecrecyId"/>
-            </td>
-        </tr>
-
-        <tr>
             <th>指标类型：</th>
             <td>
                 <input name="bdiTypeId" id="bdiTypeId"/>
             </td>
         </tr>
-
         <tr>
-            <th>所属指标集：</th>
+            <th>指标名称：</th>
             <td>
-                <input name="bdiSetIdsCombobox" id="bdiSetIdsCombobox"/>
+                <input name="bdiName" id="bdiName"/>
             </td>
         </tr>
         <tr>
             <th>指标备注：</th>
             <td>
                 <input name="remarks" id="remarks">
+            </td>
+        </tr>
+        <tr>
+            <th>所属指标集：</th>
+            <td>
+                <input name="bdiSetIdsCombobox" id="bdiSetIdsCombobox"/>
             </td>
         </tr>
     </table>
@@ -52,12 +43,11 @@
         }
 
         delayTime = setTimeout(show, 100);
-    }
+    };
 
     $(function () {
         initAddSdtBdiDialog();
-    })
-
+    });
 
     /**
      * 初始化新增窗口。
@@ -66,19 +56,6 @@
         //指标集名称
         $('#bdiName').textbox({
             editable: true,
-            readonly: false,
-            required: true,
-            value: ''
-        });
-
-        //指标加密级别
-        $('#bdiSecrecyId').combobox({
-            url: '/sdt/sdtBdiSecrecyForList',
-            valueField: 'id',
-            textField: 'text',
-            panelHeight: 'auto',
-            panelMaxHeight: '200px',
-            editable: false,
             readonly: false,
             required: true,
             value: ''

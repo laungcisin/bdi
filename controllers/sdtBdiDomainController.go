@@ -49,7 +49,7 @@ func (this *SdtBdiDomainController) All() {
 	if err != nil {
 		log.Fatal("查询数据失败！")
 		returnData.Total = 0
-		returnData.Rows = nil
+		returnData.Rows = &sdtBdiDomainSlice
 		this.Data[JSON_STRING] = returnData
 		this.ServeJSON()
 		return
@@ -86,7 +86,7 @@ func (this *SdtBdiDomainController) Add() {
 		return
 	}
 
-	err = sdtBdiDomain.Add()//新增
+	err = sdtBdiDomain.Add() //新增
 
 	if err != nil {
 		fmt.Println("新增数据出错！")
@@ -106,14 +106,14 @@ func (this *SdtBdiDomainController) Add() {
 
 // 更新Dialog
 func (this *SdtBdiDomainController) UpdatePage() {
-	bdiDomainId, err := this.GetInt("bdiDomainId")
+	id, err := this.GetInt("id")
 	if err != nil {
 		log.Fatal("解析参数出错！")
 		return
 	}
 
 	sdtBdiDomain := new(models.SdtBdiDomain)
-	sdtBdiDomain.BdiDomainId = bdiDomainId
+	sdtBdiDomain.Id = id
 
 	err = sdtBdiDomain.GetSdtBdiDomainById()
 
@@ -178,7 +178,7 @@ func (this *SdtBdiDomainController) Delete() {
 	}
 
 	o := orm.NewOrm()
-	if _, err := o.Delete(&models.SdtBdiDomain{BdiDomainId: bdiDomainId}); err != nil {
+	if _, err := o.Delete(&models.SdtBdiDomain{Id: bdiDomainId}); err != nil {
 		fmt.Println("数据删除失败")
 		returnData.Success = false
 		returnData.Message = "数据删除失败"

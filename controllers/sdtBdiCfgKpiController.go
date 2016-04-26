@@ -2,23 +2,27 @@ package controllers
 
 import (
 	"bdi/models"
+	"fmt"
 	"log"
 	"strconv"
 )
 
-type SdtBdiSetController struct {
+type SdtBdiCfgKpiController struct {
 	BaseController
 }
 
-// 首页
-func (this *SdtBdiSetController) Index() {
-	this.TplName = "sdtBdiSet/sdtBdiSetIndex.html"
+// Kpi首页
+func (this *SdtBdiCfgKpiController) Index() {
+	bdiId, _ := this.GetInt("bdiId")
+	this.Data["bdiId"] = bdiId
+
+	this.TplName = "sdtBdiCfgKpi/sdtBdiCfgKpiIndex.html"
 }
 
 /**
 根据行数和列数，查询符合条件的指标集的数据。
 */
-func (this *SdtBdiSetController) All() {
+func (this *SdtBdiCfgKpiController) All() {
 	var err error
 	var rows int
 	var page int
@@ -41,8 +45,8 @@ func (this *SdtBdiSetController) All() {
 		page = 1
 	}
 
-	sdtBdiSet := new(models.SdtBdiSet)
-	sdtBdiSetSlice, num, err := sdtBdiSet.GetAllSdtBdiSet(rows, page)
+	sdtBdiCfgKpi := new(models.SdtBdiCfgKpi)
+	sdtBdiCfgKpiSetSlice, num, err := sdtBdiCfgKpi.GetAllSdtBdiCfgKpi(rows, page) //查询所有
 
 	if err != nil {
 		log.Fatal("查询数据失败！")
@@ -54,26 +58,33 @@ func (this *SdtBdiSetController) All() {
 	}
 
 	returnData.Total = num
-	returnData.Rows = &sdtBdiSetSlice
+	returnData.Rows = &sdtBdiCfgKpiSetSlice
 	this.Data[JSON_STRING] = returnData
 	this.ServeJSON()
 	return
 }
 
 // 新增Dialog
-func (this *SdtBdiSetController) AddPage() {
-	this.TplName = "sdtBdiSet/addDialog.html"
+func (this *SdtBdiCfgKpiController) AddPage() {
+	bdiId, _ := this.GetInt("bdiId")
+	this.Data["bdiId"] = bdiId
+	this.TplName = "sdtBdiCfgKpi/addDialog.html"
 }
 
 //新增
-func (this *SdtBdiSetController) Add() {
+func (this *SdtBdiCfgKpiController) Add() {
 	returnData := struct {
 		Success bool   `json:"success"`
 		Message string `json:"message"`
 	}{}
 
-	var sdtBdiSet models.SdtBdiSet
-	err := this.ParseForm(&sdtBdiSet)
+	sdtBdiCfgKpi := new(models.SdtBdiCfgKpi)
+	err := this.ParseForm(sdtBdiCfgKpi)
+
+	r := this.GetString("bdiCfgDimIds")
+	fmt.Println("r: ", r)
+
+	fmt.Println("sdtBdiCfgKpi: ", sdtBdiCfgKpi)
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "解析参数出错"
@@ -82,7 +93,7 @@ func (this *SdtBdiSetController) Add() {
 		return
 	}
 
-	err = sdtBdiSet.Add()
+	err = sdtBdiCfgKpi.Add()
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "新增数据出错"
@@ -99,37 +110,34 @@ func (this *SdtBdiSetController) Add() {
 }
 
 // 更新Dialog
-func (this *SdtBdiSetController) UpdatePage() {
-	var err error
-	id, err := this.GetInt("id")
+func (this *SdtBdiCfgKpiController) UpdatePage() {
+	kpiId, err := this.GetInt("kpiId")
+	if err != nil {
+		log.Fatal("解析参数出错！")
+		return
+	}
+	sdtBdiCfgKpi := new(models.SdtBdiCfgKpi)
+	sdtBdiCfgKpi.KpiId = kpiId
+	err = sdtBdiCfgKpi.GetSdtBdiCfgKpiById()
 
 	if err != nil {
 		log.Fatal("解析参数出错！")
 		return
 	}
 
-	sdtBdiSet := new(models.SdtBdiSet)
-	sdtBdiSet.Id = id
-	err = sdtBdiSet.GetSdtBdiSetById()
-
-	if err != nil {
-		log.Fatal("解析参数出错！")
-		return
-	}
-
-	this.Data["sdtBdiSet"] = sdtBdiSet
-	this.TplName = "sdtBdiSet/updateDialog.html"
+	this.Data["sdtBdiCfgKpi"] = sdtBdiCfgKpi
+	this.TplName = "sdtBdiCfgKpi/updateDialog.html"
 }
 
 //更新信息
-func (this *SdtBdiSetController) Update() {
+func (this *SdtBdiCfgKpiController) Update() {
 	returnData := struct {
 		Success bool   `json:"success"`
 		Message string `json:"message"`
 	}{}
 
-	var sdtBdiSet models.SdtBdiSet
-	err := this.ParseForm(&sdtBdiSet)
+	sdtBdiCfgKpi := new(models.SdtBdiCfgKpi)
+	err := this.ParseForm(sdtBdiCfgKpi)
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "解析参数出错！"
@@ -138,7 +146,7 @@ func (this *SdtBdiSetController) Update() {
 		return
 	}
 
-	err = sdtBdiSet.Update()
+	err = sdtBdiCfgKpi.Update()
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "数据更新出错！"
@@ -155,32 +163,11 @@ func (this *SdtBdiSetController) Update() {
 }
 
 //删除
-func (this *SdtBdiSetController) Delete() {
+func (this *SdtBdiCfgKpiController) Delete() {
 	returnData := struct {
 		Success bool   `json:"success"`
 		Message string `json:"message"`
 	}{}
-
-	//	bdiDomainId, err := this.GetInt("bdiDomainId")
-	//	fmt.Println("bdiDomainId: ", bdiDomainId)
-	//	if err != nil {
-	//		fmt.Println("解析参数出错")
-	//		returnData.Success = false
-	//		returnData.Message = "解析参数出错"
-	//		this.Data[JSON_STRING] = returnData
-	//		this.ServeJSON()
-	//		return
-	//	}
-	//
-	//	o := orm.NewOrm()
-	//	if _, err := o.Delete(&models.SdtBdiDomain{BdiDomainId: bdiDomainId}); err != nil {
-	//		fmt.Println("数据删除失败")
-	//		returnData.Success = false
-	//		returnData.Message = "数据删除失败"
-	//		this.Data[JSON_STRING] = returnData
-	//		this.ServeJSON()
-	//		return
-	//	}
 
 	returnData.Success = true
 	returnData.Message = "数据删除成功！"

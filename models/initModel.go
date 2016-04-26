@@ -19,7 +19,7 @@ func Init() {
 	orm.RegisterDataBase("default", "mysql", dsn)
 
 	orm.RegisterModel(new(User))
-	orm.RegisterModel(new(SdtBdiBase))
+	// orm.RegisterModel(new(SdtBdiBase))
 	orm.RegisterModel(new(AdtBdiAdm))
 	//orm.RegisterModel(new(SdtBdiDomain))
 

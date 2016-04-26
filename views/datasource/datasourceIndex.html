@@ -17,6 +17,8 @@
 <script type="text/javascript" src="/static/js/easyui/utils/utils.js"></script>
 
 <script type="text/javascript">
+    var checkedIndex = undefined;
+
     $(function () {
         $('#datasourceDataGrid').datagrid({
             method: 'GET',
@@ -26,7 +28,8 @@
             autoRowHeight: false,
             pageNumber: 1,
             pageSize: 10,
-            idField: 'BdiId',
+            pageList: [10, 30, 50],
+            idField: 'Id',
             pagination: true,
             url: '/datasource/all',
             height: '390px',
@@ -46,33 +49,29 @@
             }],
             columns: [[
                 {
-                    field: 'oid',
+                    field: 'datasource_oid',
                     title: '选择',
                     width: '50px',
                     formatter: function (value, row, index) {
-                        return '<input type="radio" name="selectRadio" id="selectRadio"' + index + ' value="' + row.Id + '" />';
+                        return '<input type="radio" name="selectDatasourceRadio" id="selectDatasourceRadio"' + index + ' value="' + row.Id + '" />';
                     }
                 },
                 {
-                    field: 'BdiDatasourceId', title: '数据源Id', width: '100px', align: 'center'
+                    field: 'Id', title: '数据源Id', width: '100px', align: 'center', hidden: true
                 },
                 {
-                    field: 'BdiDatasourceName', title: '数据源名称', width: '300px', align: 'center'
+                    field: 'Name', title: '数据源名称', width: '300px', align: 'center'
                 },
                 {
-                    field: 'BdiDatasourceTypeName', title: '数据源类型', width: '150px', align: 'center'
-                },
-                {
-                    field: 'DatasourceConnect', title: '数据源连接详情', width: '150px', align: 'center',
-                    formatter: function (value, row, index) {
-                        return value.replace(/#0F01/g, "{").replace(/#0F02/g, "\"").replace(/#0F03/g, "}");
-                    }
+                    field: 'TypeName', title: '数据源类型', width: '150px', align: 'center'
                 },
                 {
                     field: 'Remarks', title: '备注', width: '250px', align: 'center'
                 }
             ]],
             onClickRow: function (index, row) {
+                checkedIndex = index;
+
                 //加载完毕后获取所有的checkbox遍历
                 var radio = $("input[type='radio']")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
@@ -85,6 +84,8 @@
                 }
             },
             onDblClickRow: function (index, row) {
+                checkedIndex = index;
+
                 //加载完毕后获取所有的checkbox遍历
                 var radio = $("input[type='radio']")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
@@ -99,15 +100,18 @@
                 updateDatasourceDialog();
             }
         });
+    });
 
-    })
-
+    /**
+     * 新增数据源-Dialog。
+     */
     function addDatasourceDialog() {
         $('<div></div>').dialog({
+            style: "padding:10px 60px 20px 60px",
             id: 'addDatasourceDialog',
             title: '新增数据源',
             width: '500px',
-            height: '350px',
+            height: '450px',
             closed: false,
             cache: false,
             href: '/datasource/addPage',
@@ -126,26 +130,7 @@
                     $('#addDatasourceForm').form('submit', {
                         url: '/datasource/add',
                         onSubmit: function () {
-                            if ($("#addDatasourceForm").form("validate")) {
-                                var dataInfo = {
-                                    ip: $("#ip").val(),
-                                    port: $("#port").val(),
-                                    username: $("#username").val(),
-                                    password: $("#password").val(),
-                                    schemata: $("#schemata").combobox('getValue')
-                                };
-
-                                var stringJSON = JSON.stringify(dataInfo);
-                                //替换指定字符，后台以字符串形式保存
-                                // { -> #0F01
-                                // " -> #0F02
-                                // } -> #0F03
-                                stringJSON = stringJSON.replace("{", "#0F01").replace(/"/g, "#0F02").replace("}", "#0F03");
-                                $("#datasourceConnect").val(stringJSON);
-                                return true;
-                            } else {
-                                return false;
-                            }
+                            return $("#addDatasourceForm").form("validate");
                         },
                         //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                         success: function (data) {
@@ -153,12 +138,12 @@
                             var obj = jQuery.parseJSON(data);
                             if (obj.success) {
                                 $.messager.alert('提示消息', obj.message);
+                                $("#addDatasourceDialog").dialog('destroy');
                                 $('#datasourceDataGrid').datagrid('reload');
+                                $("#datasourceDataGrid").datagrid("unselectRow", checkedIndex);
                             } else {
                                 $.messager.alert('提示消息', obj.message);
                             }
-                            $("#addDatasourceDialog").dialog('destroy');
-                            $('#datasourceDataGrid').datagrid('reload');
                         }
                     });
                 }
@@ -172,19 +157,23 @@
         });
     }
 
+    /**
+     * 更新数据源-Dialog。
+     */
     function updateDatasourceDialog() {
         var row = $("#datasourceDataGrid").datagrid("getSelected");
         if (row) {
             $('<div></div>').dialog({
+                style: "padding:10px 60px 20px 60px",
                 id: 'updateDatasourceDialog',
                 title: '修改数据源内容',
                 width: '500px',
-                height: '350px',
+                height: '450px',
                 closed: false,
                 cache: false,
                 draggable: false,
                 resizable: false,
-                href: '/datasource/updatePage?bdiDatasourceId=' + row.BdiDatasourceId,
+                href: '/datasource/updatePage?id=' + row.Id,
                 modal: true,
                 onLoad: function () {
                     //初始化表单数据
@@ -200,26 +189,7 @@
                         $('#updateDatasourceForm').form('submit', {
                             url: '/datasource/update',
                             onSubmit: function () {
-                                if ($("#updateDatasourceForm").form("validate")) {
-                                    var dataInfo = {
-                                        ip: $("#ip").val(),
-                                        port: $("#port").val(),
-                                        username: $("#username").val(),
-                                        password: $("#password").val(),
-                                        schemata: $("#schemata").combobox('getValue')
-                                    };
-
-                                    var stringJSON = JSON.stringify(dataInfo);
-                                    //替换指定字符，后台以字符串形式保存
-                                    // { -> #0F01
-                                    // " -> #0F02
-                                    // } -> #0F03
-                                    stringJSON = stringJSON.replace("{", "#0F01").replace(/"/g, "#0F02").replace("}", "#0F03");
-                                    $("#datasourceConnect").val(stringJSON);
-                                    return true;
-                                } else {
-                                    return false;
-                                }
+                                return $("#updateDatasourceForm").form("validate");
                             },
                             //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                             success: function (data) {
@@ -227,13 +197,12 @@
                                 var obj = jQuery.parseJSON(data);
                                 if (obj.success) {
                                     $.messager.alert('提示消息', obj.message);
+                                    $("#updateDatasourceDialog").dialog('destroy');
                                     $('#datasourceDataGrid').datagrid('reload');
+                                    $("#datasourceDataGrid").datagrid("unselectRow", checkedIndex);
                                 } else {
                                     $.messager.alert('提示消息', obj.message);
                                 }
-
-                                $("#updateDatasourceDialog").dialog('destroy');
-                                $('#datasourceDataGrid').datagrid('reload');
                             }
                         });
                     }

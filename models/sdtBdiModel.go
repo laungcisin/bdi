@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/astaxie/beego/orm"
 	"log"
 	"strconv"
@@ -9,23 +10,21 @@ import (
 )
 
 type SdtBdi struct {
-	BdiId        int    `form:"bdiId"`        //主键
-	BdiName      string `form:"bdiName"`      //指标名称
-	BdiSecrecyId int    `form:"bdiSecrecyId"` //指标密级ID
-	BdiTypeId    int    `form:"bdiTypeId"`    //指标类型ID
+	Id        int    `form:"bdiId"`     //主键
+	BdiTypeId int    `form:"bdiTypeId"` //指标类型ID
+	BdiName   string `form:"bdiName"`   //指标名称
+	Remarks   string `form:"remarks"`   //指标集备注
 
-	Remarks string `form:"remarks"` //指标集备注
+	UserCode   int       `form:"userCode"`   //创建人ID
+	CreateTime time.Time `form:"createTime"` //创建时间
+	EditTime   time.Time `form:"editTime"`   //修改时间
 
-	CreateUserId int       //创建人ID
-	CreateTime   time.Time //创建时间
-	ModifyUserId int       //修改人ID
-	ModifyTime   time.Time //修改时间
+	//新增时使用
+	BdiSetIds string `form:"bdiSetIds"` //所属指标集ids
 
 	//以下字段为datagrid展示
-	BdiTypeName    string //所属指标类型名称
-	BdiSecrecyName string //所属指标密级级别名称
-	BdiSetIds      string `form:"bdiSetIds"` //所属指标集ids
-	BdiSetNames    string //所属指标集名称
+	TypeName    string //所属指标类型名称
+	BdiSetNames string //所属指标集名称
 }
 
 func (u *SdtBdi) TableName() string {
@@ -38,42 +37,49 @@ func (u *SdtBdi) TableName() string {
 func (this *SdtBdi) GetAllSdtBdi(rows int, page int) ([]SdtBdi, int, error) {
 	var o orm.Ormer
 	o = orm.NewOrm()
-	var sdtBdiSlice []SdtBdi
+	var sdtBdiSlice []SdtBdi = make([]SdtBdi, 0)
 
 	//查询的字段顺序最好和model的字段对应，方便解析并赋值。
 	var querySql = "select " +
-		"	sb.bdi_id, " +
+		"	sb.id, " +
 		"	sb.bdi_name, " +
 		"	sb.bdi_type_id, " +
-		"	sb.bdi_secrecy_id, " +
 		"	sb.remarks, " +
-		"	sbt.bdi_type_name, " +
-		"	sbsec.bdi_secrecy_name, " +
-		"	group_concat(sbset.bdi_set_id) as bdi_set_ids, " +
+		"	sbt.type_name, " +
+		"	group_concat(sbset.id) as bdi_set_ids, " +
 		"	group_concat(sbset.bdi_set_name) as bdi_set_names " +
 		"from " +
 		"	sdt_bdi sb, " +
-		"	sdt_bdi_set_rel_bdi rel, " +
+		"	sdt_bdi_set_bdi rel, " +
 		"	sdt_bdi_set sbset, " +
-		"	sdt_bdi_type sbt, " +
-		"	sdt_bdi_secrecy sbsec " +
+		"	sdt_bdi_type sbt " +
 		"where " +
-		"	sb.bdi_id = rel.bdi_id " +
-		"and rel.bdi_set_id = sbset.bdi_set_id " +
-		"and sb.bdi_type_id = sbt.bdi_type_id " +
-		"and sb.bdi_secrecy_id = sbsec.bdi_secrecy_id " +
-		"group by sb.bdi_id limit ?, ? "
+		"	sb.id = rel.bdi_id " +
+		"and rel.set_id = sbset.id " +
+		"and sb.bdi_type_id = sbt.id " +
+		"group by sb.id limit ?, ? "
 
 	num, err := o.Raw(querySql, (page-1)*rows, page*rows).QueryRows(&sdtBdiSlice)
 	if err != nil {
-		log.Fatal("查询表：sdt_bdi出错！")
+		log.Fatal("查询表：" + this.TableName() + "出错！")
 		return nil, 0, err
 	}
 
-	var countSql = " select count(*) as counts from " + this.TableName()
+	var countSql = "select " +
+		"	count(*) as counts " +
+		"from " +
+		"	sdt_bdi sb, " +
+		"	sdt_bdi_set_bdi rel, " +
+		"	sdt_bdi_set sbset, " +
+		"	sdt_bdi_type sbt " +
+		"where " +
+		"	sb.id = rel.bdi_id " +
+		"and rel.set_id = sbset.id " +
+		"and sb.bdi_type_id = sbt.id"
+
 	err = o.Raw(countSql).QueryRow(&num)
 	if err != nil {
-		log.Fatal("查询表：sdt_bdi出错！")
+		log.Fatal("查询表：" + this.TableName() + "出错！")
 		return nil, 0, err
 	}
 
@@ -88,31 +94,28 @@ func (this *SdtBdi) GetSdtBdiById() error {
 	o = orm.NewOrm()
 	//查询的字段顺序最好和model的字段对应，这样才方便解析并赋值。
 	var querySql = "select " +
-		"	sb.bdi_id, " +
+		"	sb.id, " +
 		"	sb.bdi_name, " +
 		"	sb.bdi_type_id, " +
-		"	sb.bdi_secrecy_id, " +
 		"	sb.remarks, " +
-		"	sbt.bdi_type_name, " +
-		"	sbsec.bdi_secrecy_name, " +
-		"	group_concat(sbset.bdi_set_id) as bdi_set_ids, " +
+		"	sbt.type_name, " +
+		"	group_concat(sbset.id) as bdi_set_ids, " +
 		"	group_concat(sbset.bdi_set_name) as bdi_set_names " +
 		"from " +
 		"	sdt_bdi sb, " +
-		"	sdt_bdi_set_rel_bdi rel, " +
+		"	sdt_bdi_set_bdi rel, " +
 		"	sdt_bdi_set sbset, " +
-		"	sdt_bdi_type sbt, " +
-		"	sdt_bdi_secrecy sbsec " +
+		"	sdt_bdi_type sbt " +
 		"where " +
-		"sb.bdi_id = ? " +
-		"and sb.bdi_id = rel.bdi_id " +
-		"and rel.bdi_set_id = sbset.bdi_set_id " +
-		"and sb.bdi_type_id = sbt.bdi_type_id " +
-		"and sb.bdi_secrecy_id = sbsec.bdi_secrecy_id "
+		" sb.id = ? " +
+		" and sb.id = rel.bdi_id " +
+		" and rel.set_id = sbset.id " +
+		" and sb.bdi_type_id = sbt.id "
 
-	err := o.Raw(querySql, this.BdiId).QueryRow(this)
+	err := o.Raw(querySql, this.Id).QueryRow(this)
 	if err != nil {
-		log.Fatal("查询表：sdt_bdi_set出错！")
+		fmt.Println(err)
+		log.Fatal("查询表：" + this.TableName() + "出错！")
 		return err
 	}
 
@@ -123,10 +126,10 @@ func (this *SdtBdi) Add() error {
 	o := orm.NewOrm()
 	o.Begin()
 
-	var insertSdtBdiSql = " insert into sdt_bdi(bdi_name, bdi_type_id, bdi_secrecy_id, remarks, create_user_id, create_time) values (?, ?, ?, ?, ?, ?)"
-	var insertSdtBdiSetRelBdiSql = " insert into sdt_bdi_set_rel_bdi(bdi_set_id, bdi_id) values (?, ?) "
+	var insertSdtBdiSql = " insert into sdt_bdi(bdi_name, bdi_type_id, remarks, user_code, create_time) values (?, ?, ?, ?, ?)"
+	var insertSdtBdiSetRelBdiSql = " insert into sdt_bdi_set_bdi(set_id, bdi_id) values (?, ?) "
 
-	res, err := o.Raw(insertSdtBdiSql, this.BdiName, this.BdiTypeId, this.BdiSecrecyId, this.Remarks, 0, time.Now()).Exec()
+	res, err := o.Raw(insertSdtBdiSql, this.BdiName, this.BdiTypeId, this.Remarks, 0, time.Now()).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -161,25 +164,24 @@ func (this *SdtBdi) Update() error {
 	o := orm.NewOrm()
 	o.Begin()
 
-	var deleteSdtBdiSetRelBdiSql = " delete from sdt_bdi_set_rel_bdi where bdi_id = ? "
+	fmt.Println("SdtBdi: ", this)
+	var deleteSdtBdiSetRelBdiSql = " delete from sdt_bdi_set_bdi where bdi_id = ? "
 	var updateSdtBdiSql = "update sdt_bdi " +
 		"set  " +
 		" bdi_name = ?, " +
 		" bdi_type_id = ?, " +
-		" bdi_secrecy_id = ?, " +
 		" remarks = ?, " +
-		//" modify_user_id = ?, " + //暂时没有修改人
-		" modify_time = ? " +
-		"where bdi_id = ?"
-	var insertSdtBdiSetRelBdiSql = " insert into sdt_bdi_set_rel_bdi(bdi_set_id, bdi_id) values (?, ?) "
+		" edit_time = ? " +
+		"where id = ?"
+	var insertSdtBdiSetRelBdiSql = " insert into sdt_bdi_set_bdi(set_id, bdi_id) values (?, ?) "
 
-	_, err := o.Raw(updateSdtBdiSql, this.BdiName, this.BdiTypeId, this.BdiSecrecyId, this.Remarks, time.Now(), this.BdiId).Exec()
+	_, err := o.Raw(updateSdtBdiSql, this.BdiName, this.BdiTypeId, this.Remarks, time.Now(), this.Id).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
 	}
 
-	_, err = o.Raw(deleteSdtBdiSetRelBdiSql, this.BdiId).Exec()
+	_, err = o.Raw(deleteSdtBdiSetRelBdiSql, this.Id).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -193,7 +195,7 @@ func (this *SdtBdi) Update() error {
 			o.Rollback()
 			return err
 		}
-		_, err = o.Raw(insertSdtBdiSetRelBdiSql, bdiSetId, this.BdiId).Exec()
+		_, err = o.Raw(insertSdtBdiSetRelBdiSql, bdiSetId, this.Id).Exec()
 		if err != nil {
 			o.Rollback()
 			return err

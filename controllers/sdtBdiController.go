@@ -64,6 +64,7 @@ func (this *SdtBdiController) All() {
 func (this *SdtBdiController) AddPage() {
 	this.TplName = "sdtBdi/addDialog.html"
 }
+
 //新增
 func (this *SdtBdiController) Add() {
 	returnData := struct {
@@ -99,13 +100,13 @@ func (this *SdtBdiController) Add() {
 
 // 更新Dialog
 func (this *SdtBdiController) UpdatePage() {
-	bdiId, err := this.GetInt("bdiId")
+	id, err := this.GetInt("id")
 	if err != nil {
 		log.Fatal("解析参数出错！")
 		return
 	}
 	sdtBdi := new(models.SdtBdi)
-	sdtBdi.BdiId = bdiId
+	sdtBdi.Id = id
 	err = sdtBdi.GetSdtBdiById()
 
 	if err != nil {

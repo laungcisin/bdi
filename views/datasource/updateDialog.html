@@ -1,20 +1,20 @@
 <div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
 <form id="updateDatasourceForm" method="post">
-    <input type="hidden" id="bdiDatasourceId" name="bdiDatasourceId" value=""/>
+    <input type="hidden" id="id" name="id" value=""/>
     <input type="hidden" id="datasourceConnect" name="datasourceConnect" value=""/>
 
     <table>
         <tr>
             <th>数据源名称：</th>
             <td>
-                <input name="bdiDatasourceName" id="bdiDatasourceName"/>
+                <input name="name" id="name"/>
             </td>
         </tr>
         <tr>
             <th>数据源类型：</th>
             <td>
-                <input name="bdiDatasourceTypeId" id="bdiDatasourceTypeId"/>
+                <input name="typeId" id="typeId"/>
             </td>
         </tr>
         <tr>
@@ -44,7 +44,7 @@
         <tr>
             <th>数据库：</th>
             <td>
-                <input name="schemata" id="schemata">
+                <input name="dbname" id="dbname">
             </td>
         </tr>
         <tr>
@@ -69,29 +69,28 @@
         }
 
         delayTime = setTimeout(show, 100);
-    }
+    };
 
     $(function () {
         initUpdateDatasourceDialog();
-    })
-
+    });
 
     /**
      * 初始化修改窗口。
      */
     function initUpdateDatasourceDialog() {
-        $("#bdiDatasourceId").val('{{.datasource.BdiDatasourceId}}');
+        $("#id").val('{{.datasource.Id}}');
 
         //数据源名称
-        $('#bdiDatasourceName').textbox({
+        $('#name').textbox({
             editable: true,
             readonly: false,
             required: true,
-            value: '{{.datasource.BdiDatasourceName}}'
+            value: '{{.datasource.Name}}'
         });
 
         //数据源类型
-        $('#bdiDatasourceTypeId').combobox({
+        $('#typeId').combobox({
             url: '/sdt/datasourceForList',
             editable: false,
             required: true,
@@ -100,7 +99,7 @@
             textField: 'text',
             panelHeight: 'auto',
             multiple: false,
-            value: '{{.datasource.BdiDatasourceTypeId}}'
+            value: '{{.datasource.TypeId}}'
         });
 
         //指标库备注
@@ -113,21 +112,12 @@
             value: '{{.datasource.Remarks}}'
         });
 
-        //datasourceConnect字段存储配置信息
-        // 解析时，替换相应的字符串
-        // #0F01 -> {
-        // #0F02 -> "
-        // #0F03 -> }
-        var dataConfigString = "{{.datasource.DatasourceConnect}}";
-        dataConfigString = dataConfigString.replace(/#0F01/g, "{").replace(/#0F02/g, "\"").replace(/#0F03/g, "}");
-        var dataConfig = JSON.parse(dataConfigString);
-
         //主机IP地址
         $('#ip').textbox({
             editable: true,
             readonly: false,
             required: true,
-            value: dataConfig.ip
+            value: '{{.datasource.Ip}}'
         });
 
         //端口号
@@ -135,7 +125,7 @@
             editable: true,
             readonly: false,
             required: true,
-            value: dataConfig.port
+            value: '{{.datasource.Port}}'
         });
 
         //用户名
@@ -143,7 +133,7 @@
             editable: true,
             readonly: false,
             required: true,
-            value: dataConfig.username
+            value: '{{.datasource.Username}}'
         });
 
         //密码
@@ -151,11 +141,11 @@
             editable: true,
             readonly: false,
             required: true,
-            value: dataConfig.password
+            value: '{{.datasource.Password}}'
         });
 
         //数据源库
-        $('#schemata').combobox({
+        $('#dbname').combobox({
             url: '',
             editable: false,
             required: true,
@@ -167,14 +157,14 @@
             panelMaxHeight: '150px',
             multiple: false,
             onShowPanel: function () {
-                $('#schemata').combobox("clear");
+                $('#dbname').combobox("clear");
 
                 var dataInfo = {
                     ip: $("#ip").val(),
                     port: $("#port").val(),
                     username: $("#username").val(),
                     password: $("#password").val(),
-                    databaseType: $('#bdiDatasourceTypeId').combobox('getText')
+                    databaseType: $('#typeId').combobox('getText')
                 };
 
                 $.ajax({
@@ -184,12 +174,12 @@
                     type: "GET",
                     data: dataInfo,
                     success: function (data) {
-                        $('#schemata').combobox("clear");
+                        $('#dbname').combobox("clear");
 
                         if (data.success == "true" || data.success) {
-                            $('#schemata').combobox('loadData', data.databaseInfo);
+                            $('#dbname').combobox('loadData', data.databaseInfo);
                         } else {
-                            $('#schemata').combobox('loadData', '');
+                            $('#dbname').combobox('loadData', '');
                             $.messager.alert('提示信息', data.message);
                         }
                     },
@@ -200,11 +190,11 @@
 
         //初始化时，给一个默认值
         var data = [{
-            "id": dataConfig.schemata,
-            "text": dataConfig.schemata
+            "id": '{{.datasource.Dbname}}',
+            "text": '{{.datasource.Dbname}}'
         }];
 
-        $('#schemata').combobox('loadData', data);
-        $('#schemata').combobox('setValue', dataConfig.schemata);
+        $('#dbname').combobox('loadData', data);
+        $('#dbname').combobox('setValue', '{{.datasource.Dbname}}');
     }
 </script>

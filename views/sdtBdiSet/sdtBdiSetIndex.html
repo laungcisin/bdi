@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<table id="bdiSetDataGrid"></table>
+<table id="sdtBdiSetDataGrid"></table>
 
 <script type="text/javascript" src="/static/js/jquery.min.js"></script>
 <script type="text/javascript" src="/static/js/easyui/jquery.easyui.min.js"></script>
@@ -17,10 +17,10 @@
 <script type="text/javascript" src="/static/js/easyui/utils/utils.js"></script>
 
 <script type="text/javascript">
-    var editIndex = undefined;
+    var checkedIndex = undefined;
 
     $(function () {
-        $('#bdiSetDataGrid').datagrid({
+        $('#sdtBdiSetDataGrid').datagrid({
             method: 'GET',
             selectOnCheck: true,
             checkOnSelect: true,
@@ -28,7 +28,8 @@
             autoRowHeight: false,
             pageNumber: 1,
             pageSize: 10,
-            idField: 'BdiSetId',
+            pageList: [10, 30, 50],
+            idField: 'Id',
             pagination: true,
             url: '/sdtBdiSet/all',
             height: '390px',
@@ -56,19 +57,21 @@
                     }
                 },
                 {
-                    field: 'BdiSetId', title: '指标集Id', width: '200px', align: 'center'
+                    field: 'Id', title: '指标集Id', width: '200px', align: 'center', hidden: true
                 },
                 {
                     field: 'BdiSetName', title: '指标集名称', width: '200px', align: 'center'
                 },
                 {
-                    field: 'BdiDomainName', title: '所属指标域', width: '200px', align: 'left'
+                    field: 'BdiDomainName', title: '所属指标域', width: '200px', align: 'center'
                 },
                 {
                     field: 'Remarks', title: '指标集备注', width: '250px', align: 'center'
                 }
             ]],
             onClickRow: function (index, row) {
+                checkedIndex = index;
+
                 //加载完毕后获取所有的checkbox遍历
                 var radio = $("input[type='radio']")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
@@ -81,6 +84,8 @@
                 }
             },
             onDblClickRow: function (index, row) {
+                checkedIndex = index;
+
                 //加载完毕后获取所有的checkbox遍历
                 var radio = $("input[type='radio']")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
@@ -95,12 +100,14 @@
                 updateSdtBdiSetDialog();
             }
         });
+    });
 
-    })
-
+    /**
+     * 新增指集-Dialog。
+     */
     function addSdtBdiSetDialog() {
         $('<div></div>').dialog({
-            id: 'addBidSetDialog',
+            id: 'addSdtBdiSetDialog',
             title: '新增指标集',
             width: '500px',
             height: '300px',
@@ -121,12 +128,12 @@
                 iconCls: 'icon-ok',
                 handler: function () {
                     //提交表单
-                    $('#addBdiSetForm').form('submit', {
+                    $('#addSdtBdiSetForm').form('submit', {
                         url: '/sdtBdiSet/add',
                         onSubmit: function () {
-                            if ($("#addBdiSetForm").form("validate")) {
-                                var res = $("#bdiSetIdsCombobox").combobox('getValues');
-                                $("#bdiDomainIds").val(res.toString());
+                            if ($("#addSdtBdiSetForm").form("validate")) {
+                                var res = $("#sdtBdiSetIdsCombobox").combobox('getValues');
+                                $("#sdtBdiDomainIds").val(res.toString());
                                 return true;
                             } else {
                                 return false;
@@ -138,12 +145,12 @@
                             var obj = jQuery.parseJSON(data);
                             if (obj.success) {
                                 $.messager.alert('提示消息', obj.message);
-                                $('#bdiSetDataGrid').datagrid('reload');
+                                $("#addSdtBdiSetDialog").dialog('destroy');
+                                $('#sdtBdiSetDataGrid').datagrid('reload');
+                                $("#sdtBdiSetDataGrid").datagrid("unselectRow", checkedIndex);
                             } else {
                                 $.messager.alert('提示消息', obj.message);
                             }
-                            $("#addBidSetDialog").dialog('destroy');
-                            $('#bdiSetDataGrid').datagrid('reload');
                         }
                     });
                 }
@@ -151,14 +158,17 @@
                 text: '取消',
                 iconCls: 'icon-cancel',
                 handler: function () {
-                    $("#addBidSetDialog").dialog('destroy');
+                    $("#addSdtBdiSetDialog").dialog('destroy');
                 }
             }]
         });
     }
 
+    /**
+     * 更新指标集-Dialog。
+     */
     function updateSdtBdiSetDialog() {
-        var row = $("#bdiSetDataGrid").datagrid("getSelected");
+        var row = $("#sdtBdiSetDataGrid").datagrid("getSelected");
         if (row) {
             $('<div></div>').dialog({
                 id: 'updateBidSetDialog',
@@ -169,7 +179,7 @@
                 cache: false,
                 draggable: false,
                 resizable: false,
-                href: '/sdtBdiSet/updatePage?bdiSetId=' + row.BdiSetId,
+                href: '/sdtBdiSet/updatePage?id=' + row.Id,
                 modal: true,
                 onLoad: function () {
                     //初始化表单数据
@@ -181,15 +191,13 @@
                     text: '保存',
                     iconCls: 'icon-ok',
                     handler: function () {
-                        debugger;
                         //提交表单
-                        $('#updateBdiSetForm').form('submit', {
+                        $('#updateSdtBdiSetForm').form('submit', {
                             url: '/sdtBdiSet/update',
                             onSubmit: function () {
-                                debugger;
-                                if ($("#updateBdiSetForm").form("validate")) {
-                                    var res = $("#bdiDomainIdsCombobox").combobox('getValues');
-                                    $("#bdiDomainIds").val(res.toString());
+                                if ($("#updateSdtBdiSetForm").form("validate")) {
+                                    var res = $("#sdtBdiDomainIdsCombobox").combobox('getValues');
+                                    $("#sdtBdiDomainIds").val(res.toString());
                                     return true;
                                 } else {
                                     return false;
@@ -197,18 +205,16 @@
                             },
                             //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                             success: function (data) {
-                                debugger;
                                 //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
                                 var obj = jQuery.parseJSON(data);
                                 if (obj.success) {
                                     $.messager.alert('提示消息', obj.message);
-                                    $('#bdiSetDataGrid').datagrid('reload');
+                                    $("#updateBidSetDialog").dialog('destroy');
+                                    $('#sdtBdiSetDataGrid').datagrid('reload');
+                                    $("#sdtBdiSetDataGrid").datagrid("unselectRow", checkedIndex);
                                 } else {
                                     $.messager.alert('提示消息', obj.message);
                                 }
-
-                                $("#updateBidSetDialog").dialog('destroy');
-                                $('#bdiSetDataGrid').datagrid('reload');
                             }
                         });
                     }
@@ -231,9 +237,9 @@
     }
 
     /**
-     * 删除BdiSet。
+     * 删除-SdtBdiSet。
      */
-    function deleteBdiSet(bdiSetId) {
+    function deleteBdiSet(id) {
         $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
             if (r) {
                 $.ajax({
@@ -241,7 +247,7 @@
                     async: false,
                     cache: false,
                     type: 'POST',
-                    data: {bdiSetId: bdiSetId},
+                    data: {id: id},
                     dataType: 'json',
                     error: function (data) {
                         $.messager.alert('提示信息', data.message);
@@ -252,7 +258,7 @@
                         } else {
                             $.messager.alert('提示信息', data.message);
                         }
-                        $('#bdiSetDataGrid').datagrid('reload');
+                        $('#sdtBdiSetDataGrid').datagrid('reload');
                     }
                 });
             }

@@ -1,30 +1,28 @@
 <div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
-<div id="addBdiSetWindow">
-    <form id="addBdiSetForm" method="post">
-        <input type="hidden" id="bdiDomainIds" name="bdiDomainIds"/>
-        <table>
-            <tr>
-                <th>指标集名称：</th>
-                <td>
-                    <input name="bdiSetName" id="bdiSetName"/>
-                </td>
-            </tr>
-            <tr>
-                <th>指标域：</th>
-                <td>
-                    <input name="bdiSetIdsCombobox" id="bdiSetIdsCombobox"/>
-                </td>
-            </tr>
-            <tr>
-                <th>指标库备注：</th>
-                <td>
-                    <input name="remarks" id="remarks">
-                </td>
-            </tr>
-        </table>
-    </form>
-</div>
+<form id="addSdtBdiSetForm" method="post">
+    <input type="hidden" id="sdtBdiDomainIds" name="sdtBdiDomainIds"/>
+    <table>
+        <tr>
+            <th>指标集名称：</th>
+            <td>
+                <input name="bdiSetName" id="bdiSetName"/>
+            </td>
+        </tr>
+        <tr>
+            <th>指标域：</th>
+            <td>
+                <input name="sdtBdiSetIdsCombobox" id="sdtBdiSetIdsCombobox"/>
+            </td>
+        </tr>
+        <tr>
+            <th>指标库备注：</th>
+            <td>
+                <input name="remarks" id="remarks">
+            </td>
+        </tr>
+    </table>
+</form>
 
 <script type="text/javascript">
     function show() {
@@ -39,12 +37,11 @@
         }
 
         delayTime = setTimeout(show, 100);
-    }
+    };
 
     $(function () {
         initAddBdiSetWindow();
-    })
-
+    });
 
     /**
      * 初始化修改窗口。
@@ -59,7 +56,7 @@
         });
 
         //指标域
-        $('#bdiSetIdsCombobox').combobox({
+        $('#sdtBdiSetIdsCombobox').combobox({
             url: '/sdt/sdtBdiDomainForList',
             editable: false,
             required: true,

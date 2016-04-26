@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"bdi/models"
+	"fmt"
 	"log"
 	"strconv"
-	"fmt"
 )
 
 type SdtBdiRuleController struct {
@@ -14,9 +14,9 @@ type SdtBdiRuleController struct {
 // 首页
 func (this *SdtBdiRuleController) Index() {
 	bdiRuleSetId, _ := this.GetInt("bdiRuleSetId")
-	bdiId, _ := this.GetInt("bdiId")
+	Id, _ := this.GetInt("Id")
 	this.Data["bdiRuleSetId"] = bdiRuleSetId
-	this.Data["bdiId"] = bdiId
+	this.Data["Id"] = Id
 	this.TplName = "sdtBdiRule/sdtBdiRuleIndex.html"
 }
 
@@ -69,12 +69,13 @@ func (this *SdtBdiRuleController) All() {
 
 // 新增Dialog
 func (this *SdtBdiRuleController) AddPage() {
-	bdiId, _ := this.GetInt("bdiId")
+	Id, _ := this.GetInt("Id")
 	bdiRuleSetId, _ := this.GetInt("bdiRuleSetId")
-	this.Data["bdiId"] = bdiId
+	this.Data["Id"] = Id
 	this.Data["bdiRuleSetId"] = bdiRuleSetId
 	this.TplName = "sdtBdiRule/addDialog.html"
 }
+
 //新增
 func (this *SdtBdiRuleController) Add() {
 	returnData := struct {
@@ -91,7 +92,7 @@ func (this *SdtBdiRuleController) Add() {
 		this.ServeJSON()
 		return
 	}
-	
+
 	fmt.Println("sdtBdiRule: ", sdtBdiRule)
 
 	err = sdtBdiRule.Add()
@@ -113,13 +114,13 @@ func (this *SdtBdiRuleController) Add() {
 
 // 更新Dialog
 func (this *SdtBdiRuleController) UpdatePage() {
-	bdiId, err := this.GetInt("bdiId")
+	Id, err := this.GetInt("Id")
 	if err != nil {
 		log.Fatal("解析参数出错！")
 		return
 	}
 	sdtBdiRule := new(models.SdtBdi)
-	sdtBdiRule.BdiId = bdiId
+	sdtBdiRule.Id = Id
 	err = sdtBdiRule.GetSdtBdiById()
 
 	if err != nil {

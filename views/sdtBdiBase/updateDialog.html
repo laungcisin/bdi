@@ -1,0 +1,206 @@
+<div id="loading"
+     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+
+<form id="updateSdtBdiBaseForm" method="post">
+    <input type="hidden" id="id" name="id"/>
+    <table>
+        <tr>
+            <th>指标库名称：</th>
+            <td>
+                <input name="bdiBaseName" id="bdiBaseName"/>
+            </td>
+        </tr>
+        <tr>
+            <th>统计年：</th>
+            <td>
+                <input name="bdiBaseYear" id="bdiBaseYear"/>
+            </td>
+        </tr>
+        <tr>
+            <th>统计行政区域代码：</th>
+            <td>
+                <input name="admCode" id="admCode"/>
+            </td>
+        </tr>
+        <tr>
+            <th>是否使用：</th>
+            <td>
+                <input name="adtFlag" id="adtFlag"/>
+            </td>
+        </tr>
+        <tr>
+            <th>指标库备注：</th>
+            <td>
+                <input name="remarks" id="remarks">
+            </td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+    function show() {
+        $("#loading").fadeOut("normal", function () {
+            $(this).remove();
+        });
+    }
+    var delayTime;
+    $.parser.onComplete = function () {
+        if (delayTime) {
+            clearTimeout(delayTime);
+        }
+
+        delayTime = setTimeout(show, 100);
+    };
+
+    var yearDataArray = [{
+        "id": 2015,
+        "text": 2015
+    }, {
+        "id": 2016,
+        "text": 2016
+    }, {
+        "id": 2017,
+        "text": 2017
+    }, {
+        "id": 2018,
+        "text": 2018
+    }, {
+        "id": 2019,
+        "text": 2019
+    }, {
+        "id": 2020,
+        "text": 2020
+    }, {
+        "id": 2021,
+        "text": 2021
+    }, {
+        "id": 2022,
+        "text": 2022
+    }, {
+        "id": 2023,
+        "text": 2023
+    }, {
+        "id": 2024,
+        "text": 2024
+    }, {
+        "id": 2025,
+        "text": 2025
+    }];
+
+    var adtFlagDataArray = [{
+        "value": "0",
+        "label": "停用"
+    }, {
+        "value": "1",
+        "label": "启用"
+    }];
+
+    $(function () {
+        initUpdateSdtBdiBaseWindow();
+    });
+
+    /**
+     * 初始化新增窗口。
+     */
+    function initUpdateSdtBdiBaseWindow() {
+        $("#id").val('{{.sdtBdiBase.Id}}');
+
+        //指标库名称
+        $('#bdiBaseName').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdiBase.BdiBaseName}}'
+        });
+
+        //统计年
+        $('#bdiBaseYear').combobox({
+            editable: false,
+            required: true,
+            valueField: 'id',
+            textField: 'text',
+            value: '{{.sdtBdiBase.BdiBaseYear}}',
+            data: yearDataArray
+        });
+
+        //统计行政区域代码
+        $('#admCode').textbox({
+            required: true,
+            editable: true,
+            readonly: false,
+            icons: [{
+                iconCls: 'icon-search',
+                handler: function (e) {
+                }
+            }],
+            value: '{{.sdtBdiBase.AdmCode}}'
+        });
+
+        //是否使用
+        $('#adtFlag').combobox({
+            panelHeight: 'auto',
+            editable: false,
+            required: true,
+            valueField: 'value',
+            textField: 'label',
+            value: '{{.sdtBdiBase.AdtFlag}}',
+            data: adtFlagDataArray
+        });
+
+        //指标库备注
+        $('#remarks').textbox({
+            editable: true,
+            required: true,
+            readonly: false,
+            value: '{{.sdtBdiBase.Remarks}}'
+        });
+
+        $('#updateSdtBdiBaseWindow').dialog({
+            iconCls: 'icon-add',
+            title: '修改指标库',
+            width: '500px',
+            height: '300px',
+            closed: true,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            closable: true,
+            cache: false,
+            draggable: false,
+            resizable: false,
+            modal: true,
+            buttons: [{
+                id: 'chooseOk',
+                text: '保存',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    $('#updateSdtBdiBaseForm').form('submit', {
+                        url: '/sdtBdiBase/update',
+                        onSubmit: function () {
+                            return $("#updateSdtBdiBaseForm").form("validate");
+                        },
+                        //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
+                        success: function (data) {
+                            //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
+                            var obj = jQuery.parseJSON(data);
+                            if (obj.success) {
+                                $.messager.alert('提示消息', obj.message);
+                                $('#sdtBdiBaseDataGrid').datagrid('reload');
+                                $("#updateSdtBdiBaseWindow").dialog('close');
+                            } else {
+                                $.messager.alert('提示消息', obj.message);
+                            }
+                        }
+                    });
+                }
+            }, {
+                id: 'chooseNo',
+                text: '取消',
+                iconCls: 'icon-no',
+                handler: function () {
+                    $('#updateSdtBdiBaseWindow').dialog("close");
+                }
+            }]
+        });
+    }
+</script>

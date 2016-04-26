@@ -1,7 +1,7 @@
 <div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
 <form id="updateBdiDomainForm" method="post">
-    <input type="hidden" id="bdiDomainId" name="bdiDomainId"/>
+    <input type="hidden" id="id" name="id"/>
     <table>
         <tr>
             <th>指标域名称：</th>
@@ -54,7 +54,8 @@
      * 初始化新增窗口。
      */
     function initAddBdiDomainWindow() {
-        $("#bdiDomainId").val('{{.sdtBdiDomain.BdiDomainId}}');
+        $("#id").val('{{.sdtBdiDomain.Id}}');
+
         //指标域名称
         $('#bdiDomainName').textbox({
             editable: true,

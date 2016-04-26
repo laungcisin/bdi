@@ -3,10 +3,10 @@ package controllers
 import (
 	"bdi/models"
 	"encoding/json"
-//	"github.com/astaxie/beego/orm"
+	//	"github.com/astaxie/beego/orm"
 	"log"
 	"strconv"
-//	"fmt"
+	//	"fmt"
 	"fmt"
 )
 
@@ -18,7 +18,7 @@ type SdtBdiRuleSetController struct {
 func (this *SdtBdiRuleSetController) Index() {
 	bdiId, _ := this.GetInt("bdiId")
 	sdtBdi := new(models.SdtBdi)
-	sdtBdi.BdiId = bdiId
+	sdtBdi.Id = bdiId
 	sdtBdi.GetSdtBdiById()
 
 	this.Data["sdtBdi"] = sdtBdi
@@ -323,7 +323,9 @@ func (this *SdtBdiRuleSetController) BatchAdd() {
 func (this *SdtBdiRuleSetController) UpdatePage() {
 	bdiSetId, err := this.GetInt("bdiSetId")
 
-	sdtBdiSet, err := models.GetSdtBdiSetById(bdiSetId)
+	sdtBdiSet := new(models.SdtBdiSet)
+	sdtBdiSet.Id = bdiSetId
+	err = sdtBdiSet.GetSdtBdiSetById()
 
 	if err != nil {
 		log.Fatal("解析参数出错！")
@@ -333,4 +335,3 @@ func (this *SdtBdiRuleSetController) UpdatePage() {
 	this.Data["sdtBdiSet"] = sdtBdiSet
 	this.TplName = "sdtBdiSet/updateDialog.html"
 }
-
