@@ -15,7 +15,7 @@ type SdtBdi struct {
 	BdiName   string `form:"bdiName"`   //指标名称
 	Remarks   string `form:"remarks"`   //指标集备注
 
-	UserCode   int       `form:"userCode"`   //创建人ID
+	UserCode   string    `form:"userCode"`   //创建人ID
 	CreateTime time.Time `form:"createTime"` //创建时间
 	EditTime   time.Time `form:"editTime"`   //修改时间
 

@@ -14,7 +14,7 @@ type SdtBdiDomain struct {
 	AdtFlag       int    `form:"adtFlag"`       //是否使用: 0 - 停用， 1 - 使用
 	Remarks       string `form:"remarks"`       //指标库备注
 
-	UserCode   int       `form:"userCode"`   //创建人ID
+	UserCode   string    `form:"userCode"`   //创建人ID
 	CreateTime time.Time `form:"createTime"` //创建时间
 	EditTime   time.Time `form:"editTime"`   //修改时间
 

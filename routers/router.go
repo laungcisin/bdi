@@ -18,13 +18,14 @@ func init() {
 	beego.Router("/bdi/adtBdiAdmTree", &controllers.AdtBdiAdmTreeController{}, "*:Index")
 
 	//公共展示数据列表
-	beego.Router("/sdt/sdtBdiBaseForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiBaseForList")       //列出所有的指标库-用于下拉列表
-	beego.Router("/sdt/sdtBdiDomainForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiDomainForList")   //列出所有的指标域-用于下拉列表
-	beego.Router("/sdt/sdtBdiSetForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiSetForList")         //列出所有的指标集-用于下拉列表
-	beego.Router("/sdt/sdtBdiSecrecyForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiSecrecyForList") //列出所有的保密级别-用于下拉列表
-	beego.Router("/sdt/sdtTypeSetForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiTypeForList")       //列出所有的指标类型-用于下拉列表
-	beego.Router("/sdt/datasourceForList", &controllers.SdtPublicDisplayDataController{}, "*:DatasourceTypeForList")   //列出所有的指标类型-用于下拉列表
-	beego.Router("/sdt/statDimForList", &controllers.SdtPublicDisplayDataController{}, "*:StatDimForList")             //列出所有的Stat-Dim-用于下拉列表
+	beego.Router("/sdt/sdtBdiBaseForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiBaseForList")         //列出所有的指标库-用于下拉列表
+	beego.Router("/sdt/sdtBdiDomainForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiDomainForList")     //列出所有的指标域-用于下拉列表
+	beego.Router("/sdt/sdtBdiSetForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiSetForList")           //列出所有的指标集-用于下拉列表
+	beego.Router("/sdt/sdtBdiSecrecyForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiSecrecyForList")   //列出所有的保密级别-用于下拉列表
+	beego.Router("/sdt/sdtTypeSetForList", &controllers.SdtPublicDisplayDataController{}, "*:SdtBdiTypeForList")         //列出所有的指标类型-用于下拉列表
+	beego.Router("/sdt/datasourceTypeForList", &controllers.SdtPublicDisplayDataController{}, "*:DatasourceTypeForList") //列出所有的数据源类型-用于下拉列表
+	beego.Router("/sdt/datasourceForList", &controllers.SdtPublicDisplayDataController{}, "*:DatasourceForList")         //列出所有的数据源类型-用于下拉列表
+	//beego.Router("/sdt/statDimForList", &controllers.SdtPublicDisplayDataController{}, "*:StatDimForList")               //列出所有的Stat-Dim-用于下拉列表
 
 	//指标库
 	beego.Router("/sdtBdiBase/index", &controllers.SdtBdiBaseController{}, "*:Index")           //列表首页
@@ -74,34 +75,61 @@ func init() {
 	beego.Router(models.UrlForTable, &controllers.DatasourceController{}, "*:GetAllTableForTree")
 	beego.Router(models.UrlForColumn, &controllers.DatasourceController{}, "*:GetAllColumnForTree")
 
-	//规则集
-	beego.Router("/sdtBdiRuleSet/index", &controllers.SdtBdiRuleSetController{}, "*:Index")             //列表首页
-	beego.Router("/sdtBdiRuleSet/all", &controllers.SdtBdiRuleSetController{}, "*:All")                 //列出所有数据
-	beego.Router("/sdtBdiRuleSet/add", &controllers.SdtBdiRuleSetController{}, "*:Add")                 //新增内容
-	beego.Router("/sdtBdiRuleSet/update", &controllers.SdtBdiRuleSetController{}, "*:Update")           //更新内容
-	beego.Router("/sdtBdiRuleSet/rowMoveUp", &controllers.SdtBdiRuleSetController{}, "*:RowMoveUp")     //行上移
-	beego.Router("/sdtBdiRuleSet/rowMoveDown", &controllers.SdtBdiRuleSetController{}, "*:RowMoveDown") //行下移
-	beego.Router("/sdtBdiRuleSet/delete", &controllers.SdtBdiRuleSetController{}, "*:Delete")           //删除
+	//指标计算业务表
+	beego.Router("/sdtBdiBusi/index", &controllers.SdtBdiBusiController{}, "*:Index")           //列表首页
+	beego.Router("/sdtBdiBusi/all", &controllers.SdtBdiBusiController{}, "*:All")               //列出所有数据
+	beego.Router("/sdtBdiBusi/addPage", &controllers.SdtBdiBusiController{}, "*:AddPage")       //新增页面
+	beego.Router("/sdtBdiBusi/add", &controllers.SdtBdiBusiController{}, "*:Add")               //新增内容
+	beego.Router("/sdtBdiBusi/updatePage", &controllers.SdtBdiBusiController{}, "*:UpdatePage") //更新页面
+	beego.Router("/sdtBdiBusi/update", &controllers.SdtBdiBusiController{}, "*:Update")         //更新内容
 
-	//规则
-	beego.Router("/sdtBdiRule/index", &controllers.SdtBdiRuleController{}, "*:Index")           //列表首页
-	beego.Router("/sdtBdiRule/all", &controllers.SdtBdiRuleController{}, "*:All")               //列出所有数据
-	beego.Router("/sdtBdiRule/addPage", &controllers.SdtBdiRuleController{}, "*:AddPage")       //新增页面
-	beego.Router("/sdtBdiRule/add", &controllers.SdtBdiRuleController{}, "*:Add")               //新增内容
-	beego.Router("/sdtBdiRule/updatePage", &controllers.SdtBdiRuleController{}, "*:UpdatePage") //更新页面
-	beego.Router("/sdtBdiRule/update", &controllers.SdtBdiRuleController{}, "*:Update")         //更新内容
+	//指标结果表配置
+	beego.Router("/sdtBdiResult/index", &controllers.SdtBdiResultController{}, "*:Index")                    //列表首页
+	beego.Router("/sdtBdiResult/all", &controllers.SdtBdiResultController{}, "*:All")                        //列出所有数据
+	beego.Router("/sdtBdiResult/addPage", &controllers.SdtBdiResultController{}, "*:AddPage")                //新增页面
+	beego.Router("/sdtBdiResult/add", &controllers.SdtBdiResultController{}, "*:Add")                        //新增内容
+	beego.Router("/sdtBdiResult/updatePage", &controllers.SdtBdiResultController{}, "*:UpdatePage")          //更新页面
+	beego.Router("/sdtBdiResult/update", &controllers.SdtBdiResultController{}, "*:Update")                  //更新内容
+	beego.Router("//sdtBdiResult/datasourceTree", &controllers.SdtBdiResultController{}, "*:DatasourceTree") //更新内容
 
-	//规则语言
-	beego.Router("/sdtBdiRuleLanguage/all", &controllers.SdtBdiRuleLanguageController{}, "*:All")         //列出所有数据
-	beego.Router("/sdtBdiRuleLanguage/addPage", &controllers.SdtBdiRuleLanguageController{}, "*:AddPage") //新增页面
-	beego.Router("/sdtBdiRuleLanguage/add", &controllers.SdtBdiRuleLanguageController{}, "*:Add")         //新增内容
+	//指标结果表字段配置
+	beego.Router("/sdtBdiResultFields/index", &controllers.SdtBdiResultFieldsController{}, "*:Index")     //列表首页
+	beego.Router("/sdtBdiResultFields/all", &controllers.SdtBdiResultFieldsController{}, "*:All")         //列出所有数据
+	beego.Router("/sdtBdiResultFields/addPage", &controllers.SdtBdiResultFieldsController{}, "*:AddPage") //新增页面
+	beego.Router("/sdtBdiResultFields/add", &controllers.SdtBdiResultController{}, "*:Add")               //新增内容
+	// beego.Router("/sdtBdiResultFields/updatePage", &controllers.SdtBdiResultFieldsController{}, "*:UpdatePage") //更新页面
+	// beego.Router("/sdtBdiResultFields/update", &controllers.SdtBdiResultFieldsController{}, "*:Update")         //更新内容
 
-	//KPI
-	beego.Router("/sdtBdiCfgKpi/index", &controllers.SdtBdiCfgKpiController{}, "*:Index")           //列表首页
-	beego.Router("/sdtBdiCfgKpi/all", &controllers.SdtBdiCfgKpiController{}, "*:All")               //列出所有数据
-	beego.Router("/sdtBdiCfgKpi/addPage", &controllers.SdtBdiCfgKpiController{}, "*:AddPage")       //新增页面
-	beego.Router("/sdtBdiCfgKpi/add", &controllers.SdtBdiCfgKpiController{}, "*:Add")               //新增内容
-	beego.Router("/sdtBdiCfgKpi/updatePage", &controllers.SdtBdiCfgKpiController{}, "*:UpdatePage") //更新页面
-	beego.Router("/sdtBdiCfgKpi/update", &controllers.SdtBdiCfgKpiController{}, "*:Update")         //更新内容
+	/*
+		//规则集
+		beego.Router("/sdtBdiRuleSet/index", &controllers.SdtBdiRuleSetController{}, "*:Index")             //列表首页
+		beego.Router("/sdtBdiRuleSet/all", &controllers.SdtBdiRuleSetController{}, "*:All")                 //列出所有数据
+		beego.Router("/sdtBdiRuleSet/add", &controllers.SdtBdiRuleSetController{}, "*:Add")                 //新增内容
+		beego.Router("/sdtBdiRuleSet/update", &controllers.SdtBdiRuleSetController{}, "*:Update")           //更新内容
+		beego.Router("/sdtBdiRuleSet/rowMoveUp", &controllers.SdtBdiRuleSetController{}, "*:RowMoveUp")     //行上移
+		beego.Router("/sdtBdiRuleSet/rowMoveDown", &controllers.SdtBdiRuleSetController{}, "*:RowMoveDown") //行下移
+		beego.Router("/sdtBdiRuleSet/delete", &controllers.SdtBdiRuleSetController{}, "*:Delete")           //删除
+
+		//规则
+		beego.Router("/sdtBdiRule/index", &controllers.SdtBdiRuleController{}, "*:Index")           //列表首页
+		beego.Router("/sdtBdiRule/all", &controllers.SdtBdiRuleController{}, "*:All")               //列出所有数据
+		beego.Router("/sdtBdiRule/addPage", &controllers.SdtBdiRuleController{}, "*:AddPage")       //新增页面
+		beego.Router("/sdtBdiRule/add", &controllers.SdtBdiRuleController{}, "*:Add")               //新增内容
+		beego.Router("/sdtBdiRule/updatePage", &controllers.SdtBdiRuleController{}, "*:UpdatePage") //更新页面
+		beego.Router("/sdtBdiRule/update", &controllers.SdtBdiRuleController{}, "*:Update")         //更新内容
+
+		//规则语言
+		beego.Router("/sdtBdiRuleLanguage/all", &controllers.SdtBdiRuleLanguageController{}, "*:All")         //列出所有数据
+		beego.Router("/sdtBdiRuleLanguage/addPage", &controllers.SdtBdiRuleLanguageController{}, "*:AddPage") //新增页面
+		beego.Router("/sdtBdiRuleLanguage/add", &controllers.SdtBdiRuleLanguageController{}, "*:Add")         //新增内容
+
+		//KPI
+		beego.Router("/sdtBdiCfgKpi/index", &controllers.SdtBdiCfgKpiController{}, "*:Index")           //列表首页
+		beego.Router("/sdtBdiCfgKpi/all", &controllers.SdtBdiCfgKpiController{}, "*:All")               //列出所有数据
+		beego.Router("/sdtBdiCfgKpi/addPage", &controllers.SdtBdiCfgKpiController{}, "*:AddPage")       //新增页面
+		beego.Router("/sdtBdiCfgKpi/add", &controllers.SdtBdiCfgKpiController{}, "*:Add")               //新增内容
+		beego.Router("/sdtBdiCfgKpi/updatePage", &controllers.SdtBdiCfgKpiController{}, "*:UpdatePage") //更新页面
+		beego.Router("/sdtBdiCfgKpi/update", &controllers.SdtBdiCfgKpiController{}, "*:Update")         //更新内容
+	*/
 
 }

@@ -75,6 +75,12 @@
                 },
                 {
                     field: 'BdiSetNames', title: '所属指标集', width: '120px', align: 'center'
+                },
+                {
+                    field: 'sdt_bdi_opt1', title: '操作', width: '150px', align: 'center',
+                    formatter: function (value, rowData, rowIndex) {
+                        return '<a href="#" class="stdBdiClass" onclick="addSdtBdiCalDialog(' + rowData.Id + ', ' + rowData.BdiTypeId + ')">指标计算</a>';
+                    }
                 }//,
 //                {
 //                    field: 'opt1', title: '规则集操作', width: '150px', align: 'center',
@@ -90,7 +96,7 @@
 //                }
             ]],
             onLoadSuccess: function (data) {
-                $('.easyui-linkbutton').linkbutton({plain: true, iconCls: 'icon-add'});
+                $('.stdBdiClass').linkbutton({plain: true, iconCls: 'icon-add'});
             },
             onClickRow: function (index, row) {
                 checkedIndex = index;
@@ -123,12 +129,14 @@
         });
     });
 
-    //Kpi配置
-    function bdiAddSdtBdiCfgKpiDialog(bdiId) {
+    /**
+     * 指标计算-Dialog。
+     */
+    function addSdtBdiCalDialog(bdiId, bdiTypeId) {
         debugger;
         $('<div></div>').dialog({
-            id: 'bdiAddSdtBdiCfgKpi',
-            title: '配置Kpi',
+            id: 'addSdtBdiCalDialog',
+            title: '指标结果表配置',
             width: '1000px',
             height: '500px',
             closed: false,
@@ -140,7 +148,7 @@
             draggable: false,
             resizable: false,
             modal: true,
-            href: '/sdtBdiCfgKpi/index?bdiId=' + bdiId,
+            href: '/sdtBdiResult/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
             onLoad: function () {
             },
             onClose: function () {
@@ -149,30 +157,56 @@
         });
     }
 
+//    //Kpi配置
+//    function bdiAddSdtBdiCfgKpiDialog(bdiId) {
+//        debugger;
+//        $('<div></div>').dialog({
+//            id: 'bdiAddSdtBdiCfgKpi',
+//            title: '配置Kpi',
+//            width: '1000px',
+//            height: '500px',
+//            closed: false,
+//            cache: false,
+//            collapsible: false,
+//            minimizable: false,
+//            maximizable: false,
+//            closable: true,
+//            draggable: false,
+//            resizable: false,
+//            modal: true,
+//            href: '/sdtBdiCfgKpi/index?bdiId=' + bdiId,
+//            onLoad: function () {
+//            },
+//            onClose: function () {
+//                $(this).dialog('destroy');
+//            }
+//        });
+//    }
+
     //指标项添加规则集
-    function addSdtBdiRelRuleSetDialog(bdiId) {
-        $('<div></div>').dialog({
-            id: 'addSdtBdiRelRuleSet',
-            title: '新增（修改）规则集',
-            width: '1000px',
-            height: '500px',
-            closed: false,
-            cache: false,
-            collapsible: false,
-            minimizable: false,
-            maximizable: false,
-            closable: true,
-            draggable: false,
-            resizable: false,
-            modal: true,
-            href: '/sdtBdiRuleSet/index?bdiId=' + bdiId,
-            onLoad: function () {
-            },
-            onClose: function () {
-                $(this).dialog('destroy');
-            }
-        });
-    }
+//    function addSdtBdiRelRuleSetDialog(bdiId) {
+//        $('<div></div>').dialog({
+//            id: 'addSdtBdiRelRuleSet',
+//            title: '新增（修改）规则集',
+//            width: '1000px',
+//            height: '500px',
+//            closed: false,
+//            cache: false,
+//            collapsible: false,
+//            minimizable: false,
+//            maximizable: false,
+//            closable: true,
+//            draggable: false,
+//            resizable: false,
+//            modal: true,
+//            href: '/sdtBdiRuleSet/index?bdiId=' + bdiId,
+//            onLoad: function () {
+//            },
+//            onClose: function () {
+//                $(this).dialog('destroy');
+//            }
+//        });
+//    }
 
     function addSdtBdiDialog() {
         $('<div></div>').dialog({
@@ -306,31 +340,31 @@
     /**
      * 删除BdiSet。
      */
-    function deleteBdiSet(bdiId) {
-        $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
-            if (r) {
-                $.ajax({
-                    url: "/sdtBdi/delete",
-                    async: false,
-                    cache: false,
-                    type: 'POST',
-                    data: {bdiId: bdiId},
-                    dataType: 'json',
-                    error: function (data) {
-                        $.messager.alert('提示信息', data.message);
-                    },
-                    success: function (data) {
-                        if (data.success) {
-                            $.messager.alert('提示信息', data.message);
-                        } else {
-                            $.messager.alert('提示信息', data.message);
-                        }
-                        $('#sdtBdiDataGrid').datagrid('reload');
-                    }
-                });
-            }
-        });
-    }
+//    function deleteBdiSet(bdiId) {
+//        $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
+//            if (r) {
+//                $.ajax({
+//                    url: "/sdtBdi/delete",
+//                    async: false,
+//                    cache: false,
+//                    type: 'POST',
+//                    data: {bdiId: bdiId},
+//                    dataType: 'json',
+//                    error: function (data) {
+//                        $.messager.alert('提示信息', data.message);
+//                    },
+//                    success: function (data) {
+//                        if (data.success) {
+//                            $.messager.alert('提示信息', data.message);
+//                        } else {
+//                            $.messager.alert('提示信息', data.message);
+//                        }
+//                        $('#sdtBdiDataGrid').datagrid('reload');
+//                    }
+//                });
+//            }
+//        });
+//    }
 </script>
 
 </body>

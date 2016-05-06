@@ -1,0 +1,131 @@
+<div id="loading"
+     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+
+<form id="addSdtBdiResultFieldsForm" method="post">
+    <table>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">字段名：</th>
+            <td>
+                <input name="name" id="name"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">注释：</th>
+            <td>
+                <input name="comment" id="comment">
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">字段类型：</th>
+            <td>
+                <input name="dataType" id="dataType"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">字段长度：</th>
+            <td>
+                <input name="dataLength" id="dataLength">
+            </td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+    var dataTypeArray = [
+        {
+            "id": "char",
+            "text": "char"
+        }, {
+            "id": "varchar",
+            "text": "varchar"
+        }, {
+            "id": "tinytext",
+            "text": "tinytext"
+        }, {
+            "id": "text",
+            "text": "text"
+        }, {
+            "id": "tinyint",
+            "text": "tinyint"
+        }, {
+            "id": "smallint",
+            "text": "smallint"
+        }, {
+            "id": "mediumint",
+            "text": "mediumint"
+        }, {
+            "id": "int",
+            "text": "int"
+        }, {
+            "id": "bigint",
+            "text": "bigint"
+        }, {
+            "id": "date",
+            "text": "date"
+        }, {
+            "id": "time",
+            "text": "time"
+        }, {
+            "id": "datetime",
+            "text": "datetime",
+            "selected": false
+        }, {
+            "id": "timestamp",
+            "text": "timestamp"
+        }, {
+            "id": "5",
+            "text": "text5"
+        }];
+
+    function show() {
+        $("#loading").fadeOut("normal", function () {
+            $(this).remove();
+        });
+    }
+    var delayTime;
+    $.parser.onComplete = function () {
+        if (delayTime) {
+            clearTimeout(delayTime);
+        }
+
+        delayTime = setTimeout(show, 100);
+    };
+
+    $(function () {
+        initAddSdtBdiResultDialog();
+    });
+
+    /**
+     * 初始化新增窗口。
+     */
+    function initAddSdtBdiResultDialog() {
+        //表名
+        $('#name').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: ''
+        });
+
+        //注释
+        $('#comment').textbox({
+            editable: true,
+            required: true,
+            readonly: false,
+            value: ''
+        });
+
+        //字段类型
+        $('#dataType').combobox({
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            editable: false,
+            readonly: false,
+            required: true,
+            value: '',
+            data: dataTypeArray
+        });
+    }
+</script>

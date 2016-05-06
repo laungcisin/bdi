@@ -198,6 +198,38 @@ func (this *SdtPublicDisplayDataController) DatasourceTypeForList() {
 	return
 }
 
+//列出所有的数据源-用于下拉列表
+func (this *SdtPublicDisplayDataController) DatasourceForList() {
+	type DataType struct {
+		Id   int    `json:"id"`
+		Text string `json:"text"`
+	}
+
+	returnData := make([]DataType, 0)
+	o := orm.NewOrm()
+
+	var maps []orm.Params = make([]orm.Params, 0)
+	_, err := o.Raw(" select t.id as Id, t.name as Text from sdt_bdi_datasource t ").Values(&maps)
+
+	if err != nil {
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	for _, v := range maps {
+		dataType := new(DataType)
+		id, _ := strconv.Atoi(v["Id"].(string))
+		dataType.Id = id
+		dataType.Text = v["Text"].(string)
+		returnData = append(returnData, *dataType)
+	}
+
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
 //列出所有的Stat-Dim-用于下拉列表
 func (this *SdtPublicDisplayDataController) StatDimForList() {
 	type DataType struct {

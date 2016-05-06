@@ -9,9 +9,10 @@ import (
 	"time"
 	//"encoding/json"
 	"strconv"
-	"strings"
+	//"strings"
 	//"fmt"
-	"encoding/json"
+	//"encoding/json"
+	"fmt"
 )
 
 const (
@@ -39,6 +40,40 @@ type Datasource struct {
 
 	//以下字段为datagrid展示
 	TypeName string //数据源类型名称
+}
+
+type DatasourceTreeAttributes struct {
+	Url        string `json:"url"`
+	Ip         string `json:"ip"`
+	Port       string `json:"port"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	TableName  string `json:"tableName"`
+	SchemaName string `json:"schemaName"`
+	IsChecked  bool   `json:"isChecked"` //设置选择表和表字段
+
+	Sequence   int    `json:"sequence"`
+	Comment    string `json:"comment"`
+	DataType   string `json:"dataType"`
+	DataLength int64  `json:"dataLength"`
+	IsTable    bool   `json:"isTable"` //数据库名已保存，不需要标记。false表示表字段.
+}
+
+type TableTreeAttributes struct {
+	Name         string                 `form:"name"`
+	CnName       string                 `form:"cnName"`
+	BdiId        int                    `form:"bdiId"`
+	DatasourceId int                    `form:"datasourceId"`
+	ChildColumns []ColumnTreeAttributes `form:"childColumns"`
+}
+
+type ColumnTreeAttributes struct {
+	Name       string `form:"name"`
+	CnName     string `form:"cnName"`
+	Sequence   int    `form:"sequence"`
+	Comment    string `form:"comment"`
+	DataType   string `form:"dataType"`
+	DataLength int    `form:"dataLength"`
 }
 
 func (this *Datasource) TableName() string {
@@ -121,8 +156,7 @@ func (this *Datasource) Update() error {
 	o := orm.NewOrm()
 	o.Begin()
 
-	var updateSdtBdiSql =
-		" update sdt_bdi_datasource " +
+	var updateSdtBdiSql = " update sdt_bdi_datasource " +
 		" set type_id = ?, " +
 		" name = ?, " +
 		" ip = ?, " +
@@ -146,16 +180,6 @@ func (this *Datasource) Update() error {
 	return nil
 }
 
-type DatasourceTreeAttributes struct {
-	Url        string `json:"url"`
-	Ip         string `json:"ip"`
-	Port       string `json:"port"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	TableName  string `json:"tableName"`
-	SchemaName string `json:"schemaName"`
-}
-
 type DatasourceTree struct {
 	Id      string `json:"id"`
 	Pid     string `json:"pid"`
@@ -174,7 +198,7 @@ type DatasourceTree struct {
 func (this *Datasource) GetAllDatasourceForTree() ([]DatasourceTree, error) {
 	var o orm.Ormer
 	o = orm.NewOrm()
-	sdtBdiDatasourceSlice := make([]Datasource, 0, 10)
+	sdtBdiDatasourceSlice := make([]Datasource, 0)
 
 	var querySql = " select * from " + this.TableName()
 
@@ -191,13 +215,18 @@ func (this *Datasource) GetAllDatasourceForTree() ([]DatasourceTree, error) {
 		treeNode.Text = v.Name
 		treeNode.State = "closed"
 
-		var connectionInfo string
-		// connectionInfo = strings.Replace(v.DatasourceConnect, "#0F01", "{", -1)
-		connectionInfo = strings.Replace(connectionInfo, "#0F02", "\"", -1)
-		connectionInfo = strings.Replace(connectionInfo, "#0F03", "}", -1)
+		//var connectionInfo string
+		//connectionInfo = strings.Replace(connectionInfo, "#0F02", "\"", -1)
+		//connectionInfo = strings.Replace(connectionInfo, "#0F03", "}", -1)
 		datasourceTreeAttributes := new(DatasourceTreeAttributes)
-		json.Unmarshal([]byte(connectionInfo), datasourceTreeAttributes)
+		//json.Unmarshal([]byte(connectionInfo), datasourceTreeAttributes)
+
 		datasourceTreeAttributes.Url = UrlForSchema
+		datasourceTreeAttributes.Ip = v.Ip
+		datasourceTreeAttributes.Port = strconv.Itoa(v.Port)
+		datasourceTreeAttributes.Username = v.Username
+		datasourceTreeAttributes.Password = v.Password
+		datasourceTreeAttributes.SchemaName = v.Dbname
 		treeNode.Attributes = *datasourceTreeAttributes
 		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
 	}
@@ -221,7 +250,7 @@ func (this *Datasource) GetAllSchemaForTree(ip string, port string, username str
 		return newTreeDataSlice, err
 	}
 
-	rows, err := db.Query(" select s.schema_name as id, s.schema_name as text from information_schema.schemata s ")
+	rows, err := db.Query(" select s.schema_name as id, s.schema_name as text from information_schema.schemata s where s.schema_name = ? ", schemaName)
 	if err != nil {
 		return newTreeDataSlice, err
 	}
@@ -266,7 +295,7 @@ func (this *Datasource) GetAllTableForTree(ip string, port string, username stri
 		return newTreeDataSlice, err
 	}
 
-	rows, err := db.Query(" select table_name as id, table_name as text from information_schema.tables where table_schema = ? ", schemaName)
+	rows, err := db.Query(" select table_name as id, table_name as text, table_comment as comment from information_schema.tables where table_schema = ? ", schemaName)
 	if err != nil {
 		return newTreeDataSlice, err
 	}
@@ -274,7 +303,8 @@ func (this *Datasource) GetAllTableForTree(ip string, port string, username stri
 	for rows.Next() {
 		var id string
 		var text string
-		err := rows.Scan(&id, &text)
+		var comment string
+		err := rows.Scan(&id, &text, &comment)
 		if err != nil {
 			return newTreeDataSlice, err
 		}
@@ -289,6 +319,11 @@ func (this *Datasource) GetAllTableForTree(ip string, port string, username stri
 		datasourceTreeAttributes.Password = password
 		datasourceTreeAttributes.Url = UrlForColumn
 		datasourceTreeAttributes.SchemaName = schemaName
+		datasourceTreeAttributes.IsChecked = true
+
+		datasourceTreeAttributes.IsTable = true
+		datasourceTreeAttributes.Comment = comment
+
 		treeNode.Attributes = *datasourceTreeAttributes
 		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
 	}
@@ -313,18 +348,36 @@ func (this *Datasource) GetAllColumnForTree(ip string, port string, username str
 		return newTreeDataSlice, err
 	}
 
-	rows, err := db.Query(" select c.column_name as id , c.column_name as text from information_schema.columns c where c.table_schema = ? and c.table_name = ? ", schemaName, tableName)
+	var querySql = "select " +
+		"	c.column_name as id, " +
+		"	c.column_name as text, " +
+		"	c.ordinal_position as sequence, " +
+		"	c.column_comment as comment, " +
+		"	c.data_type as data_type, " +
+		"	c.character_maximum_length as data_length " +
+		"from   information_schema.columns c " +
+		"	where c.table_schema = ? and c.table_name = ? "
+
+	rows, err := db.Query(querySql, schemaName, tableName)
 	if err != nil {
+		fmt.Println(err)
 		return newTreeDataSlice, err
 	}
 
 	for rows.Next() {
 		var id string
 		var text string
-		err := rows.Scan(&id, &text)
+		var sequence int
+		var comment string
+		var dataType string
+		var dataLength sql.NullInt64
+
+		err := rows.Scan(&id, &text, &sequence, &comment, &dataType, &dataLength)
+
 		if err != nil {
 			return newTreeDataSlice, err
 		}
+
 		treeNode := new(DatasourceTree)
 		treeNode.Id = id
 		treeNode.Text = text
@@ -337,6 +390,16 @@ func (this *Datasource) GetAllColumnForTree(ip string, port string, username str
 		datasourceTreeAttributes.Password = password
 		datasourceTreeAttributes.SchemaName = schemaName
 		datasourceTreeAttributes.TableName = tableName
+		datasourceTreeAttributes.IsChecked = true
+
+		datasourceTreeAttributes.Sequence = sequence
+		datasourceTreeAttributes.Comment = comment
+		datasourceTreeAttributes.DataType = dataType
+		datasourceTreeAttributes.IsTable = false
+		if dataLength.Valid {
+			datasourceTreeAttributes.DataLength = dataLength.Int64
+		}
+
 		treeNode.Attributes = *datasourceTreeAttributes
 		newTreeDataSlice = append(newTreeDataSlice, *treeNode)
 	}

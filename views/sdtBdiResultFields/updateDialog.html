@@ -1,0 +1,82 @@
+<div id="loading"
+     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+
+<form id="updateSdtBdiResultForm" method="post">
+    <input type="hidden" id="id" name="id"/>
+    <table>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">指标类型：</th>
+            <td>
+                <input name="bdiTypeId" id="bdiTypeId"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">表名：</th>
+            <td>
+                <input name="tableName" id="tableName"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">表注释：</th>
+            <td>
+                <input name="tableLabel" id="tableLabel">
+            </td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+    function show() {
+        $("#loading").fadeOut("normal", function () {
+            $(this).remove();
+        });
+    }
+    var delayTime;
+    $.parser.onComplete = function () {
+        if (delayTime) {
+            clearTimeout(delayTime);
+        }
+
+        delayTime = setTimeout(show, 100);
+    };
+
+    $(function () {
+        initUpdateSdtBdiResultDialog();
+    });
+
+    /**
+     * 初始化修改窗口。
+     */
+    function initUpdateSdtBdiResultDialog() {
+        $("#id").val('{{.sdtBdiResult.Id}}');
+
+        //表名
+        $('#tableName').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdiResult.TableName}}'
+        });
+
+        //表注释
+        $('#tableLabel').textbox({
+            editable: true,
+            required: true,
+            readonly: false,
+            value: '{{.sdtBdiResult.TableLabel}}'
+        });
+
+        //指标类型
+        $('#bdiTypeId').combobox({
+            url: '/sdt/sdtTypeSetForList',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            editable: false,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdiResult.BdiTypeId}}'
+        });
+    }
+</script>
