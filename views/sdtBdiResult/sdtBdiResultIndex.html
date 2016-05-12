@@ -86,9 +86,15 @@
                     field: 'TableLabel', title: '中文表名', width: '150px', align: 'center'
                 },
                 {
-                    field: 'sdt_bdi_result_opt', title: '操作', width: '150px', align: 'center',
+                    field: 'sdt_bdi_result_opt1', title: '操作', width: '150px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
-                        return '<a href="#" class="easyui-linkbutton" onclick="addBdiValueCfgDialog((' + rowData.Id + '))">指标值配置</a>';
+                        return '<a href="#" class="easyui-linkbutton" onclick="addBdiValueCfgDialog(' + rowData.Id + ')">指标值配置</a>';
+                    }
+                },
+                {
+                    field: 'sdt_bdi_result_opt2', title: '操作', width: '150px', align: 'center',
+                    formatter: function (value, rowData, rowIndex) {
+                        return '<a href="#" class="easyui-linkbutton" onclick="addSdtBdiFieldsCfgDialog(' + rowData.Id + ')">指标结果表字段配置</a>';
                     }
                 }
             ]],
@@ -258,6 +264,8 @@
             height: '380px',
             closed: false,
             cache: false,
+            draggable: false,
+            resizable: false,
             href: '/sdtBdiResult/datasourceTree?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
             modal: true,
             onLoad: function () {
@@ -345,11 +353,15 @@
                         dataType: 'json',
                         error: function (data) {
                             debugger;
-//                            $("#addBdiValueCfgDialog").dialog('destroy');
+                            $.messager.alert('提示消息', data.message);
+                            $("#addBdiValueCfgDialog").dialog('destroy');
+                            $('#sdtBdiResultDataGrid').datagrid('reload');
                         },
                         success: function (data) {
                             debugger;
-//                            $("#addBdiValueCfgDialog").dialog('destroy');
+                            $.messager.alert('提示消息', data.message);
+                            $("#addBdiValueCfgDialog").dialog('destroy');
+                            $('#sdtBdiResultDataGrid').datagrid('reload');
                         }
                     });
 
@@ -379,6 +391,40 @@
                 iconCls: 'icon-cancel',
                 handler: function () {
                     $("#addBdiValueCfgDialog").dialog('destroy');
+                }
+            }]
+        });
+    }
+
+    //指标结果表字段配置Dialog
+    function addSdtBdiFieldsCfgDialog() {
+        $('<div></div>').dialog({
+            id: 'addSdtBdiFieldsCfgDialog',
+            title: '指标结果表字段配置',
+            width: '1000px',
+            height: '500px',
+            closed: false,
+            cache: false,
+            draggable: false,
+            resizable: false,
+            href: '/sdtBdiBusiFields/index?bdiId=' + bdiId,
+            modal: true,
+            onLoad: function () {
+                //初始化表单数据
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [/*{
+                text: '保存',
+                iconCls: 'icon-ok',
+                handler: function () {
+                }
+            }, */{
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $("#addSdtBdiFieldsCfgDialog").dialog('destroy');
                 }
             }]
         });

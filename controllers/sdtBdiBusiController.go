@@ -91,7 +91,6 @@ func (this *SdtBdiBusiController) Add() {
 		return
 	}
 
-	fmt.Println(ob)
 	sdtBdiBusi := new(models.SdtBdiBusi)
 	err = sdtBdiBusi.AddBusiAndAddField(ob)
 	if err != nil {

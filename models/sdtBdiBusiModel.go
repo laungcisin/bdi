@@ -140,10 +140,44 @@ func (this *SdtBdiBusi) AddBusiAndAddField(tableTreeAttributes []TableTreeAttrib
 	o := orm.NewOrm()
 	o.Begin()
 
+	//num := new(int)
+	//var countSql = " select count(*) as counts from sdt_bdi_busi b where b.bdi_id = ? and b.name = ? "
+	//err := o.Raw(countSql).QueryRow(num)
+
 	var insertTableSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, cn_name, create_time) values (?, ?, ?, ?, ?)"
 	var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, user_code, create_time) values (?, ?, ?, ?, ?, ?, ?, ?)"
 
+	var sequenceIndex int = 1
+
 	for _, tableValue := range tableTreeAttributes {
+		//先看是否有重复记录，如果有，先删除记录
+		var sdtBdiBusiSlice []SdtBdiBusi = make([]SdtBdiBusi, 0)
+		var querySql = " select * from sdt_bdi_busi b where b.bdi_id = ? and b.name = ? "
+		_, err := o.Raw(querySql, tableValue.BdiId, tableValue.Name).QueryRows(&sdtBdiBusiSlice)
+		if err == nil {
+			if len(sdtBdiBusiSlice) > 0 {//如果有记录，先删除记录
+				for _, tempTableValue := range sdtBdiBusiSlice {
+					_, err = o.Raw(" delete from sdt_bdi_busi where bdi_id = ? and name = ? ", tempTableValue.BdiId, tempTableValue.Name).Exec()
+					if err != nil {
+						fmt.Println(err)
+						o.Rollback()
+						return err
+					}
+
+					_, err = o.Raw(" delete from sdt_bdi_busi_fields where busi_id = ? ", tempTableValue.Id).Exec()
+					if err != nil {
+						fmt.Println(err)
+						o.Rollback()
+						return err
+					}
+				}
+			}
+		}else {
+			fmt.Println(err)
+			o.Rollback()
+			return err
+		}
+
 		tableResult, err := o.Raw(insertTableSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, tableValue.CnName, time.Now()).Exec()
 		if err != nil {
 			fmt.Println(err)
@@ -159,14 +193,15 @@ func (this *SdtBdiBusi) AddBusiAndAddField(tableTreeAttributes []TableTreeAttrib
 		}
 
 		for _, fieldValue := range tableValue.ChildColumns {
-			_, err = o.Raw(insertFieldSql, lastInsertId, fieldValue.Name, fieldValue.Sequence, fieldValue.Comment, fieldValue.DataType,
-				fieldValue.DataLength, '0', time.Now()).Exec()
+			_, err = o.Raw(insertFieldSql, lastInsertId, fieldValue.Name, sequenceIndex, fieldValue.Comment, fieldValue.DataType,
+				fieldValue.DataLength, 0, time.Now()).Exec()
 
 			if err != nil {
 				fmt.Println(err)
 				o.Rollback()
 				return err
 			}
+			sequenceIndex = sequenceIndex + 1
 		}
 	}
 

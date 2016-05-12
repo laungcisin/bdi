@@ -1,0 +1,288 @@
+<table id="sdtBdiBusiFieldsDataGrid"></table>
+
+<script type="text/javascript">
+    var checkedSdtBdiBusiIndex = undefined;
+    var bdiId = '{{.bdiId}}';
+
+    $(function () {
+        $('#sdtBdiBusiFieldsDataGrid').datagrid({
+            method: 'GET',
+            selectOnCheck: true,
+            checkOnSelect: true,
+            singleSelect: true,
+            autoRowHeight: true,
+            pageNumber: 1,
+            pageSize: 30,
+            pageList: [30, 60, 90],
+            idField: 'Id',
+            pagination: true,
+            url: '/sdtBdiBusiFields/all?bdiId=' + bdiId,
+            height: '390px',
+            toolbar: [{
+                text: '新增字段',
+                iconCls: 'icon-add',
+                handler: function () {
+                    bdiBusiFieldsAddDialog();
+                }
+            }/*, '-', {
+                iconCls: 'icon-edit',
+                text: '编辑',
+                plain: 'true',
+                onClick: function () {
+//                    updateSdtBdiBusiDialog();
+                }
+            }*/],
+            columns: [[
+//                {
+//                    field: 'sdt_bdi_busi_oid',
+//                    title: '选择',
+//                    width: '50px',
+//                    formatter: function (value, row, index) {
+//                        return '<input type="radio" class="selectSdtBdiBusiRadioClass" name="selectSdtBdiBusiRadio" id="selectSdtBdiBusiRadio' + index + '" value="' + row.Id + '" />';
+//                    }
+//                },
+                {
+                    field: 'Id', title: 'Id', width: '50px', align: 'center', hidden: true
+                },
+                {
+                    field: 'BusiId', title: 'BusiId', width: '50px', align: 'center', hidden: true
+                },
+                {
+                    field: 'BusiName', title: 'BusiName', width: '150px', align: 'left', hidden: false
+                },
+                {
+                    field: 'BdiId', title: 'BdiId', width: '50px', align: 'center', hidden: true
+                },
+                {
+                    field: 'BdiName', title: 'BdiName', width: '120px', align: 'left'
+                },
+                {
+                    field: 'Name', title: 'Name', width: '220px', align: 'left'
+                },
+                {
+                    field: 'Sequence', title: 'Sequence', width: '130px', align: 'center'
+                },
+                {
+                    field: 'Comment', title: 'Comment', width: '130px', align: 'left'
+                },
+                {
+                    field: 'DataType', title: 'DataType', width: '130px', align: 'left'
+                },
+                {
+                    field: 'DataLength', title: 'DataLength', width: '130px', align: 'left'
+                },
+                {
+                    field: 'sdt_bdi_busi_fields_opt1', title: '操作', width: '150px', align: 'center',
+                    formatter: function (value, rowData, rowIndex) {
+                        return '<a href="#" class="sdtBdiBusiFieldsClass" onclick="processFieldsDialog(' + rowData.Id + ')">字段加工</a>';
+                    }
+                },
+                {
+                    field: 'busi_fields_ctr',
+                    title: '操作',
+                    width: '190px',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+//                        if (row.editing) {
+//                            var s = '<button onclick="saveRow(this)">保存</button> ';
+//                            var c = '<button onclick="cancelRow(this)">取消</button>';
+//                            return s + c;
+//                        } else {
+                            var e = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, true)">上</button>';
+                            var d = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, false)">下</button>';
+                            return e + d;
+//                        }
+                    }
+                }
+            ]],
+            onLoadSuccess: function (data) {
+                $('.sdtBdiBusiFieldsClass').linkbutton({plain: true, iconCls: 'icon-add'});
+            },
+            onClickRow: function (index, row) {
+//                checkedSdtBdiBusiIndex = index;
+//                //加载完毕后获取所有的checkbox遍历
+//                var radio = $("input[type='radio'] .selectSdtBdiBusiRadioClass")[index].disabled;
+//                //如果当前的单选框不可选，则不让其选中
+//                if (radio != true) {
+//                    //让点击的行单选按钮选中
+//                    $("input[type='radio'] .selectSdtBdiBusiRadioClass")[index].checked = true;
+//                }
+//                else {
+//                    $("input[type='radio'] .selectSdtBdiBusiRadioClass")[index].checked = false;
+//                }
+            },
+            onDblClickRow: function (index, row) {
+//                checkedSdtBdiBusiIndex = index;
+//                //加载完毕后获取所有的checkbox遍历
+//                var radio = $("input[type='radio'] .selectSdtBdiBusiRadioClass")[index].disabled;
+//                //如果当前的单选框不可选，则不让其选中
+//                if (radio != true) {
+//                    //让点击的行单选按钮选中
+//                    $("input[type='radio'] .selectSdtBdiBusiRadioClass")[index].checked = true;
+//                }
+//                else {
+//                    $("input[type='radio'] .selectSdtBdiBusiRadioClass")[index].checked = false;
+//                }
+//
+//                updateSdtBdiBusiDialog();
+            }
+        });
+    });
+
+    /**
+     * 新增字段配置。
+     */
+    function bdiBusiFieldsAddDialog() {
+        $('<div></div>').dialog({
+            id: 'bdiBusiFieldsAddDialog',
+            title: '新增字段',
+            width: '500px',
+            height: '300px',
+            closed: false,
+            cache: false,
+            draggable: false,
+            resizable: false,
+            href: '/sdtBdiBusiFields/addFields',
+            modal: true,
+            onLoad: function () {
+                //初始化表单数据
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '保存',
+                iconCls: 'icon-ok',
+                handler: function () {
+                }
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $("#bdiBusiFieldsAddDialog").dialog('destroy');
+                }
+            }]
+        });
+    }
+
+    /**
+     * 字段加工。
+     */
+    function processFieldsDialog(busiFieldsId) {
+        $('<div></div>').dialog({
+            id: 'processFieldsDialog',
+            title: '业务字段加工配置',
+            width: '500px',
+            height: '300px',
+            draggable: false,
+            resizable: false,
+            closed: false,
+            cache: false,
+            href: '/sdtBdiBusiFields/processFields?busiFieldsId=' + busiFieldsId,
+            modal: true,
+            onLoad: function () {
+                //初始化表单数据
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '保存',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    //提交表单
+                    $('#addBusiProcessFieldsForm').form('submit', {
+                        url: '/sdtBdiBusiFields/processFields/add',
+                        onSubmit: function () {
+                            return $("#addBusiProcessFieldsForm").form("validate");
+                        },
+                        //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
+                        success: function (data) {
+                            //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
+                            var obj = jQuery.parseJSON(data);
+                            if (obj.success) {
+                                $.messager.alert('提示消息', obj.message);
+                                $("#processFieldsDialog").dialog('destroy');
+                                $('#sdtBdiBusiFieldsDataGrid').datagrid('reload');
+                            } else {
+                                $.messager.alert('提示消息', obj.message);
+                            }
+                        }
+                    });
+                }
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $("#processFieldsDialog").dialog('destroy');
+                }
+            }]
+        });
+    }
+
+    //上下行移动
+    function move(e, target, isUp) {
+        var rows = $('#sdtBdiBusiFieldsDataGrid').datagrid('getRows');
+
+        //另一种方式取DataGrid索引
+        var $view = $(target).closest('div.datagrid-view');
+        var index = $(target).closest('tr.datagrid-row').attr('datagrid-row-index');
+        var $row = $view.find('tr[datagrid-row-index=' + index + ']');
+
+        if (isUp) {//上移
+            debugger;
+            if (index == 0) {//第一行不上移
+//                $('#sdtBdiBusiFieldsDataGrid').datagrid('refreshRow', 0);
+            } else {
+                var effectRow = new Object();
+                var obj = rows[index];
+                effectRow["updated"] = JSON.stringify(rows[index]);
+
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+                    cache: false,
+                    url: '/sdtBdiBusiFields/rowMoveUp',
+                    data: effectRow,
+                    dataType: 'JSON',
+                    success: function (rsp) {
+                        if (rsp.success) {
+                            $('#sdtBdiBusiFieldsDataGrid').datagrid('reload');
+                        }
+                    },
+                    error: function () {
+                        $.messager.alert("提示", "提交错误了！");
+                        $('#sdtBdiBusiFieldsDataGrid').datagrid('reload');
+                    }
+                });
+            }
+        } else {//下移
+            debugger;
+            if (index == (rows.length - 1)) {//最后一行不下移
+//                $('#sdtBdiBusiFieldsDataGrid').datagrid('refreshRow', index);
+//                editIndex = undefined;
+            } else {
+                var effectRow = new Object();
+                effectRow["updated"] = JSON.stringify(rows[index]);
+
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+                    cache: false,
+                    url: '/sdtBdiBusiFields/rowMoveDown',
+                    data: effectRow,
+                    dataType: 'JSON',
+                    success: function (rsp) {
+                        if (rsp.success) {
+                            $('#sdtBdiBusiFieldsDataGrid').datagrid('reload');
+                        }
+                    },
+                    error: function () {
+                        $.messager.alert("提示", "提交错误了！");
+                        $('#sdtBdiBusiFieldsDataGrid').datagrid('reload');
+                    }
+                });
+            }
+        }
+    }
+</script>
