@@ -16,7 +16,7 @@ type User struct {
 }
 
 func (u *User) TableName() string {
-	return "user"
+	return "adt_bdi_user"
 }
 
 func (u *User) Update(fields ...string) error {
@@ -33,7 +33,7 @@ func UserAdd(user *User) (int64, error) {
 func UserGetById(id int) (*User, error) {
 	u := new(User)
 
-	err := orm.NewOrm().QueryTable("user").Filter("id", id).One(u)
+	err := orm.NewOrm().QueryTable("adt_bdi_user").Filter("id", id).One(u)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func UserGetById(id int) (*User, error) {
 func UserGetByName(userName string) (*User, error) {
 	u := new(User)
 
-	err := orm.NewOrm().QueryTable("user").Filter("user_name", userName).One(u)
+	err := orm.NewOrm().QueryTable("adt_bdi_user").Filter("user_name", userName).One(u)
 	if err != nil {
 		return nil, err
 	}
