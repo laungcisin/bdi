@@ -1,3 +1,9 @@
+<style>
+    .tag-editor {
+        height: 60px;
+    }
+</style>
+
 <div id="busiFieldsLoading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
 <form id="addBusiProcessFieldsForm" method="post">
@@ -12,7 +18,7 @@
         <tr>
             <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">处理参数：</th>
             <td>
-                <input name="params" id="params"/>
+                <input name="params" id="params" style="height: 60px;"/>
             </td>
         </tr>
     </table>
@@ -44,12 +50,31 @@
         $("#busiFieldsId").val('{{.sdtBdiBusiFields.Id}}');
 
         //业务表名
-        $('#params').textbox({
-            editable: true,
-            readonly: false,
-            required: true,
-            value: '{{.sdtBdiBusiFields.Params}}'
+//        $('#params').textbox({
+//            editable: true,
+//            readonly: false,
+//            required: true,
+//            value: '{{.sdtBdiBusiFields.Params}}'
+//        });
+
+        $('#params').tagEditor({
+            maxTags: 100,
+            maxLength: 150,
+            removeDuplicates: false,
+            sortable: false,
+            initialTags: [],
+            placeholder: '请输入条件表达式',
+            onChange: function (field, editor, tags) {
+            },
+            beforeTagSave: function (field, editor, tags, tag, val) {
+            },
+            beforeTagDelete: function (field, editor, tags, val) {
+            },
+            onFocus: function () {
+            }
         });
+
+        $('#params').tagEditor('addTag', '{{.sdtBdiBusiFields.Params}}');
 
         //数据源
         $('#processType').combobox({

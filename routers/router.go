@@ -83,16 +83,15 @@ func init() {
 	beego.Router("/sdtBdiBusi/updatePage", &controllers.SdtBdiBusiController{}, "*:UpdatePage") //更新页面
 	beego.Router("/sdtBdiBusi/update", &controllers.SdtBdiBusiController{}, "*:Update")         //更新内容
 
-	beego.Router("/sdtBdiBusiFields/index", &controllers.SdtBdiBusiFieldsController{}, "*:Index")           //列表首页
-	beego.Router("/sdtBdiBusiFields/all", &controllers.SdtBdiBusiFieldsController{}, "*:All")               //列出所有数据
+	beego.Router("/sdtBdiBusiFields/index", &controllers.SdtBdiBusiFieldsController{}, "*:Index") //列表首页
+	beego.Router("/sdtBdiBusiFields/all", &controllers.SdtBdiBusiFieldsController{}, "*:All")     //列出所有数据
 	beego.Router("/sdtBdiBusiFields/processFields", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessFields")
 	beego.Router("/sdtBdiBusiFields/processFields/add", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessFieldsAdd")
 	beego.Router("/sdtBdiBusiFields/processType", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessType")
-	beego.Router("/sdtBdiBusiFields/addFields", &controllers.SdtBdiBusiFieldsController{}, "*:AddFields")       //新增字段
-
-	beego.Router("/sdtBdiBusiFields/rowMoveUp", &controllers.SdtBdiBusiFieldsController{}, "*:RowMoveUp")     //行上移
-	beego.Router("/sdtBdiBusiFields/rowMoveDown", &controllers.SdtBdiBusiFieldsController{}, "*:RowMoveDown") //行下移
-
+	beego.Router("/sdtBdiBusiFields/addFieldsPage", &controllers.SdtBdiBusiFieldsController{}, "*:AddFieldsPage") //新增字段首页
+	beego.Router("/sdtBdiBusiFields/addFields/add", &controllers.SdtBdiBusiFieldsController{}, "*:AddFields")     //新增字段保存
+	beego.Router("/sdtBdiBusiFields/rowMoveUp", &controllers.SdtBdiBusiFieldsController{}, "*:RowMoveUp")         //行上移
+	beego.Router("/sdtBdiBusiFields/rowMoveDown", &controllers.SdtBdiBusiFieldsController{}, "*:RowMoveDown")     //行下移
 
 	//beego.Router("/sdtBdiBusiFields/addPage", &controllers.SdtBdiBusiFieldsController{}, "*:AddPage")       //新增页面
 	//beego.Router("/sdtBdiBusiFields/add", &controllers.SdtBdiBusiFieldsController{}, "*:Add")               //新增内容

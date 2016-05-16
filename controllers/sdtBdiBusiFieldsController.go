@@ -67,10 +67,44 @@ func (this *SdtBdiBusiFieldsController) All() {
 }
 
 //新增字段首页
-func (this *SdtBdiBusiFieldsController) AddFields() {
+func (this *SdtBdiBusiFieldsController) AddFieldsPage() {
 	bdiId, _ := this.GetInt("bdiId")
 	this.Data["bdiId"] = bdiId
 	this.TplName = "sdtBdiBusiFields/addFieldsDialog.html"
+}
+
+//新增字段
+func (this *SdtBdiBusiFieldsController) AddFields() {
+	//var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	fieldName := this.GetString("name")
+	fieldValue := this.GetString("params")
+	bdiId, _ := this.GetInt("bdiId")
+
+	sdtBdiBusiFields := new(models.SdtBdiBusiFields)
+	sdtBdiBusiFields.Name = fieldName
+	sdtBdiBusiFields.Params = fieldValue
+	sdtBdiBusiFields.BdiId = bdiId
+	sdtBdiBusiFields.ProcessType = "const"
+	err :=sdtBdiBusiFields.AddFields()
+	if err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "新增字段失败！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "新增字段成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
 }
 
 //处理字段
@@ -177,7 +211,7 @@ func (this *SdtBdiBusiFieldsController) Add() {
 	}
 
 	sdtBdiBusi := new(models.SdtBdiBusi)
-	err = sdtBdiBusi.AddBusiAndAddField(ob)
+	err = sdtBdiBusi.AddBusiAndAddBusiConfig(ob)
 	if err != nil {
 		fmt.Println(err)
 		returnData.Success = false

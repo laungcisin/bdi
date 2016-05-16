@@ -14,6 +14,10 @@ type SdtBdiBusi struct {
 	BdiId        int    `form:"bdiId"`        //指标id
 	DatasourceId int    `form:"datasourceId"` //数据源id
 	Name         string `form:"name"`         //业务表名
+	CnName       string `form:"CnName"`       //业务中文名
+	IsProcess    int    `form:"isProcess"`    //是否经过处理
+	ProcessType  string `form:"processType"`  //处理类型
+	Params       string `form:"params"`       //参数
 
 	UserCode   string    `form:"userCode"`   //创建人ID
 	CreateTime time.Time `form:"createTime"` //创建时间
@@ -136,26 +140,22 @@ func (this *SdtBdiBusi) Update() error {
 	return nil
 }
 
-func (this *SdtBdiBusi) AddBusiAndAddField(tableTreeAttributes []TableTreeAttributes) error {
+func (this *SdtBdiBusi) AddBusiAndAddBusiConfig(tableTreeAttributes []TableTreeAttributes) error {
 	o := orm.NewOrm()
 	o.Begin()
 
-	//num := new(int)
-	//var countSql = " select count(*) as counts from sdt_bdi_busi b where b.bdi_id = ? and b.name = ? "
-	//err := o.Raw(countSql).QueryRow(num)
-
-	var insertTableSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, cn_name, create_time) values (?, ?, ?, ?, ?)"
-	var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, user_code, create_time) values (?, ?, ?, ?, ?, ?, ?, ?)"
+	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, cn_name, create_time) values (?, ?, ?, ?, ?)"
+	var insertBusiConfigSql =  " insert into sdt_bdi_busi_config(busi_id, cn_name, process_column, process_data_type, process_data_length, user_code, create_time) " +
+	" values(?, ?, ?, ?, ?, ?, ?) "
 
 	var sequenceIndex int = 1
-
 	for _, tableValue := range tableTreeAttributes {
 		//先看是否有重复记录，如果有，先删除记录
 		var sdtBdiBusiSlice []SdtBdiBusi = make([]SdtBdiBusi, 0)
 		var querySql = " select * from sdt_bdi_busi b where b.bdi_id = ? and b.name = ? "
 		_, err := o.Raw(querySql, tableValue.BdiId, tableValue.Name).QueryRows(&sdtBdiBusiSlice)
 		if err == nil {
-			if len(sdtBdiBusiSlice) > 0 {//如果有记录，先删除记录
+			if len(sdtBdiBusiSlice) > 0 { //如果有记录，先删除记录
 				for _, tempTableValue := range sdtBdiBusiSlice {
 					_, err = o.Raw(" delete from sdt_bdi_busi where bdi_id = ? and name = ? ", tempTableValue.BdiId, tempTableValue.Name).Exec()
 					if err != nil {
@@ -164,7 +164,7 @@ func (this *SdtBdiBusi) AddBusiAndAddField(tableTreeAttributes []TableTreeAttrib
 						return err
 					}
 
-					_, err = o.Raw(" delete from sdt_bdi_busi_fields where busi_id = ? ", tempTableValue.Id).Exec()
+					_, err = o.Raw(" delete from sdt_bdi_busi_config where busi_id = ? ", tempTableValue.Id).Exec()
 					if err != nil {
 						fmt.Println(err)
 						o.Rollback()
@@ -172,13 +172,13 @@ func (this *SdtBdiBusi) AddBusiAndAddField(tableTreeAttributes []TableTreeAttrib
 					}
 				}
 			}
-		}else {
+		} else {
 			fmt.Println(err)
 			o.Rollback()
 			return err
 		}
 
-		tableResult, err := o.Raw(insertTableSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, tableValue.CnName, time.Now()).Exec()
+		tableResult, err := o.Raw(insertBusiSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, tableValue.CnName, time.Now()).Exec()
 		if err != nil {
 			fmt.Println(err)
 			o.Rollback()
@@ -193,7 +193,7 @@ func (this *SdtBdiBusi) AddBusiAndAddField(tableTreeAttributes []TableTreeAttrib
 		}
 
 		for _, fieldValue := range tableValue.ChildColumns {
-			_, err = o.Raw(insertFieldSql, lastInsertId, fieldValue.Name, sequenceIndex, fieldValue.Comment, fieldValue.DataType,
+			_, err = o.Raw(insertBusiConfigSql, lastInsertId, fieldValue.Comment, fieldValue.Name, fieldValue.DataType,
 				fieldValue.DataLength, 0, time.Now()).Exec()
 
 			if err != nil {

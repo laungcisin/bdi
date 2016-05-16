@@ -114,7 +114,7 @@ func (this *SdtBdiBusiFields) Add() error {
 		") " +
 		"values (?, ?, ?, ?, ?) "
 
-	_, err := o.Raw(insertSdtBdiBusiSql, this.Id, this.Id, this.Name, 0, time.Now()).Exec()
+	_, err := o.Raw(insertSdtBdiBusiSql, this.BdiId, this.Id, this.Name, 0, time.Now()).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -123,24 +123,78 @@ func (this *SdtBdiBusiFields) Add() error {
 	return nil
 }
 
-func (this *SdtBdiBusiFields) Update() error {
+func (this *SdtBdiBusiFields) AddFields() error {
 	o := orm.NewOrm()
 	o.Begin()
 
-	var updateSql = "update sdt_bdi_busi " +
-		" set  " +
-		" datasource_id = ?, " +
-		" name = ?, " +
-		" user_code = ?, " +
-		" edit_time = ? " +
-		" where id = ?"
+	//往 sdt_bdi_busi， 新增一条虚拟表记录
+	var insertSdtBdiBusiSql =
+	"insert into sdt_bdi_busi ( " +
+	"	bdi_id, " +
+	"	datasource_id, " +
+	"	name, " +
+	"	cn_name, " +
+	"	is_process, " +
+	"	process_type, " +
+	"	params, " +
+	"	user_code, " +
+	"	create_time " +
+	") " +
+	"values (?, ?, ?, ?, ?, ?, ?, ?, ?) "
 
-	_, err := o.Raw(updateSql, this.Id, this.Name, this.UserCode, time.Now(), this.Id).Exec()
+	res, err := o.Raw(insertSdtBdiBusiSql, this.BdiId, 0, "virtual_table", "虚拟表", 0, "const", "", 0, time.Now()).Exec()
+	if err != nil {
+		fmt.Println(err)
+		o.Rollback()
+		return err
+	}
+
+	busiId, err := res.LastInsertId()
+	if err != nil {
+		fmt.Println(err)
+		o.Rollback()
+		return err
+	}
+
+	num := new(int)
+	var selectMaxSequence = " select max(sequence) from sdt_bdi_busi_fields where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) "
+	err = o.Raw(selectMaxSequence, this.BdiId).QueryRow(&num)
 	if err != nil {
 		o.Rollback()
 		return err
 	}
+
+	var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, params, user_code, create_time) " +
+		"values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+
+	_, err = o.Raw(insertFieldSql, busiId, this.Name, *num + 1, "", "", "", this.Params, 0, time.Now()).Exec()
+	if err != nil {
+		o.Rollback()
+		return err
+	}
+
 	o.Commit()
+	return nil
+}
+
+func (this *SdtBdiBusiFields) Update() error {
+	//o := orm.NewOrm()
+	//o.Begin()
+	//
+	//var updateSql = "update sdt_bdi_busi " +
+	//	" set  " +
+	//	" datasource_id = ?, " +
+	//	" name = ?, " +
+	//	" user_code = ?, " +
+	//	" edit_time = ? " +
+	//	" where id = ?"
+	//
+	//_, err := o.Raw(updateSql, this.Id, this.Name, this.UserCode, time.Now(), this.Id).Exec()
+	//if err != nil {
+	//	o.Rollback()
+	//	return err
+	//}
+	//o.Commit()
 	return nil
 }
 

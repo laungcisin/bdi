@@ -61,7 +61,7 @@
                     title: '选择',
                     width: '50px',
                     formatter: function (value, row, index) {
-                        return '<input type="radio" name="selectSdtBdiResultRadio" id="selectSdtBdiResultRadio' + index + '" value="' + row.Id + '" />';
+                        return '<input type="radio" class="selectSdtBdiResultRadioClass" name="selectSdtBdiResultRadio" id="selectSdtBdiResultRadio' + index + '" value="' + row.Id + '" />';
                     }
                 },
                 {
@@ -88,7 +88,7 @@
                 {
                     field: 'sdt_bdi_result_opt1', title: '操作', width: '150px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
-                        return '<a href="#" class="easyui-linkbutton" onclick="addBdiValueCfgDialog(' + rowData.Id + ')">指标值配置</a>';
+                        return '<a href="#" class="easyui-linkbutton" onclick="addBdiBusiCfgDialog(' + rowData.Id + ')">指标业务表配置</a>';
                     }
                 },
                 {
@@ -104,27 +104,27 @@
             onClickRow: function (index, row) {
                 checkedSdtBdiResultIndex = index;
                 //加载完毕后获取所有的checkbox遍历
-                var radio = $("input[type='radio']")[index].disabled;
+                var radio = $(".selectSdtBdiResultRadioClass")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
                 if (radio != true) {
                     //让点击的行单选按钮选中
-                    $("input[type='radio']")[index].checked = true;
+                    $(".selectSdtBdiResultRadioClass")[index].checked = true;
                 }
                 else {
-                    $("input[type='radio']")[index].checked = false;
+                    $(".selectSdtBdiResultRadioClass")[index].checked = false;
                 }
             },
             onDblClickRow: function (index, row) {
                 checkedSdtBdiResultIndex = index;
                 //加载完毕后获取所有的checkbox遍历
-                var radio = $("input[type='radio']")[index].disabled;
+                var radio = $(".selectSdtBdiResultRadioClass")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
                 if (radio != true) {
                     //让点击的行单选按钮选中
-                    $("input[type='radio']")[index].checked = true;
+                    $(".selectSdtBdiResultRadioClass")[index].checked = true;
                 }
                 else {
-                    $("input[type='radio']")[index].checked = false;
+                    $(".selectSdtBdiResultRadioClass")[index].checked = false;
                 }
 
                 updateSdtBdiResultDialog();
@@ -213,7 +213,6 @@
                     text: '保存',
                     iconCls: 'icon-ok',
                     handler: function () {
-                        debugger;
                         //提交表单
                         $('#updateSdtBdiResultForm').form('submit', {
                             url: '/sdtBdiResult/update',
@@ -256,9 +255,9 @@
     /**
      * 指标值配置-Dialog
      */
-    function addBdiValueCfgDialog() {
+    function addBdiBusiCfgDialog() {
         $('<div></div>').dialog({
-            id: 'addBdiValueCfgDialog',
+            id: 'addBdiBusiCfgDialog',
             title: '指标计算业务表配置项',
             width: '500px',
             height: '380px',
@@ -275,10 +274,9 @@
                 $(this).dialog('destroy');
             },
             buttons: [{
-                text: '保存',
+                text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
-                    debugger;
                     var resultArray = new Array();
                     var treeObj = $('#columnsTree');
                     var nodes = treeObj.tree('getChecked');
@@ -342,7 +340,7 @@
                             }
                         }
                     }
-                    console.info(JSON.stringify(resultArray));
+//                    console.info(JSON.stringify(resultArray));
 
                     $.ajax({
                         url: "/sdtBdiBusi/add",
@@ -352,45 +350,26 @@
                         data: JSON.stringify(resultArray),
                         dataType: 'json',
                         error: function (data) {
-                            debugger;
                             $.messager.alert('提示消息', data.message);
-                            $("#addBdiValueCfgDialog").dialog('destroy');
-                            $('#sdtBdiResultDataGrid').datagrid('reload');
+//                            $("#addBdiBusiCfgDialog").dialog('destroy');
+//                            $('#sdtBdiResultDataGrid').datagrid('reload');
                         },
                         success: function (data) {
-                            debugger;
-                            $.messager.alert('提示消息', data.message);
-                            $("#addBdiValueCfgDialog").dialog('destroy');
-                            $('#sdtBdiResultDataGrid').datagrid('reload');
+//                            $.messager.alert('提示消息', data.message);
+//                            $("#addBdiBusiCfgDialog").dialog('destroy');
+//                            $('#sdtBdiResultDataGrid').datagrid('reload');
+                            if(data.success) {
+                                //成功选择后，进行业务表和业务表配置
+                                addBdiBusiDetailCfgDialog(bdiId);
+                            }
                         }
                     });
-
-//                    //提交表单
-//                    $('#addBdiBusiTableCfgForm').form('submit', {
-//                        url: '/sdtBdiBusi/add',
-//                        onSubmit: function () {
-//                            return true;
-//                        },
-//                        //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
-//                        success: function (data) {
-//                            //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
-//                            var obj = jQuery.parseJSON(data);
-//                            if (obj.success) {
-//                                $.messager.alert('提示消息', obj.message);
-//                                $("#addBdiValueCfgDialog").dialog('destroy');
-//                                $('#sdtBdiResultDataGrid').datagrid('reload');
-//                                $("#sdtBdiResultDataGrid").datagrid("unselectRow", checkedSdtBdiResultIndex);
-//                            } else {
-//                                $.messager.alert('提示消息', obj.message);
-//                            }
-//                        }
-//                    });
                 }
             }, {
                 text: '取消',
                 iconCls: 'icon-cancel',
                 handler: function () {
-                    $("#addBdiValueCfgDialog").dialog('destroy');
+                    $("#addBdiBusiCfgDialog").dialog('destroy');
                 }
             }]
         });
@@ -425,6 +404,42 @@
                 iconCls: 'icon-cancel',
                 handler: function () {
                     $("#addSdtBdiFieldsCfgDialog").dialog('destroy');
+                }
+            }]
+        });
+    }
+
+
+    /**
+     * 业务表sdt_bdi_busi-配置Dialog
+     */
+    function addBdiBusiDetailCfgDialog(bdiId) {
+        $('<div></div>').dialog({
+            id: 'addBdiBusiDetailCfgDialog',
+            title: '指标计算业务表详细配置',
+            width: '700px',
+            height: '580px',
+            closed: false,
+            cache: false,
+            draggable: false,
+            resizable: false,
+//            href: '/sdtBdiResult/datasourceTree?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
+            modal: true,
+            onLoad: function () {
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '下一步',
+                iconCls: 'icon-ok',
+                handler: function () {
+                }
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $("#addBdiBusiDetailCfgDialog").dialog('destroy');
                 }
             }]
         });

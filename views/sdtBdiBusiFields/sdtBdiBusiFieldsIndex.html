@@ -142,7 +142,7 @@
             cache: false,
             draggable: false,
             resizable: false,
-            href: '/sdtBdiBusiFields/addFields',
+            href: '/sdtBdiBusiFields/addFieldsPage?bdiId=' + bdiId,
             modal: true,
             onLoad: function () {
                 //初始化表单数据
@@ -154,6 +154,25 @@
                 text: '保存',
                 iconCls: 'icon-ok',
                 handler: function () {
+                    //提交表单
+                    $('#addSdtBdiBusiFieldsForm').form('submit', {
+                        url: '/sdtBdiBusiFields/addFields/add',
+                        onSubmit: function () {
+                            return $("#addSdtBdiBusiFieldsForm").form("validate");
+                        },
+                        //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
+                        success: function (data) {
+                            //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
+                            var obj = jQuery.parseJSON(data);
+                            if (obj.success) {
+                                $.messager.alert('提示消息', obj.message);
+                                $("#bdiBusiFieldsAddDialog").dialog('destroy');
+                                $('#sdtBdiBusiFieldsDataGrid').datagrid('reload');
+                            } else {
+                                $.messager.alert('提示消息', obj.message);
+                            }
+                        }
+                    });
                 }
             }, {
                 text: '取消',

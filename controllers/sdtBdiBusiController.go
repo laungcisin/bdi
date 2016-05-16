@@ -92,7 +92,7 @@ func (this *SdtBdiBusiController) Add() {
 	}
 
 	sdtBdiBusi := new(models.SdtBdiBusi)
-	err = sdtBdiBusi.AddBusiAndAddField(ob)
+	err = sdtBdiBusi.AddBusiAndAddBusiConfig(ob)
 	if err != nil {
 		fmt.Println(err)
 		returnData.Success = false

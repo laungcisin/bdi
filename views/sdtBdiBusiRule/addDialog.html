@@ -1,18 +1,18 @@
 <div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
-<form id="addSdtBdiBusiFieldsForm" method="post">
+<form id="addSdtBdiBusiForm" method="post">
     <input type="hidden" id="bdiId" name="bdiId"/>
     <table>
         <tr>
-            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">字段名称：</th>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">数据源：</th>
             <td>
-                <input name="name" id="name"/>
+                <input name="datasourceId" id="datasourceId"/>
             </td>
         </tr>
         <tr>
-            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">字段值：</th>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">业务表名：</th>
             <td>
-                <input name="params" id="params"/>
+                <input name="name" id="name"/>
             </td>
         </tr>
     </table>
@@ -51,8 +51,14 @@
             value: ''
         });
 
-        $('#params').textbox({
-            editable: true,
+        //数据源
+        $('#datasourceId').combobox({
+            url: '/sdt/datasourceForList',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            editable: false,
             readonly: false,
             required: true,
             value: ''
