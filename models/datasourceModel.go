@@ -250,7 +250,9 @@ func (this *Datasource) GetAllSchemaForTree(ip string, port string, username str
 		return newTreeDataSlice, err
 	}
 
-	rows, err := db.Query(" select s.schema_name as id, s.schema_name as text from information_schema.schemata s where s.schema_name = ? ", schemaName)
+	//rows, err := db.Query(" select s.schema_name as id, s.schema_name as text from information_schema.schemata s where s.schema_name = ? ", schemaName)
+	rows, err := db.Query(" select distinct(table_schema) as id, s.table_schema as text from information_schema.TABLES s where INSTR(s.TABLE_NAME,'bdt_') or INSTR(s.TABLE_NAME,'adt_') ")
+
 	if err != nil {
 		return newTreeDataSlice, err
 	}

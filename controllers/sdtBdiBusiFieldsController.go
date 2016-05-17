@@ -107,7 +107,7 @@ func (this *SdtBdiBusiFieldsController) AddFields() {
 	return
 }
 
-//处理字段
+//处理类型
 func (this *SdtBdiBusiFieldsController) ProcessType() {
 	type DataType struct {
 		Id   string `json:"id"`

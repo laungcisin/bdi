@@ -1,0 +1,94 @@
+<style>
+    .tag-editor {
+        height: 60px;
+    }
+</style>
+
+<div id="busiDetailConfigLoading"
+     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+
+<form id="addBusiDetailConfigForm" method="post">
+    <input type="hidden" id="id" name="id"/>
+    <input type="hidden" id="isProcess" name="isProcess"/>
+
+    <table>
+        <tr>
+            <th style="width: 230px;text-align: right; padding: 5px 5px 5px 5px;">处理方式：</th>
+            <td>
+                <input name="processType" id="processType"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 230px;text-align: right; padding: 5px 5px 5px 5px;">处理参数：</th>
+            <td>
+                <input name="params" id="params" style="height: 60px;"/>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+    function show() {
+        $("#busiDetailConfigLoading").fadeOut("normal", function () {
+            $(this).remove();
+        });
+    }
+    var delayTime;
+    $.parser.onComplete = function () {
+        if (delayTime) {
+            clearTimeout(delayTime);
+        }
+
+        delayTime = setTimeout(show, 100);
+    };
+
+    $(function () {
+        initAddSdtBdiBusiDetailConfigDialog();
+    });
+
+    /**
+     * 初始化新增窗口。
+     */
+    function initAddSdtBdiBusiDetailConfigDialog() {
+        $("#id").val('{{.id}}');
+        $("#isProcess").val('{{.isProcess}}');
+
+        //busi处理类型
+        $('#processType').combobox({
+            url: '/sdtBdiBusi/processType',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            width: '280px',
+            editable: false,
+            readonly: false,
+            required: true,
+            value: '',
+            onChange: function (newValue, oldValue) {
+                $("#isProcess").val(1);
+            }
+        });
+
+        $('#params').tagEditor({
+            maxTags: 100,
+            maxLength: 150,
+            width: '280px',
+            removeDuplicates: false,
+            sortable: false,
+            initialTags: [],
+            placeholder: '请输入条件表达式',
+            onChange: function (field, editor, tags) {
+                $("#isProcess").val(1);
+            },
+            beforeTagSave: function (field, editor, tags, tag, val) {
+            },
+            beforeTagDelete: function (field, editor, tags, val) {
+            },
+            onFocus: function () {
+            }
+        });
+
+        $('#params').tagEditor('addTag', 'bdt_family_swater');
+    }
+</script>

@@ -1,26 +1,4 @@
-<!--
-
-<!DOCTYPE html>
-<html lang="zh-cn">
-
-<head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/easyui/demo.css">
-</head>
-<body>
-
--->
-
 <table id="sdtBdiResultDataGrid"></table>
-<!--
-
-<script type="text/javascript" src="/static/js/jquery.min.js"></script>
-<script type="text/javascript" src="/static/js/easyui/jquery.easyui.min.js"></script>
-<script type="text/javascript" src="/static/js/easyui/locale/easyui-lang-zh_CN.js"></script>
-
--->
 
 <script type="text/javascript">
     var checkedSdtBdiResultIndex = undefined;
@@ -258,14 +236,14 @@
     function addBdiBusiCfgDialog() {
         $('<div></div>').dialog({
             id: 'addBdiBusiCfgDialog',
-            title: '指标计算业务表配置项',
+            title: '选择指标计算业务表',
             width: '500px',
             height: '380px',
             closed: false,
             cache: false,
             draggable: false,
             resizable: false,
-            href: '/sdtBdiResult/datasourceTree?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
+//            href: '/sdtBdiResult/datasourceTree?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
             modal: true,
             onLoad: function () {
                 //初始化表单数据
@@ -277,93 +255,99 @@
                 text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
-                    var resultArray = new Array();
-                    var treeObj = $('#columnsTree');
-                    var nodes = treeObj.tree('getChecked');
-                    for (var i = 0; i < nodes.length; i++) {
-                        if (nodes[i].attributes.isTable) {//table-节点
-                            var obj = {
-                                name: nodes[i].id,
-                                cnName: nodes[i].attributes.comment,
-                                bdiId: parseInt(bdiId),
-                                datasourceId: parseInt(treeObj.tree('getRoot').id),
-                                childColumns: new Array()
-                            };
-                            resultArray.push(obj);
-                        } else {//columns-节点
-                            //寻找父节点
-                            var found = false;
-                            var foundIndex = 0;
+                    /*
+                     var resultArray = new Array();
+                     var treeObj = $('#columnsTree');
+                     var nodes = treeObj.tree('getChecked');
+                     for (var i = 0; i < nodes.length; i++) {
+                     if (nodes[i].attributes.isTable) {//table-节点
+                     var obj = {
+                     name: nodes[i].id,
+                     cnName: nodes[i].attributes.comment,
+                     bdiId: parseInt(bdiId),
+                     datasourceId: parseInt(treeObj.tree('getRoot').id),
+                     childColumns: new Array()
+                     };
+                     resultArray.push(obj);
+                     } else {//columns-节点
+                     //寻找父节点
+                     var found = false;
+                     var foundIndex = 0;
 
-                            var parentNode = treeObj.tree('getParent', nodes[i].target);
-                            if (parentNode != null) {
-                                for (var j = 0; j < resultArray.length; j++) {
-                                    if (parentNode.id == resultArray[j].name) {
-                                        found = true;
-                                        foundIndex = j;
-                                        break;
-                                    }
-                                }
-                            }
+                     var parentNode = treeObj.tree('getParent', nodes[i].target);
+                     if (parentNode != null) {
+                     for (var j = 0; j < resultArray.length; j++) {
+                     if (parentNode.id == resultArray[j].name) {
+                     found = true;
+                     foundIndex = j;
+                     break;
+                     }
+                     }
+                     }
 
-                            if (!found) {
-                                var tableObj = {
-                                    name: parentNode.id,
-                                    cnName: parentNode.attributes.comment,
-                                    bdiId: parseInt(bdiId),
-                                    datasourceId: parseInt(treeObj.tree('getRoot').id),
-                                    childColumns: new Array()
-                                };
+                     if (!found) {
+                     var tableObj = {
+                     name: parentNode.id,
+                     cnName: parentNode.attributes.comment,
+                     bdiId: parseInt(bdiId),
+                     datasourceId: parseInt(treeObj.tree('getRoot').id),
+                     childColumns: new Array()
+                     };
 
-                                var columnObj = {
-                                    name: nodes[i].id,
-                                    cnName: nodes[i].attributes.comment,
-                                    sequence: nodes[i].attributes.sequence,
-                                    comment: nodes[i].attributes.comment,
-                                    dataType: nodes[i].attributes.dataType,
-                                    dataLength: nodes[i].attributes.dataLength
-                                };
+                     var columnObj = {
+                     name: nodes[i].id,
+                     cnName: nodes[i].attributes.comment,
+                     sequence: nodes[i].attributes.sequence,
+                     comment: nodes[i].attributes.comment,
+                     dataType: nodes[i].attributes.dataType,
+                     dataLength: nodes[i].attributes.dataLength
+                     };
 
-                                tableObj.childColumns.push(columnObj);
-                                resultArray.push(tableObj);
-                            } else {
-                                var columnObj = {
-                                    name: nodes[i].id,
-                                    cnName: nodes[i].attributes.comment,
-                                    sequence: nodes[i].attributes.sequence,
-                                    comment: nodes[i].attributes.comment,
-                                    dataType: nodes[i].attributes.dataType,
-                                    dataLength: nodes[i].attributes.dataLength
-                                };
+                     tableObj.childColumns.push(columnObj);
+                     resultArray.push(tableObj);
+                     } else {
+                     var columnObj = {
+                     name: nodes[i].id,
+                     cnName: nodes[i].attributes.comment,
+                     sequence: nodes[i].attributes.sequence,
+                     comment: nodes[i].attributes.comment,
+                     dataType: nodes[i].attributes.dataType,
+                     dataLength: nodes[i].attributes.dataLength
+                     };
 
-                                resultArray[foundIndex].childColumns.push(columnObj);
-                            }
-                        }
-                    }
-//                    console.info(JSON.stringify(resultArray));
+                     resultArray[foundIndex].childColumns.push(columnObj);
+                     }
+                     }
+                     }
+                     //                    console.info(JSON.stringify(resultArray));
 
-                    $.ajax({
-                        url: "/sdtBdiBusi/add",
-                        async: false,
-                        cache: false,
-                        type: 'POST',
-                        data: JSON.stringify(resultArray),
-                        dataType: 'json',
-                        error: function (data) {
-                            $.messager.alert('提示消息', data.message);
-//                            $("#addBdiBusiCfgDialog").dialog('destroy');
-//                            $('#sdtBdiResultDataGrid').datagrid('reload');
-                        },
-                        success: function (data) {
-//                            $.messager.alert('提示消息', data.message);
-//                            $("#addBdiBusiCfgDialog").dialog('destroy');
-//                            $('#sdtBdiResultDataGrid').datagrid('reload');
-                            if(data.success) {
-                                //成功选择后，进行业务表和业务表配置
-                                addBdiBusiDetailCfgDialog(bdiId);
-                            }
-                        }
-                    });
+                     $.ajax({
+                     url: "/sdtBdiBusi/add",
+                     async: false,
+                     cache: false,
+                     type: 'POST',
+                     data: JSON.stringify(resultArray),
+                     dataType: 'json',
+                     error: function (data) {
+                     $.messager.alert('提示消息', data.message);
+                     //                            $("#addBdiBusiCfgDialog").dialog('destroy');
+                     //                            $('#sdtBdiResultDataGrid').datagrid('reload');
+                     },
+                     success: function (data) {
+                     //                            $.messager.alert('提示消息', data.message);
+                     //                            $("#addBdiBusiCfgDialog").dialog('destroy');
+                     //                            $('#sdtBdiResultDataGrid').datagrid('reload');
+                     if(data.success) {
+                     //成功选择后，进行业务表和业务表配置
+                     addBdiBusiDetailDialog(bdiId);
+                     }
+                     }
+                     });*/
+
+                    $("#addBdiBusiCfgDialog").dialog('destroy');
+                    //成功选择后，进行业务表详细配置
+                    addBdiBusiDetailDialog(bdiId);
+
                 }
             }, {
                 text: '取消',
@@ -395,11 +379,11 @@
                 $(this).dialog('destroy');
             },
             buttons: [/*{
-                text: '保存',
-                iconCls: 'icon-ok',
-                handler: function () {
-                }
-            }, */{
+             text: '保存',
+             iconCls: 'icon-ok',
+             handler: function () {
+             }
+             }, */{
                 text: '取消',
                 iconCls: 'icon-cancel',
                 handler: function () {
@@ -409,21 +393,80 @@
         });
     }
 
-
     /**
-     * 业务表sdt_bdi_busi-配置Dialog
+     * 业务表: sdt_bdi_busi-详细配置Dialog
      */
-    function addBdiBusiDetailCfgDialog(bdiId) {
+    function addBdiBusiDetailDialog(bdiId) {
         $('<div></div>').dialog({
-            id: 'addBdiBusiDetailCfgDialog',
-            title: '指标计算业务表详细配置',
+            id: 'addBdiBusiDetailDialog',
+            title: '指标业务表详细配置',
             width: '700px',
-            height: '580px',
+            height: '380px',
             closed: false,
             cache: false,
             draggable: false,
             resizable: false,
-//            href: '/sdtBdiResult/datasourceTree?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
+            href: '/sdtBdiBusi/detailConfigPage?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
+            modal: true,
+            onLoad: function () {
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '下一步',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    //业务表字段详细配置
+                    $.ajax({
+                        url: "/sdtBdiBusi/detailConfig/update",
+                        async: false,
+                        cache: false,
+                        type: 'POST',
+                        data: {
+                            id: 1,
+                            isProcess: $("#isProcess").val(),
+                            processType: $("#processType").combobox('getValue'),
+                            params: $("#params").val()
+                        },
+                        dataType: 'json',
+                        error: function (data) {
+                            $.messager.alert('提示消息', data.message);
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                $("#addBdiBusiDetailDialog").dialog('destroy');
+                                //sdt_bdi_busi_config-详细配置Dialog
+                                addBdiBusiConfigDetailDialog(bdiId);
+                            }
+                        }
+                    });
+                }
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $("#addBdiBusiDetailDialog").dialog('destroy');
+                }
+            }]
+        });
+    }
+
+    /**
+     * 业务表: sdt_bdi_busi_config-详细配置Dialog
+     */
+    function addBdiBusiConfigDetailDialog(bdiId) {
+        //TODO:
+        $('<div></div>').dialog({
+            id: 'addBdiBusiConfigDetailDialog',
+            title: '业务配置表详细配置',
+            width: '1000px',
+            height: '500px',
+            closed: false,
+            cache: false,
+            draggable: false,
+            resizable: false,
+            href: '/sdtBdiBusiConfig/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
             modal: true,
             onLoad: function () {
             },
@@ -439,7 +482,7 @@
                 text: '取消',
                 iconCls: 'icon-cancel',
                 handler: function () {
-                    $("#addBdiBusiDetailCfgDialog").dialog('destroy');
+                    $("#addBdiBusiConfigDetailDialog").dialog('destroy');
                 }
             }]
         });

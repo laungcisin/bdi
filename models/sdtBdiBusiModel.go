@@ -208,3 +208,27 @@ func (this *SdtBdiBusi) AddBusiAndAddBusiConfig(tableTreeAttributes []TableTreeA
 	o.Commit()
 	return nil
 }
+
+// sdt_bdi_busi - 详细配置
+func (this *SdtBdiBusi) UpdateDetailConfig() error {
+	o := orm.NewOrm()
+	o.Begin()
+
+	var updateSql = "update sdt_bdi_busi " +
+	" set  " +
+	" is_process = ?, " +
+	" process_type = ?, " +
+	" params = ?, " +
+	" user_code = ?, " +
+	" edit_time = ? " +
+	" where id = ?"
+
+	_, err := o.Raw(updateSql, this.IsProcess, this.ProcessType, this.Params, '0', time.Now(), this.Id).Exec()
+	if err != nil {
+		fmt.Println(err)
+		o.Rollback()
+		return err
+	}
+	o.Commit()
+	return nil
+}

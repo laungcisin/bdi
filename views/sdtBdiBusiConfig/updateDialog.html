@@ -1,19 +1,59 @@
+<style>
+    .tag-editor {
+        width: 220px;
+        height: 100px;
+    }
+</style>
+
 <div id="loading"
      style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
-<form id="updateSdtBdiBusiForm" method="post">
+<form id="updateSdtBdiBusiConfigForm" method="post">
     <input type="hidden" id="id" name="id"/>
+    <input type="hidden" id="params" name="params"/>
+
     <table>
         <tr>
-            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">数据源：</th>
+            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">配置业务表名：</th>
             <td>
-                <input name="datasourceId" id="datasourceId"/>
+                <input name="name" id="name" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">业务表名：</th>
+            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">配置业务表中文名：</th>
             <td>
-                <input name="name" id="name"/>
+                <input name="cnName" id="cnName" style="width: 220px"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">选择字段：</th>
+            <td>
+                <input name="selectStar" id="selectStar" style="width: 220px"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">处理字段：</th>
+            <td>
+                <input name="processColumn" id="processColumn" style="width: 220px"/>
+            </td>
+        </tr>
+
+        <tr>
+            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">别名：</th>
+            <td>
+                <input name="asName" id="asName" style="width: 220px"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">处理类型：</th>
+            <td>
+                <input name="processType" id="processType" style="width: 220px"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">参数：</th>
+            <td>
+                <input name="paramsTag" id="paramsTag" style="width: 220px"/>
             </td>
         </tr>
     </table>
@@ -30,7 +70,6 @@
         if (delayTime) {
             clearTimeout(delayTime);
         }
-
         delayTime = setTimeout(show, 100);
     };
 
@@ -42,19 +81,99 @@
      * 初始化更新窗口。
      */
     function initUpdateSdtBdiBusiDialog() {
-        $("#id").val('{{.sdtBdiBusi.Id}}');
+        $("#id").val('{{.sdtBdiBusiConfig.Id}}');
 
-        //业务表名
+        //配置业务表名
         $('#name').textbox({
-            editable: true,
             readonly: false,
             required: true,
-            value: '{{.sdtBdiBusi.Name}}'
+            prompt: '请输入配置业务表名',
+            value: '{{.sdtBdiBusiConfig.Name}}'
         });
 
-        //数据源
-        $('#datasourceId').combobox({
-            url: '/sdt/datasourceForList',
+        //配置业务表中文名
+        $('#cnName').textbox({
+            readonly: false,
+            required: true,
+            prompt: '请输入配置业务表中文名',
+            value: '{{.sdtBdiBusiConfig.CnName}}'
+        });
+
+        //选择字段
+        $('#selectStar').textbox({
+            editable: false,
+            readonly: false,
+            required: true,
+            prompt: '请选择表字段',
+            icons: [{
+                iconCls: 'icon-add',
+                handler: function (e) {
+                    $('<div></div>').dialog({
+                        id: 'columnSelectDialog',
+                        title: '选择表字段',
+                        width: '500px',
+                        height: '300px',
+                        closed: false,
+                        cache: false,
+                        draggable: false,
+                        resizable: false,
+                        href: '/sdtBdiBusiConfig/columnSelectTreePage',
+                        modal: true,
+                        onLoad: function () {
+                        },
+                        onClose: function () {
+                            $(this).dialog('destroy');
+                        },
+                        buttons: [{
+                            text: '保存',
+                            iconCls: 'icon-ok',
+                            handler: function () {
+                                debugger;
+                                var selectNode = $('#columnSelectTree').tree('getSelected');
+                                if (selectNode == undefined || selectNode == null) {
+                                    $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                                    return;
+                                }
+
+                                if ((selectNode.attributes.isTable == false && selectNode.attributes.tableName == '') || selectNode.attributes.isTable) {
+                                    $.messager.alert('提示信息', '只能选择表字段!', 'info');
+                                    return;
+                                }
+                                $(e.data.target).textbox('setValue', selectNode.id);
+                                $("#columnSelectDialog").dialog('destroy');
+                            }
+                        }, {
+                            text: '取消',
+                            iconCls: 'icon-cancel',
+                            handler: function () {
+                                $("#columnSelectDialog").dialog('destroy');
+                            }
+                        }]
+                    });
+                }
+            }],
+            value: '{{.sdtBdiBusiConfig.SelectStar}}'
+        });
+
+        //处理字段
+        $('#processColumn').textbox({
+            editable: false,
+            readonly: true,
+            required: true,
+            value: '{{.sdtBdiBusiConfig.ProcessColumn}}'
+        });
+
+        //别名
+        $('#asName').textbox({
+            readonly: false,
+            required: true,
+            prompt: '请输入别名',
+            value: '{{.sdtBdiBusiConfig.AsName}}'
+        });
+
+        //处理类型
+        $('#processType').combobox({
+            url: '/sdtBdiBusiFields/processType',
             valueField: 'id',
             textField: 'text',
             panelHeight: 'auto',
@@ -62,7 +181,16 @@
             editable: false,
             readonly: false,
             required: true,
-            value: '{{.sdtBdiBusi.DatasourceId}}'
+            prompt: '请选择处理类型',
+            value: '{{.sdtBdiBusiConfig.ProcessType}}'
+        });
+
+        //参数
+        $('#paramsTag').tagEditor({
+            removeDuplicates: false,
+            clickDelete: true,
+            initialTags: '{{.sdtBdiBusiConfig.Params}}'.split(","),
+            placeholder: '请输入参数'
         });
     }
 </script>

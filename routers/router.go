@@ -83,6 +83,18 @@ func init() {
 	beego.Router("/sdtBdiBusi/updatePage", &controllers.SdtBdiBusiController{}, "*:UpdatePage") //更新页面
 	beego.Router("/sdtBdiBusi/update", &controllers.SdtBdiBusiController{}, "*:Update")         //更新内容
 
+	beego.Router("/sdtBdiBusi/detailConfigPage", &controllers.SdtBdiBusiController{}, "*:DetailConfigPage")               //详细配置
+	beego.Router("/sdtBdiBusi/processType", &controllers.SdtBdiBusiController{}, "*:ProcessType")
+	beego.Router("/sdtBdiBusi/detailConfig/update", &controllers.SdtBdiBusiController{}, "*:UpdateDetailConfig")               //详细配置
+
+	// sdt_bdi_busi_config
+	beego.Router("/sdtBdiBusiConfig/index", &controllers.SdtBdiBusiConfigController{}, "*:Index") //列表首页
+	beego.Router("/sdtBdiBusiConfig/all", &controllers.SdtBdiBusiConfigController{}, "*:All")     //列出所有数据
+	beego.Router("/sdtBdiBusiConfig/updatePage", &controllers.SdtBdiBusiConfigController{}, "*:UpdatePage") //更新页面
+	beego.Router("/sdtBdiBusiConfig/update", &controllers.SdtBdiBusiConfigController{}, "*:Update")         //更新内容
+	beego.Router("/sdtBdiBusiConfig/columnSelectTreePage", &controllers.SdtBdiBusiConfigController{}, "*:ColumnSelectTreePage")         //更新内容
+
+
 	beego.Router("/sdtBdiBusiFields/index", &controllers.SdtBdiBusiFieldsController{}, "*:Index") //列表首页
 	beego.Router("/sdtBdiBusiFields/all", &controllers.SdtBdiBusiFieldsController{}, "*:All")     //列出所有数据
 	beego.Router("/sdtBdiBusiFields/processFields", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessFields")
@@ -105,7 +117,7 @@ func init() {
 	beego.Router("/sdtBdiResult/add", &controllers.SdtBdiResultController{}, "*:Add")                        //新增内容
 	beego.Router("/sdtBdiResult/updatePage", &controllers.SdtBdiResultController{}, "*:UpdatePage")          //更新页面
 	beego.Router("/sdtBdiResult/update", &controllers.SdtBdiResultController{}, "*:Update")                  //更新内容
-	beego.Router("//sdtBdiResult/datasourceTree", &controllers.SdtBdiResultController{}, "*:DatasourceTree") //更新内容
+	beego.Router("/sdtBdiResult/datasourceTree", &controllers.SdtBdiResultController{}, "*:DatasourceTree") //更新内容
 
 	//指标结果表字段配置
 	beego.Router("/sdtBdiResultFields/index", &controllers.SdtBdiResultFieldsController{}, "*:Index")     //列表首页

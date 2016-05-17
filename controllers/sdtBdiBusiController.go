@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/astaxie/beego/orm"
 	"bdi/models"
 	"fmt"
 	"log"
@@ -194,29 +195,79 @@ func (this *SdtBdiBusiController) Delete() {
 		Message string `json:"message"`
 	}{}
 
-	//	bdiDomainId, err := this.GetInt("bdiDomainId")
-	//	fmt.Println("bdiDomainId: ", bdiDomainId)
-	//	if err != nil {
-	//		fmt.Println("解析参数出错")
-	//		returnData.Success = false
-	//		returnData.Message = "解析参数出错"
-	//		this.Data[JSON_STRING] = returnData
-	//		this.ServeJSON()
-	//		return
-	//	}
-	//
-	//	o := orm.NewOrm()
-	//	if _, err := o.Delete(&models.SdtBdiDomain{BdiDomainId: bdiDomainId}); err != nil {
-	//		fmt.Println("数据删除失败")
-	//		returnData.Success = false
-	//		returnData.Message = "数据删除失败"
-	//		this.Data[JSON_STRING] = returnData
-	//		this.ServeJSON()
-	//		return
-	//	}
-
 	returnData.Success = true
 	returnData.Message = "数据删除成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
+// SdtBdiBusi-详细配置页面。
+func (this *SdtBdiBusiController) DetailConfigPage() {
+	//bdiId, _ := this.GetInt("bdiId")
+	//this.Data["bdiId"] = bdiId
+	this.TplName = "sdtBdiBusi/sdtBdiBusiDetailConfigIndex.html"
+}
+
+//处理类型
+func (this *SdtBdiBusiController) ProcessType() {
+	type DataType struct {
+		Id   string `json:"id"`
+		Text string `json:"text"`
+	}
+
+	returnData := make([]DataType, 0)
+	o := orm.NewOrm()
+
+	var maps []orm.Params = make([]orm.Params, 0)
+	_, err := o.Raw(" select process_type as Id, process_name as Text from sdt_bdi_busi_process_type ").Values(&maps)
+
+	if err != nil {
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	for _, v := range maps {
+		dataType := new(DataType)
+		dataType.Id = v["Id"].(string)
+		dataType.Text = v["Text"].(string)
+		returnData = append(returnData, *dataType)
+	}
+
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
+//更新信息
+func (this *SdtBdiBusiController) UpdateDetailConfig() {
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiBusi := new(models.SdtBdiBusi)
+	err := this.ParseForm(sdtBdiBusi)
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "解析参数出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	err = sdtBdiBusi.UpdateDetailConfig()
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "数据更新出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据更新成功！"
 	this.Data[JSON_STRING] = returnData
 	this.ServeJSON()
 	return
