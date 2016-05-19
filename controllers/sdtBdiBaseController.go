@@ -169,7 +169,6 @@ func (this *SdtBdiBaseController) Delete() {
 	}{}
 
 	bdiBaseId, err := this.GetInt("bdiBaseId")
-	fmt.Println("bdiBaseId: ", bdiBaseId)
 	if err != nil {
 		fmt.Println("解析参数出错")
 		returnData.Success = false

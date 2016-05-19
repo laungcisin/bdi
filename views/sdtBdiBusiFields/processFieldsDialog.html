@@ -21,6 +21,12 @@
                 <input name="params" id="params" style="height: 60px;"/>
             </td>
         </tr>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">字段注释：</th>
+            <td>
+                <input name="comment" id="comment"/>
+            </td>
+        </tr>
     </table>
 </form>
 
@@ -48,14 +54,6 @@
      */
     function initAddSdtBdiBusiFieldsDialog() {
         $("#busiFieldsId").val('{{.sdtBdiBusiFields.Id}}');
-
-        //业务表名
-//        $('#params').textbox({
-//            editable: true,
-//            readonly: false,
-//            required: true,
-//            value: '{{.sdtBdiBusiFields.Params}}'
-//        });
 
         $('#params').tagEditor({
             maxTags: 100,
@@ -87,6 +85,13 @@
             readonly: false,
             required: true,
             value: '{{.sdtBdiBusiFields.ProcessType}}'
+        });
+
+        $('#comment').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdiBusiFields.Comment}}'
         });
     }
 </script>

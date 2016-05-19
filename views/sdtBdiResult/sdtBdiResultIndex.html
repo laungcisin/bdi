@@ -69,10 +69,10 @@
                     field: 'Id', title: 'Id', width: '50px', align: 'center', hidden: true
                 },
                 {
-                    field: 'BdiId', title: '指标Id', width: '80px', align: 'center', hidden: false
+                    field: 'BdiId', title: '指标Id', width: '80px', align: 'center', hidden: true
                 },
                 {
-                    field: 'BdiTypeId', title: '指标类型Id', width: '80px', align: 'center', hidden: false
+                    field: 'BdiTypeId', title: '指标类型Id', width: '80px', align: 'center', hidden: true
                 },
                 {
                     field: 'BdiTypeName', title: '指标类型名称', width: '130px', align: 'center'
@@ -95,7 +95,7 @@
                 {
                     field: 'sdt_bdi_result_opt2', title: '操作', width: '150px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
-                        return '<a href="#" class="easyui-linkbutton" onclick="columnSelectDialog(' + rowData.Id + ')">指标结果表字段配置</a>';
+                        return '<a href="#" class="easyui-linkbutton" onclick="columnSelectDialog(' + rowData.Id + ')">指标业务表字段配置</a>';
                     }
                 }
             ]],
@@ -147,7 +147,6 @@
             href: '/sdtBdiResult/addPage?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
             modal: true,
             onLoad: function () {
-                //初始化表单数据
             },
             onClose: function () {
                 $(this).dialog('destroy');
@@ -410,14 +409,14 @@
     function columnSelectDialog() {
         $('<div></div>').dialog({
             id: 'columnSelectDialog',
-            title: '选择表字段',
+            title: '选择指标业务表字段',
             width: '1000px',
             height: '500px',
             closed: false,
             cache: false,
             draggable: false,
             resizable: false,
-            href: '/sdtBdiBusiConfig/columnSelectTreePage',
+            href: '/sdtBdiBusiFields/columnSelectTreePage?bdiId=' + bdiId,
             modal: true,
             onLoad: function () {
             },
@@ -428,6 +427,7 @@
                 text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
+                    /*
                     if (found == undefined) {
                         //判断sdt_bdi_busi_fields表中是否有配置过数据，如果没有要选择表字段。
                         $.ajax({
@@ -483,6 +483,38 @@
                         $("#columnSelectDialog").dialog('destroy');
                         addSdtBdiFieldsCfgDialog();
                     }
+                    */
+
+                    debugger;
+                    var nodes = $('#columnSelectTree').tree('getChecked');
+                    if(nodes != null) {
+                        var resultArray = new Array();
+                        for (var i = 0; i < nodes.length; i++) {
+                            var obj = {
+                                bdiId: parseInt(bdiId),
+                                name: nodes[i].id.toString(),
+                                dataType: nodes[i].attributes.dataType.toString(),
+                                dataLength: nodes[i].attributes.dataLength.toString()
+                            };
+                            resultArray.push(obj);
+                        }
+                        //往 sdt_bdi_busi_fields 表插入数据。
+                        $.ajax({
+                            url: "/sdtBdiBusiFields/addFields/add",
+                            async: true,
+                            cache: false,
+                            data: JSON.stringify(resultArray),
+                            type: 'POST',
+                            dataType: 'json',
+                            error: function (data) {
+                            },
+                            success: function (data) {
+                            }
+                        });
+                    }
+
+                    $("#columnSelectDialog").dialog('destroy');
+                    addSdtBdiFieldsCfgDialog();
                 }
             }, {
                 text: '取消',
@@ -515,7 +547,7 @@
                 $(this).dialog('destroy');
             },
             buttons: [{
-                text: '关闭',
+                text: '配置完成',
                 iconCls: 'icon-close',
                 handler: function () {
                     $("#addSdtBdiFieldsCfgDialog").dialog('destroy');

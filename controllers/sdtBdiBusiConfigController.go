@@ -120,11 +120,6 @@ func (this *SdtBdiBusiConfigController) Update() {
 	return
 }
 
-// 首页
-func (this *SdtBdiBusiConfigController) ColumnSelectTreePage() {
-	this.TplName = "sdtBdiBusiConfig/columnTreeDialog.html"
-}
-
 //同步表信息
 func (this *SdtBdiBusiConfigController) Synchronize() {
 	returnData := struct {

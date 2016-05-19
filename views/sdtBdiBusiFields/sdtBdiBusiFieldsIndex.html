@@ -48,28 +48,28 @@
                     field: 'BusiId', title: 'BusiId', width: '50px', align: 'center', hidden: true
                 },
                 {
-                    field: 'BusiName', title: 'BusiName', width: '150px', align: 'left', hidden: false
+                    field: 'BusiName', title: '业务表名', width: '150px', align: 'left', hidden: false
                 },
                 {
                     field: 'BdiId', title: 'BdiId', width: '50px', align: 'center', hidden: true
                 },
                 {
-                    field: 'BdiName', title: 'BdiName', width: '120px', align: 'left'
+                    field: 'BdiName', title: '指标名称', width: '120px', align: 'left'
                 },
                 {
-                    field: 'Name', title: 'Name', width: '220px', align: 'left'
+                    field: 'Name', title: '字段名称', width: '220px', align: 'left'
                 },
                 {
-                    field: 'Sequence', title: 'Sequence', width: '130px', align: 'center'
+                    field: 'Sequence', title: '字段序号', width: '130px', align: 'center'
                 },
                 {
-                    field: 'Comment', title: 'Comment', width: '130px', align: 'left'
+                    field: 'Comment', title: '字段注释', width: '130px', align: 'left'
                 },
                 {
-                    field: 'DataType', title: 'DataType', width: '130px', align: 'left'
+                    field: 'DataType', title: '字段类型', width: '130px', align: 'left'
                 },
                 {
-                    field: 'DataLength', title: 'DataLength', width: '130px', align: 'left'
+                    field: 'DataLength', title: '字段长度', width: '130px', align: 'left'
                 },
                 {
                     field: 'sdt_bdi_busi_fields_opt1', title: '操作', width: '150px', align: 'center',
@@ -145,7 +145,6 @@
             href: '/sdtBdiBusiFields/addFieldsPage?bdiId=' + bdiId,
             modal: true,
             onLoad: function () {
-                //初始化表单数据
             },
             onClose: function () {
                 $(this).dialog('destroy');
@@ -156,7 +155,7 @@
                 handler: function () {
                     //提交表单
                     $('#addSdtBdiBusiFieldsForm').form('submit', {
-                        url: '/sdtBdiBusiFields/addFields/add',
+                        url: '/sdtBdiBusiFields/addConstFields/add',
                         onSubmit: function () {
                             return $("#addSdtBdiBusiFieldsForm").form("validate");
                         },

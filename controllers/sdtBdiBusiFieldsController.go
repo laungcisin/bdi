@@ -75,14 +75,25 @@ func (this *SdtBdiBusiFieldsController) AddFieldsPage() {
 
 //新增字段
 func (this *SdtBdiBusiFieldsController) AddFields() {
-	//var err error
+	var err error
 	returnData := struct {
 		Success bool   `json:"success"`
 		Message string `json:"message"`
 	}{}
 
 	sdtBdiBusiFields := new(models.SdtBdiBusiFields)
-	err := sdtBdiBusiFields.AddFields()
+	var ob []models.SdtBdiBusiFields
+	err = json.Unmarshal(this.Ctx.Input.RequestBody, &ob)
+	if err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	err = sdtBdiBusiFields.AddFields(ob)
 	if err != nil {
 		fmt.Println(err)
 		returnData.Success = false
@@ -107,16 +118,18 @@ func (this *SdtBdiBusiFieldsController) AddConstFields() {
 		Message string `json:"message"`
 	}{}
 
-	fieldName := this.GetString("name")
-	fieldValue := this.GetString("params")
-	bdiId, _ := this.GetInt("bdiId")
-
 	sdtBdiBusiFields := new(models.SdtBdiBusiFields)
-	sdtBdiBusiFields.Name = fieldName
-	sdtBdiBusiFields.Params = fieldValue
-	sdtBdiBusiFields.BdiId = bdiId
+	err := this.ParseForm(sdtBdiBusiFields)
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
 	sdtBdiBusiFields.ProcessType = "const"
-	err := sdtBdiBusiFields.AddConstFields()
+	err = sdtBdiBusiFields.AddConstFields()
 	if err != nil {
 		fmt.Println(err)
 		returnData.Success = false
@@ -356,7 +369,6 @@ func (this *SdtBdiBusiFieldsController) CheckData() {
 	}{}
 
 	bdiId, _ := this.GetInt("bdiId")
-	fmt.Println("bdiId: ", bdiId)
 
 	sdtBdiBusiFields := new(models.SdtBdiBusiFields)
 	sdtBdiBusiFields.BdiId = bdiId
@@ -374,4 +386,9 @@ func (this *SdtBdiBusiFieldsController) CheckData() {
 	this.Data[JSON_STRING] = returnData
 	this.ServeJSON()
 	return
+}
+
+// 选择字段
+func (this *SdtBdiBusiFieldsController) ColumnSelectTreePage() {
+	this.TplName = "sdtBdiBusiFields/columnTreeDialog.html"
 }

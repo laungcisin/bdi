@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"bdi/models"
-	"fmt"
 	"log"
 	"strconv"
 )
@@ -81,10 +80,6 @@ func (this *SdtBdiCfgKpiController) Add() {
 	sdtBdiCfgKpi := new(models.SdtBdiCfgKpi)
 	err := this.ParseForm(sdtBdiCfgKpi)
 
-	r := this.GetString("bdiCfgDimIds")
-	fmt.Println("r: ", r)
-
-	fmt.Println("sdtBdiCfgKpi: ", sdtBdiCfgKpi)
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "解析参数出错"

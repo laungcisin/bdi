@@ -28,13 +28,17 @@
             onlyLeafCheck: true,
             multiple: false,
             lines: true,
+            checkbox: function (node) {
+                return node.attributes.isChecked && !node.attributes.isTable;
+            },
             //选择树节点触发事件
             onSelect: function (node) {
             },
             onBeforeExpand: function (node) {
                 debugger;
                 var paramStr = "?param=" + node.id + "&ip=" + node.attributes.ip + "&port=" + node.attributes.port +
-                        "&username=" + node.attributes.username + "&password=" + node.attributes.password + "&tableName=" + node.attributes.tableName + "&schemaName=" + node.attributes.schemaName;
+                        "&username=" + node.attributes.username + "&password=" + node.attributes.password + "&tableName=" + node.attributes.tableName + "&schemaName=" + node.attributes.schemaName +
+                        "&showLeafLevel=4";
                 $('#columnSelectTree').tree("options").url = node.attributes.url + paramStr;
             },
             onCheck: function (node, checked) {

@@ -92,11 +92,11 @@ func init() {
 	beego.Router("/sdtBdiBusiConfig/all", &controllers.SdtBdiBusiConfigController{}, "*:All")                                   //列出所有数据
 	beego.Router("/sdtBdiBusiConfig/updatePage", &controllers.SdtBdiBusiConfigController{}, "*:UpdatePage")                     //更新页面
 	beego.Router("/sdtBdiBusiConfig/update", &controllers.SdtBdiBusiConfigController{}, "*:Update")                             //更新内容
-	beego.Router("/sdtBdiBusiConfig/columnSelectTreePage", &controllers.SdtBdiBusiConfigController{}, "*:ColumnSelectTreePage") //更新内容
 	beego.Router("/sdtBdiBusiConfig/content/synchronize", &controllers.SdtBdiBusiConfigController{}, "*:Synchronize")           //更新内容
 
 	beego.Router("/sdtBdiBusiFields/index", &controllers.SdtBdiBusiFieldsController{}, "*:Index") //列表首页
 	beego.Router("/sdtBdiBusiFields/all", &controllers.SdtBdiBusiFieldsController{}, "*:All")     //列出所有数据
+	beego.Router("/sdtBdiBusiFields/columnSelectTreePage", &controllers.SdtBdiBusiFieldsController{}, "*:ColumnSelectTreePage") //选择表字段
 	beego.Router("/sdtBdiBusiFields/processFields", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessFields")
 	beego.Router("/sdtBdiBusiFields/processFields/add", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessFieldsAdd")
 	beego.Router("/sdtBdiBusiFields/processType", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessType")

@@ -26,7 +26,7 @@ type SdtBdiBusiFields struct {
 
 	//以下字段为datagrid展示
 	BusiName string
-	BdiId int
+	BdiId int `form:"bdiId"`
 	BdiName string
 }
 
@@ -123,31 +123,56 @@ func (this *SdtBdiBusiFields) Add() error {
 	return nil
 }
 
-func (this *SdtBdiBusiFields) AddFields() error {
+func (this *SdtBdiBusiFields) AddFields(sdtBdiBusiFieldsSlice []SdtBdiBusiFields) error {
 	var err error
 	o := orm.NewOrm()
 	o.Begin()
 
-	num := new(int)
-	var selectMaxSequence = " select max(sequence) from sdt_bdi_busi_fields where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) "
-	err = o.Raw(selectMaxSequence, this.BdiId).QueryRow(&num)
-	if err != nil {
-		o.Rollback()
-		return err
+	for _, v := range sdtBdiBusiFieldsSlice {
+		count := new(int)
+		var countSql =
+		" select count(*) as counts from sdt_bdi_busi_fields f where  " +
+		"	f.busi_id in (select b.bdi_id from sdt_bdi_busi b where b.bdi_id = ?) " +
+		" and f.name = ? "
+		err = o.Raw(countSql, v.BdiId, v.Name).QueryRow(&count)
+		if err != nil {
+			fmt.Println(err)
+			o.Rollback()
+			return err
+		}
+
+		if *count > 0 {
+			continue
+		}
+
+		num := new(int)
+		var selectMaxSequence = " select max(sequence) from sdt_bdi_busi_fields where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) "
+		err = o.Raw(selectMaxSequence, v.BdiId).QueryRow(&num)
+		if err != nil {
+			fmt.Println(err)
+			o.Rollback()
+			return err
+		}
+
+		var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, data_type, data_length, user_code, create_time) " +
+		"values (?, ?, ?, ?, ?, ?, ?)"
+
+		maxSequence := 0
+		if num == nil {
+			maxSequence = 0
+		}else {
+			maxSequence = *num
+		}
+
+		_, err = o.Raw(insertFieldSql, v.BdiId, v.Name, maxSequence + 1, v.DataType, v.DataLength, 0, time.Now()).Exec()
+		if err != nil {
+			fmt.Println(err)
+			o.Rollback()
+			return err
+		}
 	}
 
-
-
-	//var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, process_type, params, user_code, create_time) " +
-	//"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-
-	//_, err = o.Raw(insertFieldSql, busiId, this.Name, *num + 1, "", "", "", "const",this.Params, 0, time.Now()).Exec()
-	//if err != nil {
-	//	o.Rollback()
-	//	return err
-	//}
-	//
-	//o.Commit()
+	o.Commit()
 	return nil
 }
 
@@ -192,10 +217,17 @@ func (this *SdtBdiBusiFields) AddConstFields() error {
 		return err
 	}
 
+	maxSequence := 0
+	if num == nil {
+		maxSequence = 0
+	}else {
+		maxSequence = *num
+	}
+
 	var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, process_type, params, user_code, create_time) " +
 		"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-	_, err = o.Raw(insertFieldSql, busiId, this.Name, *num + 1, "", "", "", "const",this.Params, 0, time.Now()).Exec()
+	_, err = o.Raw(insertFieldSql, busiId, this.Name, maxSequence + 1, this.Comment, this.DataType, this.DataLength, "const",this.Params, 0, time.Now()).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -234,10 +266,11 @@ func (this *SdtBdiBusiFields) UpdateFields() error {
 	" update sdt_bdi_busi_fields set " +
 	" process_type = ?, " +
 	" params = ?, " +
+	" comment = ?, " +
 	" edit_time = ? " +
 	" where id = ? "
 
-	_, err := o.Raw(updateSql, this.ProcessType, this.Params, time.Now(), this.Id).Exec()
+	_, err := o.Raw(updateSql, this.ProcessType, this.Params, this.Comment, time.Now(), this.Id).Exec()
 	if err != nil {
 		fmt.Println(err)
 		o.Rollback()
