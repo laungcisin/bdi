@@ -81,6 +81,32 @@ func (this *SdtBdiBusiFieldsController) AddFields() {
 		Message string `json:"message"`
 	}{}
 
+	sdtBdiBusiFields := new(models.SdtBdiBusiFields)
+	err := sdtBdiBusiFields.AddFields()
+	if err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "新增字段失败！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "新增字段成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
+//新增Const字段
+func (this *SdtBdiBusiFieldsController) AddConstFields() {
+	//var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
 	fieldName := this.GetString("name")
 	fieldValue := this.GetString("params")
 	bdiId, _ := this.GetInt("bdiId")
@@ -90,7 +116,7 @@ func (this *SdtBdiBusiFieldsController) AddFields() {
 	sdtBdiBusiFields.Params = fieldValue
 	sdtBdiBusiFields.BdiId = bdiId
 	sdtBdiBusiFields.ProcessType = "const"
-	err :=sdtBdiBusiFields.AddFields()
+	err := sdtBdiBusiFields.AddConstFields()
 	if err != nil {
 		fmt.Println(err)
 		returnData.Success = false
@@ -249,39 +275,6 @@ func (this *SdtBdiBusiFieldsController) UpdatePage() {
 	this.TplName = "sdtBdiBusi/updateDialog.html"
 }
 
-//更新信息
-func (this *SdtBdiBusiFieldsController) Update() {
-	returnData := struct {
-		Success bool   `json:"success"`
-		Message string `json:"message"`
-	}{}
-
-	sdtBdiBusi := new(models.SdtBdiBusi)
-	err := this.ParseForm(sdtBdiBusi)
-	if err != nil {
-		returnData.Success = false
-		returnData.Message = "解析参数出错！"
-		this.Data[JSON_STRING] = returnData
-		this.ServeJSON()
-		return
-	}
-
-	err = sdtBdiBusi.Update()
-	if err != nil {
-		returnData.Success = false
-		returnData.Message = "数据更新出错！"
-		this.Data[JSON_STRING] = returnData
-		this.ServeJSON()
-		return
-	}
-
-	returnData.Success = true
-	returnData.Message = "数据更新成功！"
-	this.Data[JSON_STRING] = returnData
-	this.ServeJSON()
-	return
-}
-
 //行上移
 func (this *SdtBdiBusiFieldsController) RowMoveUp() {
 	var err error
@@ -353,4 +346,32 @@ func (this *SdtBdiBusiFieldsController) RowMoveDown() {
 	this.ServeJSON()
 	return
 
+}
+
+func (this *SdtBdiBusiFieldsController) CheckData() {
+	//var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Count   int    `json:"count"`
+	}{}
+
+	bdiId, _ := this.GetInt("bdiId")
+	fmt.Println("bdiId: ", bdiId)
+
+	sdtBdiBusiFields := new(models.SdtBdiBusiFields)
+	sdtBdiBusiFields.BdiId = bdiId
+	num, err := sdtBdiBusiFields.CheckData()
+	if err != nil {
+		returnData.Success = false
+		returnData.Count = -1
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Count = num
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
 }

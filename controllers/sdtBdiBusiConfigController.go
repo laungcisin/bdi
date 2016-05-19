@@ -68,7 +68,7 @@ func (this *SdtBdiBusiConfigController) UpdatePage() {
 	id, err := this.GetInt("id")
 	if err != nil {
 		fmt.Println("解析参数出错！")
-		
+
 		return
 	}
 	sdtBdiBusiConfig := new(models.SdtBdiBusiConfig)
@@ -123,4 +123,37 @@ func (this *SdtBdiBusiConfigController) Update() {
 // 首页
 func (this *SdtBdiBusiConfigController) ColumnSelectTreePage() {
 	this.TplName = "sdtBdiBusiConfig/columnTreeDialog.html"
+}
+
+//同步表信息
+func (this *SdtBdiBusiConfigController) Synchronize() {
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiBusiConfig := new(models.SdtBdiBusiConfig)
+	err := this.ParseForm(sdtBdiBusiConfig)
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "解析参数出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	err = sdtBdiBusiConfig.Synchronize()
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "数据更新出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据更新成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
 }

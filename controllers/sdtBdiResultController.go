@@ -196,5 +196,7 @@ func (this *SdtBdiResultController) Delete() {
 }
 
 func (this *SdtBdiResultController) DatasourceTree() {
+	showLeafLevel, _ := this.GetInt("showLeafLevel")
+	this.Data["showLeafLevel"] = showLeafLevel
 	this.TplName = "sdtBdiResult/datasourceTreeDialog.html"
 }

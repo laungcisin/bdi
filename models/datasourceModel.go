@@ -21,6 +21,18 @@ const (
 	UrlForTable      = "/datasource/tableNode"
 	UrlForColumn     = "/datasource/columnNode"
 )
+type DatasourceTree struct {
+	Id      string `json:"id"`
+	Pid     string `json:"pid"`
+	Text    string `json:"text"`
+	IconCls string `json:"iconCls"`
+	Checked string `json:"checked"`
+	State   string `json:"state"`
+
+	Attributes DatasourceTreeAttributes `json:"attributes"`
+	Children   []Tree                   `json:"children"`
+}
+
 
 type Datasource struct {
 	Id       int    `form:"id"`       //主键
@@ -180,18 +192,6 @@ func (this *Datasource) Update() error {
 	return nil
 }
 
-type DatasourceTree struct {
-	Id      string `json:"id"`
-	Pid     string `json:"pid"`
-	Text    string `json:"text"`
-	IconCls string `json:"iconCls"`
-	Checked string `json:"checked"`
-	State   string `json:"state"`
-
-	Attributes DatasourceTreeAttributes `json:"attributes"`
-	Children   []Tree                   `json:"children"`
-}
-
 /**
 获取所有数据源--用于tree。
 */
@@ -281,8 +281,8 @@ func (this *Datasource) GetAllSchemaForTree(ip string, port string, username str
 	return newTreeDataSlice, nil
 }
 
-func (this *Datasource) GetAllTableForTree(ip string, port string, username string, password string, tableName string, schemaName string) ([]DatasourceTree, error) {
-	newTreeDataSlice := make([]DatasourceTree, 0, 10)
+func (this *Datasource) GetAllTableForTree(ip string, port string, username string, password string, tableName string, schemaName string, showLeafLevel int) ([]DatasourceTree, error) {
+	newTreeDataSlice := make([]DatasourceTree, 0)
 
 	connectionInfo := username + ":" + password + "@tcp(" + ip + ":" + port + ")/mysql"
 	db, err := sql.Open("mysql", connectionInfo)
@@ -297,7 +297,7 @@ func (this *Datasource) GetAllTableForTree(ip string, port string, username stri
 		return newTreeDataSlice, err
 	}
 
-	rows, err := db.Query(" select table_name as id, table_name as text, table_comment as comment from information_schema.tables where table_schema = ? ", schemaName)
+	rows, err := db.Query(" select table_name as id, concat(table_name, '(', table_comment, ')') as text, table_comment as comment from information_schema.tables where table_schema = ? ", schemaName)
 	if err != nil {
 		return newTreeDataSlice, err
 	}
@@ -313,7 +313,13 @@ func (this *Datasource) GetAllTableForTree(ip string, port string, username stri
 		treeNode := new(DatasourceTree)
 		treeNode.Id = id
 		treeNode.Text = text
-		treeNode.State = "closed"
+
+		if showLeafLevel == 3 {
+			treeNode.State = "open"
+		}else {
+			treeNode.State = "closed"
+		}
+
 		datasourceTreeAttributes := new(DatasourceTreeAttributes)
 		datasourceTreeAttributes.Ip = ip
 		datasourceTreeAttributes.Port = port
@@ -352,7 +358,7 @@ func (this *Datasource) GetAllColumnForTree(ip string, port string, username str
 
 	var querySql = "select " +
 		"	c.column_name as id, " +
-		"	c.column_name as text, " +
+		"	concat(c.column_name, '(', c.column_comment, ')') as text, " +
 		"	c.ordinal_position as sequence, " +
 		"	c.column_comment as comment, " +
 		"	c.data_type as data_type, " +

@@ -103,30 +103,6 @@ func (this *SdtBdiBusiController) Add() {
 		return
 	}
 
-	//for _, v := range ob {
-	//	fmt.Println(v)
-	//}
-
-
-	//sdtBdiBusi := new(models.SdtBdiBusi)
-	//err := this.ParseForm(sdtBdiBusi)
-	//if err != nil {
-	//	returnData.Success = false
-	//	returnData.Message = "解析参数出错"
-	//	this.Data[JSON_STRING] = returnData
-	//	this.ServeJSON()
-	//	return
-	//}
-	//
-	//err = sdtBdiBusi.Add()
-	//if err != nil {
-	//	returnData.Success = false
-	//	returnData.Message = "新增数据出错"
-	//	this.Data[JSON_STRING] = returnData
-	//	this.ServeJSON()
-	//	return
-	//}
-
 	returnData.Success = true
 	returnData.Message = "新增数据成功！"
 	this.Data[JSON_STRING] = returnData
@@ -157,13 +133,23 @@ func (this *SdtBdiBusiController) UpdatePage() {
 
 //更新信息
 func (this *SdtBdiBusiController) Update() {
+	var err error
 	returnData := struct {
 		Success bool   `json:"success"`
 		Message string `json:"message"`
 	}{}
 
-	sdtBdiBusi := new(models.SdtBdiBusi)
-	err := this.ParseForm(sdtBdiBusi)
+	var ob []models.BusiTreeAttributes
+	err = json.Unmarshal(this.Ctx.Input.RequestBody, &ob)
+	if err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "解析参数出错！"
@@ -172,7 +158,8 @@ func (this *SdtBdiBusiController) Update() {
 		return
 	}
 
-	err = sdtBdiBusi.Update()
+	sdtBdiBusi := new(models.SdtBdiBusi)
+	err = sdtBdiBusi.Update(ob)
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "数据更新出错！"
@@ -204,8 +191,15 @@ func (this *SdtBdiBusiController) Delete() {
 
 // SdtBdiBusi-详细配置页面。
 func (this *SdtBdiBusiController) DetailConfigPage() {
-	//bdiId, _ := this.GetInt("bdiId")
-	//this.Data["bdiId"] = bdiId
+	bdiId, _ := this.GetInt("bdiId")
+	this.Data["bdiId"] = bdiId
+	id, _ := this.GetInt("id")
+	this.Data["id"] = id
+
+	sdtBdiBusi := new(models.SdtBdiBusi)
+	sdtBdiBusi.Id = id
+	sdtBdiBusi.GetSdtBdiBusiById()
+	this.Data["sdtBdiBusi"] = sdtBdiBusi
 	this.TplName = "sdtBdiBusi/sdtBdiBusiDetailConfigIndex.html"
 }
 

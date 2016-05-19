@@ -316,9 +316,10 @@ func (this *DatasourceController) GetAllTableForTree() {
 	username := this.GetString("username")
 	password := this.GetString("password")
 	tableName := this.GetString("tableName")
+	showLeafLevel, _ := this.GetInt("showLeafLevel")
 
 	datasource := new(models.Datasource)
-	schemaSlice, _ := datasource.GetAllTableForTree(ip, port, username, password, tableName, schemaName)
+	schemaSlice, _ := datasource.GetAllTableForTree(ip, port, username, password, tableName, schemaName, showLeafLevel)
 	this.Data[JSON_STRING] = schemaSlice
 	this.ServeJSON()
 	return

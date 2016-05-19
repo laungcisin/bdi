@@ -9,19 +9,27 @@
 
 <form id="addBusiDetailConfigForm" method="post">
     <input type="hidden" id="id" name="id"/>
-    <input type="hidden" id="isProcess" name="isProcess"/>
+    <input type="hidden" id="bdiId" name="bdiId"/>
 
     <table>
         <tr>
-            <th style="width: 230px;text-align: right; padding: 5px 5px 5px 5px;">处理方式：</th>
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">处理方式：</th>
             <td>
                 <input name="processType" id="processType"/>
             </td>
         </tr>
+        <!--
         <tr>
-            <th style="width: 230px;text-align: right; padding: 5px 5px 5px 5px;">处理参数：</th>
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">处理参数：</th>
             <td>
                 <input name="params" id="params" style="height: 60px;"/>
+            </td>
+        </tr>
+        -->
+        <tr>
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">表处理字段：</th>
+            <td>
+                <ul id="busiColumnsTree" style="height: 200px;"></ul>
             </td>
         </tr>
     </table>
@@ -46,12 +54,14 @@
         initAddSdtBdiBusiDetailConfigDialog();
     });
 
+    var showLeafLevel = 4;
+
     /**
      * 初始化新增窗口。
      */
     function initAddSdtBdiBusiDetailConfigDialog() {
         $("#id").val('{{.id}}');
-        $("#isProcess").val('{{.isProcess}}');
+        $("#bdiId").val('{{.bdiId}}');
 
         //busi处理类型
         $('#processType').combobox({
@@ -64,31 +74,52 @@
             editable: false,
             readonly: false,
             required: true,
-            value: '',
+            value: '{{.sdtBdiBusi.ProcessType}}',
             onChange: function (newValue, oldValue) {
-                $("#isProcess").val(1);
             }
         });
 
-        $('#params').tagEditor({
-            maxTags: 100,
-            maxLength: 150,
-            width: '280px',
-            removeDuplicates: false,
-            sortable: false,
-            initialTags: [],
-            placeholder: '请输入条件表达式',
-            onChange: function (field, editor, tags) {
-                $("#isProcess").val(1);
+//        $('#params').tagEditor({
+//            maxTags: 100,
+//            maxLength: 150,
+//            width: '280px',
+//            removeDuplicates: false,
+//            sortable: false,
+//            initialTags: [],
+//            placeholder: '请输入条件表达式',
+//            onChange: function (field, editor, tags) {
+//            },
+//            beforeTagSave: function (field, editor, tags, tag, val) {
+//            },
+//            beforeTagDelete: function (field, editor, tags, val) {
+//            },
+//            onFocus: function () {
+//            }
+//        });
+//        $('#params').tagEditor('addTag', '{{.sdtBdiBusi.Name}}');
+
+        $('#busiColumnsTree').tree({
+            //获取数据URL
+            url: '/datasource/datasourceNode?showLeafLevel=' + showLeafLevel,
+            width: '300px',
+            panelHeight: '360px',
+            panelMaxHeight: '450px',
+            onlyLeafCheck: true,
+            lines: true,
+            multiple: true,
+            checkbox: function (node) {
+                return node.attributes.isChecked;
             },
-            beforeTagSave: function (field, editor, tags, tag, val) {
+            //选择树节点触发事件
+            onSelect: function (node) {
             },
-            beforeTagDelete: function (field, editor, tags, val) {
-            },
-            onFocus: function () {
+            onBeforeExpand: function (node) {
+                debugger;
+                var paramStr = "?param=" + node.id + "&ip=" + node.attributes.ip + "&port=" + node.attributes.port +
+                        "&username=" + node.attributes.username + "&password=" + node.attributes.password + "&tableName=" + node.attributes.tableName + "&schemaName=" + node.attributes.schemaName +
+                        "&showLeafLevel=" + showLeafLevel;
+                $('#busiColumnsTree').tree("options").url = node.attributes.url + paramStr;
             }
         });
-
-        $('#params').tagEditor('addTag', 'bdt_family_swater');
     }
 </script>

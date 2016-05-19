@@ -127,3 +127,48 @@ func (this *SdtBdiBusiConfig)Update() error {
 	o.Commit()
 	return nil
 }
+
+func (this *SdtBdiBusiConfig)Synchronize() error {
+	var err error
+	o := orm.NewOrm()
+	o.Begin()
+
+	var insertString =
+		" insert into sdt_bdi_busi_fields ( " +
+		"	busi_id, " +
+		"	name, " +
+		"	sequence, " +
+		"       is_process, " +
+		"	comment, " +
+		"	data_type, " +
+		"	data_length, " +
+		"	create_time " +
+		" ) " +
+		" select t.* from ( " +
+		" select cfg.busi_id as busi_id, " +
+		"	cfg.as_name as name, " +
+		"	1 as sequence, " +
+		"	1 as is_process, " +
+		"	cfg.cn_name as comment, " +
+		"	cfg.process_data_type as data_type, " +
+		"	cfg.process_data_length as data_length, " +
+		"	now() as create_time " +
+		"	from " +
+		"		sdt_bdi_busi_config cfg, " +
+		"		sdt_bdi_busi busi " +
+		"	where " +
+		"		busi.bdi_id = ? " +
+		"	and busi.id = cfg.busi_id " +
+		"	group by cfg.as_name " +
+		") as t where not exists ( select f.busi_id from sdt_bdi_busi_fields f where f.busi_id = t.busi_id and f.name = t.name) "
+	_, err = o.Raw(insertString, this.BdiId).Exec()
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("更新数据出错！")
+		o.Rollback()
+		return err
+	}
+
+	o.Commit()
+	return nil
+}

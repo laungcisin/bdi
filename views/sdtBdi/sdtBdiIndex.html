@@ -134,35 +134,21 @@
      */
     function addSdtBdiCfgDialog(bdiId, bdiTypeId) {
         debugger;
-        $('<div></div>').dialog({
-            id: 'addSdtBdiCfgDialog',
-            title: '指标结果表配置',
-            width: '1000px',
-            height: '500px',
-            closed: false,
-            cache: false,
-            collapsible: false,
-            minimizable: false,
-            maximizable: false,
-            closable: true,
-            draggable: false,
-            resizable: false,
-            modal: true,
-            href: '/sdtBdiResult/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
-            onLoad: function () {
-            },
-            onClose: function () {
-                $(this).dialog('destroy');
+        var tab = self.parent.$('#tabs').tabs('getSelected'); //获得当前tab
+        var href = '/sdtBdiResult/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId;
+
+        self.parent.$('#tabs').tabs('update', {
+            tab: tab,
+            options: {
+                content: '<iframe scrolling="auto" frameborder="0" src="' + href + '" style="width:100%;height:100%;"></iframe>',
+                closable: true,
+                selected: true
             }
         });
-    }
-
-//    //Kpi配置
-//    function bdiAddSdtBdiCfgKpiDialog(bdiId) {
 //        debugger;
 //        $('<div></div>').dialog({
-//            id: 'bdiAddSdtBdiCfgKpi',
-//            title: '配置Kpi',
+//            id: 'addSdtBdiCfgDialog',
+//            title: '指标结果表配置',
 //            width: '1000px',
 //            height: '500px',
 //            closed: false,
@@ -174,39 +160,65 @@
 //            draggable: false,
 //            resizable: false,
 //            modal: true,
-//            href: '/sdtBdiCfgKpi/index?bdiId=' + bdiId,
+//            href: '/sdtBdiResult/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
 //            onLoad: function () {
 //            },
 //            onClose: function () {
 //                $(this).dialog('destroy');
 //            }
 //        });
-//    }
+    }
+
+    //    //Kpi配置
+    //    function bdiAddSdtBdiCfgKpiDialog(bdiId) {
+    //        debugger;
+    //        $('<div></div>').dialog({
+    //            id: 'bdiAddSdtBdiCfgKpi',
+    //            title: '配置Kpi',
+    //            width: '1000px',
+    //            height: '500px',
+    //            closed: false,
+    //            cache: false,
+    //            collapsible: false,
+    //            minimizable: false,
+    //            maximizable: false,
+    //            closable: true,
+    //            draggable: false,
+    //            resizable: false,
+    //            modal: true,
+    //            href: '/sdtBdiCfgKpi/index?bdiId=' + bdiId,
+    //            onLoad: function () {
+    //            },
+    //            onClose: function () {
+    //                $(this).dialog('destroy');
+    //            }
+    //        });
+    //    }
 
     //指标项添加规则集
-//    function addSdtBdiRelRuleSetDialog(bdiId) {
-//        $('<div></div>').dialog({
-//            id: 'addSdtBdiRelRuleSet',
-//            title: '新增（修改）规则集',
-//            width: '1000px',
-//            height: '500px',
-//            closed: false,
-//            cache: false,
-//            collapsible: false,
-//            minimizable: false,
-//            maximizable: false,
-//            closable: true,
-//            draggable: false,
-//            resizable: false,
-//            modal: true,
-//            href: '/sdtBdiRuleSet/index?bdiId=' + bdiId,
-//            onLoad: function () {
-//            },
-//            onClose: function () {
-//                $(this).dialog('destroy');
-//            }
-//        });
-//    }
+    //    function addSdtBdiRelRuleSetDialog(bdiId) {
+    //        $('<div></div>').dialog({
+    //            id: 'addSdtBdiRelRuleSet',
+    //            title: '新增（修改）规则集',
+    //            width: '1000px',
+    //            height: '500px',
+    //            closed: false,
+    //            cache: false,
+    //            collapsible: false,
+    //            minimizable: false,
+    //            maximizable: false,
+    //            closable: true,
+    //            draggable: false,
+    //            resizable: false,
+    //            modal: true,
+    //            href: '/sdtBdiRuleSet/index?bdiId=' + bdiId,
+    //            onLoad: function () {
+    //            },
+    //            onClose: function () {
+    //                $(this).dialog('destroy');
+    //            }
+    //        });
+    //    }
 
     function addSdtBdiDialog() {
         $('<div></div>').dialog({
@@ -340,31 +352,31 @@
     /**
      * 删除BdiSet。
      */
-//    function deleteBdiSet(bdiId) {
-//        $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
-//            if (r) {
-//                $.ajax({
-//                    url: "/sdtBdi/delete",
-//                    async: false,
-//                    cache: false,
-//                    type: 'POST',
-//                    data: {bdiId: bdiId},
-//                    dataType: 'json',
-//                    error: function (data) {
-//                        $.messager.alert('提示信息', data.message);
-//                    },
-//                    success: function (data) {
-//                        if (data.success) {
-//                            $.messager.alert('提示信息', data.message);
-//                        } else {
-//                            $.messager.alert('提示信息', data.message);
-//                        }
-//                        $('#sdtBdiDataGrid').datagrid('reload');
-//                    }
-//                });
-//            }
-//        });
-//    }
+    //    function deleteBdiSet(bdiId) {
+    //        $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
+    //            if (r) {
+    //                $.ajax({
+    //                    url: "/sdtBdi/delete",
+    //                    async: false,
+    //                    cache: false,
+    //                    type: 'POST',
+    //                    data: {bdiId: bdiId},
+    //                    dataType: 'json',
+    //                    error: function (data) {
+    //                        $.messager.alert('提示信息', data.message);
+    //                    },
+    //                    success: function (data) {
+    //                        if (data.success) {
+    //                            $.messager.alert('提示信息', data.message);
+    //                        } else {
+    //                            $.messager.alert('提示信息', data.message);
+    //                        }
+    //                        $('#sdtBdiDataGrid').datagrid('reload');
+    //                    }
+    //                });
+    //            }
+    //        });
+    //    }
 </script>
 
 </body>

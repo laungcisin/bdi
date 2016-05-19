@@ -1,3 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/demo.css">
+
+    <link rel="stylesheet" type="text/css" href="/static/css/tagEditor/jquery.tag-editor.css">
+</head>
+<body>
+
+<table id="sdtBdiDataGrid"></table>
+
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/static/js/easyui/utils/utils.js"></script>
+
+<script type="text/javascript" src="/static/js/caret/jquery.caret.min.js"></script>
+<script type="text/javascript" src="/static/js/tagEditor/jquery.tag-editor.js"></script>
+
 <table id="sdtBdiResultDataGrid"></table>
 
 <script type="text/javascript">
@@ -58,7 +81,7 @@
                     field: 'BdiName', title: '指标名称', width: '130px', align: 'center'
                 },
                 {
-                    field: 'TableName', title: '表名', width: '150px', align: 'center'
+                    field: 'TableName', title: '表名', width: '220px', align: 'center'
                 },
                 {
                     field: 'TableLabel', title: '中文表名', width: '150px', align: 'center'
@@ -72,7 +95,7 @@
                 {
                     field: 'sdt_bdi_result_opt2', title: '操作', width: '150px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
-                        return '<a href="#" class="easyui-linkbutton" onclick="addSdtBdiFieldsCfgDialog(' + rowData.Id + ')">指标结果表字段配置</a>';
+                        return '<a href="#" class="easyui-linkbutton" onclick="columnSelectDialog(' + rowData.Id + ')">指标结果表字段配置</a>';
                     }
                 }
             ]],
@@ -237,16 +260,15 @@
         $('<div></div>').dialog({
             id: 'addBdiBusiCfgDialog',
             title: '选择指标计算业务表',
-            width: '500px',
-            height: '380px',
+            width: '1000px',
+            height: '500px',
             closed: false,
             cache: false,
             draggable: false,
             resizable: false,
-//            href: '/sdtBdiResult/datasourceTree?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
+            href: '/sdtBdiResult/datasourceTree?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId + "&showLeafLevel=3",
             modal: true,
             onLoad: function () {
-                //初始化表单数据
             },
             onClose: function () {
                 $(this).dialog('destroy');
@@ -255,98 +277,122 @@
                 text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
-                    /*
-                     var resultArray = new Array();
-                     var treeObj = $('#columnsTree');
-                     var nodes = treeObj.tree('getChecked');
-                     for (var i = 0; i < nodes.length; i++) {
-                     if (nodes[i].attributes.isTable) {//table-节点
-                     var obj = {
-                     name: nodes[i].id,
-                     cnName: nodes[i].attributes.comment,
-                     bdiId: parseInt(bdiId),
-                     datasourceId: parseInt(treeObj.tree('getRoot').id),
-                     childColumns: new Array()
-                     };
-                     resultArray.push(obj);
-                     } else {//columns-节点
-                     //寻找父节点
-                     var found = false;
-                     var foundIndex = 0;
+                    var resultArray = new Array();
+                    var treeObj = $('#columnsTree');
+                    var nodes = treeObj.tree('getChecked');
+                    for (var i = 0; i < nodes.length; i++) {
+                        var obj = {
+                            name: nodes[i].id,
+                            cnName: nodes[i].attributes.comment,
+                            bdiId: parseInt(bdiId),
+                            datasourceId: parseInt(treeObj.tree('getRoot').id),
+                            childColumns: new Array()
+                        };
+                        resultArray.push(obj);
+                    }
 
-                     var parentNode = treeObj.tree('getParent', nodes[i].target);
-                     if (parentNode != null) {
-                     for (var j = 0; j < resultArray.length; j++) {
-                     if (parentNode.id == resultArray[j].name) {
-                     found = true;
-                     foundIndex = j;
-                     break;
-                     }
-                     }
-                     }
+                    $.ajax({
+                        url: "/sdtBdiBusi/add",
+                        async: false,
+                        cache: false,
+                        type: 'POST',
+                        data: JSON.stringify(resultArray),
+                        dataType: 'json',
+                        error: function (data) {
+                            $.messager.alert('提示消息', data.message);
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                //成功选择后，进行业务表和业务表配置
+                                $("#addBdiBusiCfgDialog").dialog('destroy');
 
-                     if (!found) {
-                     var tableObj = {
-                     name: parentNode.id,
-                     cnName: parentNode.attributes.comment,
-                     bdiId: parseInt(bdiId),
-                     datasourceId: parseInt(treeObj.tree('getRoot').id),
-                     childColumns: new Array()
-                     };
+                                //成功选择后，进行业务表详细配置
+                                addBdiBusiDetailDialog();
+                            }
+                        }
+                    });
 
-                     var columnObj = {
-                     name: nodes[i].id,
-                     cnName: nodes[i].attributes.comment,
-                     sequence: nodes[i].attributes.sequence,
-                     comment: nodes[i].attributes.comment,
-                     dataType: nodes[i].attributes.dataType,
-                     dataLength: nodes[i].attributes.dataLength
-                     };
-
-                     tableObj.childColumns.push(columnObj);
-                     resultArray.push(tableObj);
-                     } else {
-                     var columnObj = {
-                     name: nodes[i].id,
-                     cnName: nodes[i].attributes.comment,
-                     sequence: nodes[i].attributes.sequence,
-                     comment: nodes[i].attributes.comment,
-                     dataType: nodes[i].attributes.dataType,
-                     dataLength: nodes[i].attributes.dataLength
-                     };
-
-                     resultArray[foundIndex].childColumns.push(columnObj);
-                     }
-                     }
-                     }
-                     //                    console.info(JSON.stringify(resultArray));
-
-                     $.ajax({
-                     url: "/sdtBdiBusi/add",
-                     async: false,
-                     cache: false,
-                     type: 'POST',
-                     data: JSON.stringify(resultArray),
-                     dataType: 'json',
-                     error: function (data) {
-                     $.messager.alert('提示消息', data.message);
-                     //                            $("#addBdiBusiCfgDialog").dialog('destroy');
-                     //                            $('#sdtBdiResultDataGrid').datagrid('reload');
-                     },
-                     success: function (data) {
-                     //                            $.messager.alert('提示消息', data.message);
-                     //                            $("#addBdiBusiCfgDialog").dialog('destroy');
-                     //                            $('#sdtBdiResultDataGrid').datagrid('reload');
-                     if(data.success) {
-                     //成功选择后，进行业务表和业务表配置
-                     addBdiBusiDetailDialog(bdiId);
-                     }
-                     }
-                     });*/
-
-                    $("#addBdiBusiCfgDialog").dialog('destroy');
-                    //成功选择后，进行业务表详细配置
-                    addBdiBusiDetailDialog(bdiId);
+//                    var resultArray = new Array();
+//                    var treeObj = $('#columnsTree');
+//                    var nodes = treeObj.tree('getChecked');
+//                    for (var i = 0; i < nodes.length; i++) {
+//                        if (nodes[i].attributes.isTable) {//table-节点
+//                            var obj = {
+//                                name: nodes[i].id,
+//                                cnName: nodes[i].attributes.comment,
+//                                bdiId: parseInt(bdiId),
+//                                datasourceId: parseInt(treeObj.tree('getRoot').id),
+//                                childColumns: new Array()
+//                            };
+//                            resultArray.push(obj);
+//                        } else {//columns-节点
+//                            //寻找父节点
+//                            var found = false;
+//                            var foundIndex = 0;
+//
+//                            var parentNode = treeObj.tree('getParent', nodes[i].target);
+//                            if (parentNode != null) {
+//                                for (var j = 0; j < resultArray.length; j++) {
+//                                    if (parentNode.id == resultArray[j].name) {
+//                                        found = true;
+//                                        foundIndex = j;
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//
+//                            if (!found) {
+//                                var tableObj = {
+//                                    name: parentNode.id,
+//                                    cnName: parentNode.attributes.comment,
+//                                    bdiId: parseInt(bdiId),
+//                                    datasourceId: parseInt(treeObj.tree('getRoot').id),
+//                                    childColumns: new Array()
+//                                };
+//
+//                                var columnObj = {
+//                                    name: nodes[i].id,
+//                                    cnName: nodes[i].attributes.comment,
+//                                    sequence: nodes[i].attributes.sequence,
+//                                    comment: nodes[i].attributes.comment,
+//                                    dataType: nodes[i].attributes.dataType,
+//                                    dataLength: nodes[i].attributes.dataLength
+//                                };
+//
+//                                tableObj.childColumns.push(columnObj);
+//                                resultArray.push(tableObj);
+//                            } else {
+//                                var columnObj = {
+//                                    name: nodes[i].id,
+//                                    cnName: nodes[i].attributes.comment,
+//                                    sequence: nodes[i].attributes.sequence,
+//                                    comment: nodes[i].attributes.comment,
+//                                    dataType: nodes[i].attributes.dataType,
+//                                    dataLength: nodes[i].attributes.dataLength
+//                                };
+//
+//                                resultArray[foundIndex].childColumns.push(columnObj);
+//                            }
+//                        }
+//                    }
+//
+//                    $.ajax({
+//                        url: "/sdtBdiBusi/add",
+//                        async: false,
+//                        cache: false,
+//                        type: 'POST',
+//                        data: JSON.stringify(resultArray),
+//                        dataType: 'json',
+//                        error: function (data) {
+//                            $.messager.alert('提示消息', data.message);
+//                        },
+//                        success: function (data) {
+//                            if (data.success) {
+//                                //成功选择后，进行业务表和业务表配置
+//                                addBdiBusiDetailDialog(bdiId);
+//                            }
+//                        }
+//                    });
 
                 }
             }, {
@@ -359,8 +405,98 @@
         });
     }
 
+    var found = undefined;
+    //字段选择Dialog
+    function columnSelectDialog() {
+        $('<div></div>').dialog({
+            id: 'columnSelectDialog',
+            title: '选择表字段',
+            width: '1000px',
+            height: '500px',
+            closed: false,
+            cache: false,
+            draggable: false,
+            resizable: false,
+            href: '/sdtBdiBusiConfig/columnSelectTreePage',
+            modal: true,
+            onLoad: function () {
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '下一步',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    if (found == undefined) {
+                        //判断sdt_bdi_busi_fields表中是否有配置过数据，如果没有要选择表字段。
+                        $.ajax({
+                            url: "/sdtBdiBusiFields/checkData?bdiId=" + bdiId,
+                            async: true,
+                            cache: false,
+                            type: 'GET',
+                            dataType: 'json',
+                            error: function (data) {
+                                $.messager.alert('提示消息', data.message);
+                            },
+                            success: function (data) {
+                                if (!data.success || data.count < 1) {
+                                    $.messager.alert('提示信息', '未选择过表字段，请选择一个表字段!', 'info');
+                                    found = data.success;
+                                }
+                            }
+                        });
+                    }
+
+                    if (found) {
+                        var selectNode = $('#columnSelectTree').tree('getSelected');
+                        if (selectNode == undefined || selectNode == null) {
+                            $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                            return;
+                        }
+
+                        if ((selectNode.attributes.isTable == false && selectNode.attributes.tableName == '') || selectNode.attributes.isTable) {
+                            $.messager.alert('提示信息', '只能选择表字段!', 'info');
+                            return;
+                        }
+
+                        //往 sdt_bdi_busi_fields 表插入数据。
+                        $.ajax({
+                            url: "/sdtBdiBusiFields/addFields/add?bdiId=" + bdiId + "&name=" + selectNode.id,
+                            async: true,
+                            cache: false,
+                            data: {
+                                bdiId: bdiId,
+                                name: selectNode.id,
+                                dataType: selectNode.attributes.dataType,
+                                dataLength: selectNode.attributes.dataLength
+                            },
+                            type: 'POST',
+                            dataType: 'json',
+                            error: function (data) {
+                            },
+                            success: function (data) {
+                            }
+                        });
+
+                        found = undefined;
+                        $("#columnSelectDialog").dialog('destroy');
+                        addSdtBdiFieldsCfgDialog();
+                    }
+                }
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $("#columnSelectDialog").dialog('destroy');
+                }
+            }]
+        });
+    }
+
     //指标结果表字段配置Dialog
     function addSdtBdiFieldsCfgDialog() {
+        //表字段配置
         $('<div></div>').dialog({
             id: 'addSdtBdiFieldsCfgDialog',
             title: '指标结果表字段配置',
@@ -378,14 +514,9 @@
             onClose: function () {
                 $(this).dialog('destroy');
             },
-            buttons: [/*{
-             text: '保存',
-             iconCls: 'icon-ok',
-             handler: function () {
-             }
-             }, */{
-                text: '取消',
-                iconCls: 'icon-cancel',
+            buttons: [{
+                text: '关闭',
+                iconCls: 'icon-close',
                 handler: function () {
                     $("#addSdtBdiFieldsCfgDialog").dialog('destroy');
                 }
@@ -396,24 +527,25 @@
     /**
      * 业务表: sdt_bdi_busi-详细配置Dialog
      */
-    function addBdiBusiDetailDialog(bdiId) {
+    function addBdiBusiDetailDialog() {
         $('<div></div>').dialog({
             id: 'addBdiBusiDetailDialog',
             title: '指标业务表详细配置',
-            width: '700px',
-            height: '380px',
+            width: '1000px',
+            height: '500px',
             closed: false,
             cache: false,
             draggable: false,
             resizable: false,
-            href: '/sdtBdiBusi/detailConfigPage?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
+//            href: '/sdtBdiBusi/detailConfigPage?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId,
+            href: '/sdtBdiBusi/index?bdiId=' + bdiId,
             modal: true,
             onLoad: function () {
             },
             onClose: function () {
                 $(this).dialog('destroy');
             },
-            buttons: [{
+            buttons: [/*{
                 text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
@@ -437,12 +569,12 @@
                             if (data.success) {
                                 $("#addBdiBusiDetailDialog").dialog('destroy');
                                 //sdt_bdi_busi_config-详细配置Dialog
-                                addBdiBusiConfigDetailDialog(bdiId);
+                                addBdiBusiConfigDetailDialog();
                             }
                         }
                     });
                 }
-            }, {
+            }, */{
                 text: '取消',
                 iconCls: 'icon-cancel',
                 handler: function () {
@@ -455,14 +587,14 @@
     /**
      * 业务表: sdt_bdi_busi_config-详细配置Dialog
      */
-    function addBdiBusiConfigDetailDialog(bdiId) {
-        //TODO:
+    function addBdiBusiConfigDetailDialog() {
         $('<div></div>').dialog({
             id: 'addBdiBusiConfigDetailDialog',
             title: '业务配置表详细配置',
             width: '1000px',
             height: '500px',
             closed: false,
+            closable: false,
             cache: false,
             draggable: false,
             resizable: false,
@@ -474,23 +606,34 @@
                 $(this).dialog('destroy');
             },
             buttons: [{
-                text: '下一步',
+                text: '配置完成',
                 iconCls: 'icon-ok',
                 handler: function () {
-                }
-            }, {
-                text: '取消',
-                iconCls: 'icon-cancel',
-                handler: function () {
-                    $("#addBdiBusiConfigDetailDialog").dialog('destroy');
+                    //同步sdt_bdi_busi_config表中的内容到sdt_bdi_busi_fields
+                    $.ajax({
+                        url: "/sdtBdiBusiConfig/content/synchronize?bdiId=" + bdiId,
+                        async: false,
+                        cache: false,
+                        type: 'POST',
+                        data: {
+                            bdiId: bdiId
+                        },
+                        dataType: 'json',
+                        error: function (data) {
+                            $.messager.alert('提示消息', data.message);
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                $.messager.alert('提示消息', '配置完成');
+                                $("#addBdiBusiConfigDetailDialog").dialog('destroy');
+                            }
+                        }
+                    });
                 }
             }]
         });
     }
 </script>
 
-<!--
-
 </body>
 </html>
--->

@@ -1,16 +1,7 @@
 <div id="loading"
      style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
-<!--<form id="addBdiBusiTableCfgForm" method="post">-->
-<!--
-<div style="margin:20px 0;">
-    <a href="#" class="easyui-linkbutton" onclick="getChecked()">GetChecked</a>
-</div>
--->
-<!--数据源：<input name="datasourceTree1" id="datasourceTree1"/>-->
-<!--数据源：-->
 <ul id="columnsTree"></ul>
-<!--</form>-->
 
 <script type="text/javascript">
     function show() {
@@ -28,50 +19,30 @@
     };
 
     $(function () {
+        var showLeafLevel = '{{.showLeafLevel}}';
+
         $('#columnsTree').tree({
             //获取数据URL
-            url: '/datasource/datasourceNode',
+            url: '/datasource/datasourceNode?showLeafLevel=' + showLeafLevel,
             width: '300px',
             panelHeight: '360px',
             panelMaxHeight: '450px',
             onlyLeafCheck: true,
+            lines: true,
             multiple: true,
             checkbox: function (node) {
                 return node.attributes.isChecked;
             },
             //选择树节点触发事件
             onSelect: function (node) {
-//                debugger;
-//                var tree = $(this).tree;//返回树对象
-//                var isLeaf = tree('isLeaf', node.target);//选中的节点是否为叶子节点,如果不是叶子节点,清除选中
-//
-//                if (!isLeaf) {
-//                    $('#columnsTree').combotree('clear');//清除选中
-//                } else {
-//                    addTag(editingType, node.id);
-//                }
             },
             onBeforeExpand: function (node) {
                 debugger;
-                var paramStr = "?param=" + node.text + "&ip=" + node.attributes.ip + "&port=" + node.attributes.port +
-                        "&username=" + node.attributes.username + "&password=" + node.attributes.password + "&tableName=" + node.attributes.tableName + "&schemaName=" + node.attributes.schemaName;
+                var paramStr = "?param=" + node.id + "&ip=" + node.attributes.ip + "&port=" + node.attributes.port +
+                        "&username=" + node.attributes.username + "&password=" + node.attributes.password + "&tableName=" + node.attributes.tableName + "&schemaName=" + node.attributes.schemaName +
+                        "&showLeafLevel=" + showLeafLevel;
                 $('#columnsTree').tree("options").url = node.attributes.url + paramStr;
-            }//,
-//            onCheck: function (node, checked) {
-//                if (checked) {
-//                    var parentNode = $("#columnsTree").tree('getParent', node.target);
-//                    if (parentNode != null) {
-//                        $("#columnsTree").tree('check', parentNode.target);
-//                    }
-//                } else {
-//                    var childNode = $("#columnsTree").tree('getChildren', node.target);
-//                    if (childNode.length > 0) {
-//                        for (var i = 0; i < childNode.length; i++) {
-//                            $("#columnsTree").tree('uncheck', childNode[i].target);
-//                        }
-//                    }
-//                }
-//            }
+            }
         });
     });
 </script>

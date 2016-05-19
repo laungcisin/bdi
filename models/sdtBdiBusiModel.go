@@ -28,6 +28,17 @@ type SdtBdiBusi struct {
 	DatasourceName string
 }
 
+type BusiTreeAttributes struct {
+	BusiId       int                 `form:"busiId"`
+	Params       string                 `form:"params"`
+	ProcessType  string                 `form:"processType"`
+	Name         string                 `form:"name"`
+	CnName       string                 `form:"cnName"`
+	BdiId        int                    `form:"bdiId"`
+	DatasourceId int                    `form:"datasourceId"`
+	ChildColumns []ColumnTreeAttributes `form:"childColumns"`
+}
+
 func (u *SdtBdiBusi) TableName() string {
 	return "sdt_bdi_busi"
 }
@@ -119,23 +130,83 @@ func (this *SdtBdiBusi) Add() error {
 	return nil
 }
 
-func (this *SdtBdiBusi) Update() error {
+func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes) error {
+	var err error
+	var latestBusiId int64
 	o := orm.NewOrm()
 	o.Begin()
 
-	var updateSql = "update sdt_bdi_busi " +
-		" set  " +
-		" datasource_id = ?, " +
-		" name = ?, " +
+	var updateSql = "update sdt_bdi_busi set  " +
+		" process_type = ?, " +
 		" user_code = ?, " +
 		" edit_time = ? " +
 		" where id = ?"
 
-	_, err := o.Raw(updateSql, this.DatasourceId, this.Name, this.UserCode, time.Now(), this.Id).Exec()
-	if err != nil {
-		o.Rollback()
-		return err
+	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, cn_name, create_time) values (?, ?, ?, ?, ?)"
+	var insertBusiConfigSql =  " insert into sdt_bdi_busi_config(busi_id, cn_name, process_column, process_data_type, process_data_length, user_code, create_time) " +
+	" values(?, ?, ?, ?, ?, ?, ?) "
+
+	for _, tableValue := range busiTreeAttributes {
+		_, err = o.Raw(updateSql, tableValue.ProcessType, 0, time.Now(), tableValue.BusiId).Exec()
+		if err != nil {
+			fmt.Println(err)
+			o.Rollback()
+			return err
+		}
+
+		var sdtBdiBusiSlice []SdtBdiBusi = make([]SdtBdiBusi, 0)
+		var querySql = " select * from sdt_bdi_busi b where b.bdi_id = ? and b.name = ? "
+		_, err = o.Raw(querySql, tableValue.BdiId, tableValue.Name).QueryRows(&sdtBdiBusiSlice)
+		if err == nil {
+			if len(sdtBdiBusiSlice) > 0 { //有记录
+				latestBusiId = int64(tableValue.BusiId)
+			}else {
+				tableResult, err := o.Raw(insertBusiSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, tableValue.CnName, time.Now()).Exec()
+				if err != nil {
+					fmt.Println(err)
+					o.Rollback()
+					return err
+				}
+
+				latestBusiId, err = tableResult.LastInsertId()
+				if err != nil {
+					fmt.Println(err)
+					o.Rollback()
+					return err
+				}
+
+			}
+		} else {
+			fmt.Println(err)
+			o.Rollback()
+			return err
+		}
+
+		for _, fieldValue := range tableValue.ChildColumns {
+			var querySql = " select count(*) as counts from sdt_bdi_busi_config config where config.busi_id = ? and config.process_column = lower(?) "
+			num := new(int)
+			err := o.Raw(querySql, latestBusiId, tableValue.Name).QueryRow(&num)
+			if err == nil {
+				if *num > 0 {
+					continue
+				}
+			} else {
+				fmt.Println(err)
+				o.Rollback()
+				return err
+			}
+
+			_, err = o.Raw(insertBusiConfigSql, latestBusiId, fieldValue.Comment, fieldValue.Name, fieldValue.DataType,
+				fieldValue.DataLength, 0, time.Now()).Exec()
+
+			if err != nil {
+				fmt.Println(err)
+				o.Rollback()
+				return err
+			}
+		}
 	}
+
 	o.Commit()
 	return nil
 }
@@ -145,32 +216,14 @@ func (this *SdtBdiBusi) AddBusiAndAddBusiConfig(tableTreeAttributes []TableTreeA
 	o.Begin()
 
 	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, cn_name, create_time) values (?, ?, ?, ?, ?)"
-	var insertBusiConfigSql =  " insert into sdt_bdi_busi_config(busi_id, cn_name, process_column, process_data_type, process_data_length, user_code, create_time) " +
-	" values(?, ?, ?, ?, ?, ?, ?) "
 
-	var sequenceIndex int = 1
 	for _, tableValue := range tableTreeAttributes {
-		//先看是否有重复记录，如果有，先删除记录
-		var sdtBdiBusiSlice []SdtBdiBusi = make([]SdtBdiBusi, 0)
-		var querySql = " select * from sdt_bdi_busi b where b.bdi_id = ? and b.name = ? "
-		_, err := o.Raw(querySql, tableValue.BdiId, tableValue.Name).QueryRows(&sdtBdiBusiSlice)
+		var querySql = " select count(*) as counts from sdt_bdi_busi b where b.bdi_id = ? and b.name = ? "
+		num := new(int)
+		err := o.Raw(querySql, tableValue.BdiId, tableValue.Name).QueryRow(&num)
 		if err == nil {
-			if len(sdtBdiBusiSlice) > 0 { //如果有记录，先删除记录
-				for _, tempTableValue := range sdtBdiBusiSlice {
-					_, err = o.Raw(" delete from sdt_bdi_busi where bdi_id = ? and name = ? ", tempTableValue.BdiId, tempTableValue.Name).Exec()
-					if err != nil {
-						fmt.Println(err)
-						o.Rollback()
-						return err
-					}
-
-					_, err = o.Raw(" delete from sdt_bdi_busi_config where busi_id = ? ", tempTableValue.Id).Exec()
-					if err != nil {
-						fmt.Println(err)
-						o.Rollback()
-						return err
-					}
-				}
+			if *num > 0 {
+				continue
 			}
 		} else {
 			fmt.Println(err)
@@ -178,30 +231,11 @@ func (this *SdtBdiBusi) AddBusiAndAddBusiConfig(tableTreeAttributes []TableTreeA
 			return err
 		}
 
-		tableResult, err := o.Raw(insertBusiSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, tableValue.CnName, time.Now()).Exec()
+		_, err = o.Raw(insertBusiSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, tableValue.CnName, time.Now()).Exec()
 		if err != nil {
 			fmt.Println(err)
 			o.Rollback()
 			return err
-		}
-
-		lastInsertId, err := tableResult.LastInsertId()
-		if err != nil {
-			fmt.Println(err)
-			o.Rollback()
-			return err
-		}
-
-		for _, fieldValue := range tableValue.ChildColumns {
-			_, err = o.Raw(insertBusiConfigSql, lastInsertId, fieldValue.Comment, fieldValue.Name, fieldValue.DataType,
-				fieldValue.DataLength, 0, time.Now()).Exec()
-
-			if err != nil {
-				fmt.Println(err)
-				o.Rollback()
-				return err
-			}
-			sequenceIndex = sequenceIndex + 1
 		}
 	}
 

@@ -124,6 +124,34 @@ func (this *SdtBdiBusiFields) Add() error {
 }
 
 func (this *SdtBdiBusiFields) AddFields() error {
+	var err error
+	o := orm.NewOrm()
+	o.Begin()
+
+	num := new(int)
+	var selectMaxSequence = " select max(sequence) from sdt_bdi_busi_fields where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) "
+	err = o.Raw(selectMaxSequence, this.BdiId).QueryRow(&num)
+	if err != nil {
+		o.Rollback()
+		return err
+	}
+
+
+
+	//var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, process_type, params, user_code, create_time) " +
+	//"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+
+	//_, err = o.Raw(insertFieldSql, busiId, this.Name, *num + 1, "", "", "", "const",this.Params, 0, time.Now()).Exec()
+	//if err != nil {
+	//	o.Rollback()
+	//	return err
+	//}
+	//
+	//o.Commit()
+	return nil
+}
+
+func (this *SdtBdiBusiFields) AddConstFields() error {
 	o := orm.NewOrm()
 	o.Begin()
 
@@ -164,10 +192,10 @@ func (this *SdtBdiBusiFields) AddFields() error {
 		return err
 	}
 
-	var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, params, user_code, create_time) " +
-		"values (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, process_type, params, user_code, create_time) " +
+		"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-	_, err = o.Raw(insertFieldSql, busiId, this.Name, *num + 1, "", "", "", this.Params, 0, time.Now()).Exec()
+	_, err = o.Raw(insertFieldSql, busiId, this.Name, *num + 1, "", "", "", "const",this.Params, 0, time.Now()).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -386,4 +414,27 @@ func (this *SdtBdiBusiFields) RowMoveDown() error {
 
 	o.Commit()
 	return nil
+}
+
+func (this *SdtBdiBusiFields) CheckData()(int, error) {
+	var err error
+	o := orm.NewOrm()
+
+	var querySql = " select " +
+		"	count(*) as counts " +
+		" from " +
+		"	sdt_bdi_busi_fields f, " +
+		"	sdt_bdi_busi b " +
+		" where " +
+		"	b.bdi_id = ? " +
+		" and b.id = f.busi_id " +
+		" and f.is_process = 0 "
+
+	num := new(int)
+	err = o.Raw(querySql, this.BdiId).QueryRow(num)
+	if err != nil {
+		return 0, nil
+	}
+
+	return *num, err
 }
