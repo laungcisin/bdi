@@ -136,6 +136,7 @@ func (this *SdtBdiBusiConfig)Synchronize() error {
 	var insertString =
 		" insert into sdt_bdi_busi_fields ( " +
 		"	busi_id, " +
+		"       bdi_id, " +
 		"	name, " +
 		"	sequence, " +
 		"       is_process, " +
@@ -146,6 +147,7 @@ func (this *SdtBdiBusiConfig)Synchronize() error {
 		" ) " +
 		" select t.* from ( " +
 		" select cfg.busi_id as busi_id, " +
+		"       busi.bdi_id, " +
 		"	cfg.as_name as name, " +
 		"	1 as sequence, " +
 		"	1 as is_process, " +

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/demo.css">
+
+    <link rel="stylesheet" type="text/css" href="/static/css/tagEditor/jquery.tag-editor.css">
+</head>
+<body>
+
+<table id="sdtBdiDataGrid"></table>
+
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/static/js/easyui/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/static/js/easyui/utils/utils.js"></script>
+
+<script type="text/javascript" src="/static/js/caret/jquery.caret.min.js"></script>
+<script type="text/javascript" src="/static/js/tagEditor/jquery.tag-editor.js"></script>
+
+<script type="text/javascript">
+    var checkedIndex = undefined;
+
+    $(function () {
+        $('#sdtBdiDataGrid').datagrid({
+            method: 'GET',
+            selectOnCheck: true,
+            checkOnSelect: true,
+            singleSelect: true,
+            autoRowHeight: true,
+            pageNumber: 1,
+            pageSize: 10,
+            pageList: [10, 30, 50],
+            idField: 'Id',
+            pagination: true,
+            url: '/sdtBdi/all',
+            height: '390px',
+            toolbar: [],
+            columns: [[
+                {
+                    field: 'sdt_bdi_busi_rule_oid',
+                    title: '选择',
+                    width: '50px',
+                    formatter: function (value, row, index) {
+                        return '<input type="radio" class="selectSdtBdiBusiRuleRadioClass" name="selectSdtBdiBusiRuleRadioClass" id="selectSdtBdiBusiRuleRadioClass' + index + '" value="' + row.Id + '" />';
+                    }
+                },
+                {
+                    field: 'Id', title: '指标Id', width: '50px', align: 'center', hidden: true
+                },
+                {
+                    field: 'TypeName', title: '指标类型', width: '130px', align: 'center'
+                },
+                {
+                    field: 'BdiName', title: '指标名称', width: '150px', align: 'center'
+                },
+                {
+                    field: 'Remarks', title: '备注', width: '150px', align: 'center'
+                },
+                {
+                    field: 'BdiSetNames', title: '所属指标集', width: '120px', align: 'center'
+                },
+                {
+                    field: 'sdt_bdi_opt1', title: '操作', width: '150px', align: 'center',
+                    formatter: function (value, rowData, rowIndex) {
+                        return '<a href="#" class="stdBdiBusiRuleClass" onclick="addSdtBdiBusiRuleDialog(' + rowData.Id + ', ' + rowData.BdiTypeId + ')">业务规则配置</a>';
+                    }
+                }
+            ]],
+            onLoadSuccess: function (data) {
+                $('.stdBdiBusiRuleClass').linkbutton({plain: true, iconCls: 'icon-add'});
+            },
+            onClickRow: function (index, row) {
+                //加载完毕后获取所有的checkbox遍历
+                var radio = $(".selectSdtBdiBusiRuleRadioClass")[index].disabled;
+                //如果当前的单选框不可选，则不让其选中
+                if (radio != true) {
+                    //让点击的行单选按钮选中
+                    $(".selectSdtBdiBusiRuleRadioClass")[index].checked = true;
+                }
+                else {
+                    $(".selectSdtBdiBusiRuleRadioClass")[index].checked = false;
+                }
+            },
+            onDblClickRow: function (index, row) {
+                //加载完毕后获取所有的checkbox遍历
+                var radio = $(".selectSdtBdiBusiRuleRadioClass")[index].disabled;
+                //如果当前的单选框不可选，则不让其选中
+                if (radio != true) {
+                    //让点击的行单选按钮选中
+                    $(".selectSdtBdiBusiRuleRadioClass")[index].checked = true;
+                }
+                else {
+                    $(".selectSdtBdiBusiRuleRadioClass")[index].checked = false;
+                }
+            }
+        });
+    });
+
+    /**
+     * 规则配置-Dialog。
+     */
+    function addSdtBdiBusiRuleDialog(bdiId, bdiTypeId) {
+        var tab = self.parent.$('#tabs').tabs('getSelected'); //获得当前tab
+        var href = '/sdtBdiResult/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId;
+
+        $('<div></div>').dialog({
+            id: 'selectBusiFieldsDialog',
+            title: '选择业务字段',
+            width: '800px',
+            height: '450px',
+            closed: false,
+            cache: false,
+            href: '/sdtBdiBusiRule/columnSelectTreePage',
+            draggable: false,
+            resizable: false,
+            modal: true,
+            onLoad: function () {
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '下一步',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    $("#updateBdiSetDialog").dialog('destroy');
+                    self.parent.$('#tabs').tabs('update', {
+                        tab: tab,
+                        options: {
+                            content: '<iframe scrolling="auto" frameborder="0" src="' + href + '" style="width:100%;height:100%;"></iframe>',
+                            closable: true,
+                            selected: true
+                        }
+                    });
+                }
+            }]
+        });
+    }
+</script>
+
+</body>
+</html>

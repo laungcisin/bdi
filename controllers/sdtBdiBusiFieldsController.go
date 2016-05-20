@@ -390,5 +390,7 @@ func (this *SdtBdiBusiFieldsController) CheckData() {
 
 // 选择字段
 func (this *SdtBdiBusiFieldsController) ColumnSelectTreePage() {
+	bdiId, _ := this.GetInt("bdiId")
+	this.Data["bdiId"] = bdiId
 	this.TplName = "sdtBdiBusiFields/columnTreeDialog.html"
 }
