@@ -22,9 +22,9 @@ type SdtBdiBusiRule struct {
 	EditTime   time.Time `form:"editTime"`   //修改时间
 
 	//以下字段为datagrid展示
-	BdiName string
+	BdiName          string
 	OperatorTypeName string
-	OperatorName string
+	OperatorName     string
 }
 
 func (u *SdtBdiBusiRule) TableName() string {
@@ -38,8 +38,7 @@ func (this *SdtBdiBusiRule) GetAllSdtBdiBusiRule(rows int, page int) ([]SdtBdiBu
 	o := orm.NewOrm()
 	var sdtBdiBusiRuleSlice []SdtBdiBusiRule = make([]SdtBdiBusiRule, 0)
 
-	var querySql =
-		"select " +
+	var querySql = "select " +
 		"	t.*, t1.process_name as operator_type_name, " +
 		"	t2.process_name as operator_name " +
 		"from " +
@@ -60,7 +59,6 @@ func (this *SdtBdiBusiRule) GetAllSdtBdiBusiRule(rows int, page int) ([]SdtBdiBu
 		"left join sdt_bdi_process_type t2 on t2.main_class = 3 " +
 		"and t2.sub_class = t.operator_type " +
 		"and t2.process_type = t.operator"
-
 
 	_, err := o.Raw(querySql, this.BdiId, (page-1)*rows, page*rows).QueryRows(&sdtBdiBusiRuleSlice)
 	if err != nil {

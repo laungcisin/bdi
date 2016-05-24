@@ -29,7 +29,7 @@
         <tr>
             <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">表处理字段：</th>
             <td>
-                <ul id="busiColumnsTree" style="height: 200px;"></ul>
+                <ul id="busiColumnsTree"></ul>
             </td>
         </tr>
     </table>
@@ -65,7 +65,7 @@
 
         //busi处理类型
         $('#processType').combobox({
-            url: '/sdtBdiBusi/processType',
+            url: '/sdt/processTypeForListAll',
             valueField: 'id',
             textField: 'text',
             panelHeight: 'auto',
@@ -112,6 +112,7 @@
             },
             //选择树节点触发事件
             onSelect: function (node) {
+                $('#busiColumnsTree').tree('check', node.target);
             },
             onBeforeExpand: function (node) {
                 debugger;

@@ -33,6 +33,7 @@
             },
             //选择树节点触发事件
             onSelect: function (node) {
+                $('#columnSelectTree').tree('check', node.target);
             },
             onBeforeExpand: function (node) {
                 debugger;

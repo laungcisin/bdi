@@ -485,7 +485,6 @@
                     }
                     */
 
-                    debugger;
                     var nodes = $('#columnSelectTree').tree('getChecked');
                     if(nodes != null) {
                         var resultArray = new Array();
@@ -535,6 +534,7 @@
             width: '1000px',
             height: '500px',
             closed: false,
+            closable: false,
             cache: false,
             draggable: false,
             resizable: false,
@@ -550,7 +550,26 @@
                 text: '配置完成',
                 iconCls: 'icon-close',
                 handler: function () {
-                    $("#addSdtBdiFieldsCfgDialog").dialog('destroy');
+                    //同步 sdt_bdi_busi_fields 表中的内容到 sdt_bdi_result_fields
+                    $.ajax({
+                        url: "/sdtBdiBusiFields/content/synchronize?bdiId=" + bdiId,
+                        async: false,
+                        cache: false,
+                        type: 'POST',
+                        data: {
+                            bdiId: bdiId
+                        },
+                        dataType: 'json',
+                        error: function (data) {
+                            $.messager.alert('提示消息', data.message);
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                $.messager.alert('提示消息', '配置完成');
+                                $("#addSdtBdiFieldsCfgDialog").dialog('destroy');
+                            }
+                        }
+                    });
                 }
             }]
         });

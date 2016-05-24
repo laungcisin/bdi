@@ -65,7 +65,7 @@
 
         //运算符类型
         $('#operatorType').combobox({
-            url: '/sdt/processTypeForList?mainClass=4&subClass=1',
+            url: '/sdt/processTypeForListByCondition?mainClass=4&subClass=1',
             valueField: 'id',
             textField: 'text',
             panelHeight: 'auto',
@@ -76,7 +76,7 @@
             value: '{{.sdtBdiBusiRule.OperatorType}}',
             onSelect: function (record) {
                 $('#operator').combobox('clear');
-                var url = "/sdt/processTypeForList?mainClass=3&subClass=" + record.id;
+                var url = "/sdt/processTypeForListByCondition?mainClass=3&subClass=" + record.id;
                 $('#operator').combobox('reload', url);
             }
         });
@@ -86,7 +86,7 @@
         if(operatorTypeValue == undefined || operatorTypeValue == '') {
             operatorUrl = '';
         }else {
-            operatorUrl = '/sdt/processTypeForList?mainClass=3&subClass=' + operatorTypeValue;
+            operatorUrl = '/sdt/processTypeForListByCondition?mainClass=3&subClass=' + operatorTypeValue;
         }
 
         //运算符

@@ -229,10 +229,10 @@ func (this *SdtBdiBusiFields) AddConstFields() error {
 		maxSequence = *num
 	}
 
-	var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, process_type, params, user_code, create_time) " +
-		"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, bdi_id, name, sequence, comment, data_type, data_length, process_type, params, user_code, create_time) " +
+		"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-	_, err = o.Raw(insertFieldSql, busiId, this.Name, maxSequence+1, this.Comment, this.DataType, this.DataLength, "const", this.Params, 0, time.Now()).Exec()
+	_, err = o.Raw(insertFieldSql, busiId, this.BdiId, this.Name, maxSequence+1, this.Comment, this.DataType, this.DataLength, "const", this.Params, 0, time.Now()).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -285,7 +285,7 @@ func (this *SdtBdiBusiFields) UpdateFields() error {
 }
 
 func (this *SdtBdiBusiFields) AddBusiAndAddField(tableTreeAttributes []TableTreeAttributes) error {
-	o := orm.NewOrm()``
+	o := orm.NewOrm()
 	o.Begin()
 
 	//num := new(int)
@@ -370,6 +370,7 @@ func (this *SdtBdiBusiFields) AddBusiAndAddField(tableTreeAttributes []TableTree
 
 //行上移
 func (this *SdtBdiBusiFields) RowMoveUp() error {
+	fmt.Println("SdtBdiBusiFields: ", this.BdiId, this.Sequence)
 	var err error
 	o := orm.NewOrm()
 	o.Begin()
@@ -382,7 +383,7 @@ func (this *SdtBdiBusiFields) RowMoveUp() error {
 	incFieldsId := new(int)
 	err = o.Raw(incFieldsIdSql, this.BdiId, this.Sequence-1).QueryRow(incFieldsId)
 	if err != nil {
-		fmt.Println("err: ", err)
+		fmt.Println("err1: ", err)
 		o.Rollback()
 		return err
 	}
@@ -392,7 +393,7 @@ func (this *SdtBdiBusiFields) RowMoveUp() error {
 	//1. 更新下移行记录的 Sequence
 	_, err = o.Raw(updateSql, this.Sequence, time.Now(), incFieldsId).Exec()
 	if err != nil {
-		fmt.Println("err: ", err)
+		fmt.Println("err2: ", err)
 		o.Rollback()
 		return err
 	}
@@ -400,7 +401,7 @@ func (this *SdtBdiBusiFields) RowMoveUp() error {
 	//2. 更新上移行记录的 Sequence
 	_, err = o.Raw(updateSql, this.Sequence-1, time.Now(), this.Id).Exec()
 	if err != nil {
-		fmt.Println("err: ", err)
+		fmt.Println("err3: ", err)
 		o.Rollback()
 		return err
 	}
@@ -471,4 +472,47 @@ func (this *SdtBdiBusiFields) CheckData() (int, error) {
 	}
 
 	return *num, err
+}
+
+
+func (this *SdtBdiBusiFields)Synchronize() error {
+	var err error
+	o := orm.NewOrm()
+	o.Begin()
+
+	var insertString =
+		" insert into sdt_bdi_result_fields ( " +
+		"	result_id, " +
+		"	name, " +
+		"	sequence, " +
+		"	comment, " +
+		"	data_type, " +
+		"	data_length, " +
+		"	create_time " +
+		" )select " +
+		"	r.id as result_id, " +
+		"	lower(f.name) as name, " +
+		"	f.sequence, " +
+		"	f. comment, " +
+		"	f.data_type, " +
+		"	f.data_length, " +
+		"	now() as create_time " +
+		" from " +
+		"	sdt_bdi_busi_fields f, " +
+		"	sdt_bdi b, " +
+		"	sdt_bdi_result r " +
+		" where " +
+		"	f.bdi_id = ? " +
+		" and f.bdi_id = b.id " +
+		" and r.bdi_id = b.id order by f.sequence "
+	_, err = o.Raw(insertString, this.BdiId).Exec()
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("更新数据出错！")
+		o.Rollback()
+		return err
+	}
+
+	o.Commit()
+	return nil
 }

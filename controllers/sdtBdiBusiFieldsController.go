@@ -428,3 +428,36 @@ func (this *SdtBdiBusiFieldsController) SdtBdiBusiFieldsForList() {
 	this.ServeJSON()
 	return
 }
+
+//同步表信息
+func (this *SdtBdiBusiFieldsController) Synchronize() {
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiBusiFields := new(models.SdtBdiBusiFields)
+	err := this.ParseForm(sdtBdiBusiFields)
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "解析参数出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	err = sdtBdiBusiFields.Synchronize()
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "数据更新出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据更新成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
