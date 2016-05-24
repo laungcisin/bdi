@@ -10,24 +10,24 @@ import (
 )
 
 type SdtBdiBusiFields struct {
-	Id         int       `form:"id"`         //主键
-	BusiId     int       `form:"busiId"`     //业务表ID
-	Name       string    `form:"name"`       //字段名称
-	Sequence   int       `form:"sequence"`   //字段序号
-	Comment    string    `form:"comment"`    //字段注释
-	DataType   string    `form:"dataType"`   //字段类型
-	DataLength string    `form:"dataLength"` //字段长度
-	IsProcess  int       `form:"isProcess"`  //是否经过处理
+	Id          int       `form:"id"`          //主键
+	BusiId      int       `form:"busiId"`      //业务表ID
+	Name        string    `form:"name"`        //字段名称
+	Sequence    int       `form:"sequence"`    //字段序号
+	Comment     string    `form:"comment"`     //字段注释
+	DataType    string    `form:"dataType"`    //字段类型
+	DataLength  string    `form:"dataLength"`  //字段长度
+	IsProcess   int       `form:"isProcess"`   //是否经过处理
 	ProcessType string    `form:"processType"` //处理类型
-	Params     string    `form:"params"`     //参数
-	UserCode   string    `form:"userCode"`   //用户编码
-	CreateTime time.Time `form:"createTime"` //创建时间
-	EditTime   time.Time `form:"editTime"`   //更新时间
+	Params      string    `form:"params"`      //参数
+	UserCode    string    `form:"userCode"`    //用户编码
+	CreateTime  time.Time `form:"createTime"`  //创建时间
+	EditTime    time.Time `form:"editTime"`    //更新时间
 
 	//以下字段为datagrid展示
 	BusiName string
-	BdiId int `form:"bdiId"`
-	BdiName string
+	BdiId    int `form:"bdiId"`
+	BdiName  string
 }
 
 func (u *SdtBdiBusiFields) TableName() string {
@@ -35,13 +35,12 @@ func (u *SdtBdiBusiFields) TableName() string {
 }
 
 /**
-*/
+ */
 func (this *SdtBdiBusiFields) GetAllSdtBdiBusiFields(rows int, page int) ([]SdtBdiBusiFields, int, error) {
 	o := orm.NewOrm()
 	var sdtBdiBusiFieldsSlice []SdtBdiBusiFields = make([]SdtBdiBusiFields, 0)
 
-	var querySql =
-		" select " +
+	var querySql = " select " +
 		"	bdi.id as bdi_id, " +
 		"	bdi.bdi_name as bdi_name, " +
 		"	busi. name as busi_name, " +
@@ -65,8 +64,7 @@ func (this *SdtBdiBusiFields) GetAllSdtBdiBusiFields(rows int, page int) ([]SdtB
 	}
 
 	num := new(int)
-	var countSql =
-		" select " +
+	var countSql = " select " +
 		" count(*) as counts " +
 		" from " +
 		"	sdt_bdi bdi, " +
@@ -87,7 +85,7 @@ func (this *SdtBdiBusiFields) GetAllSdtBdiBusiFields(rows int, page int) ([]SdtB
 }
 
 /**
-*/
+ */
 func (this *SdtBdiBusiFields) GetSdtBdiBusiById() error {
 	o := orm.NewOrm()
 	var querySql = " select * from sdt_bdi_busi_fields busi where busi.id = ? "
@@ -130,10 +128,9 @@ func (this *SdtBdiBusiFields) AddFields(sdtBdiBusiFieldsSlice []SdtBdiBusiFields
 
 	for _, v := range sdtBdiBusiFieldsSlice {
 		count := new(int)
-		var countSql =
-		" select count(*) as counts from sdt_bdi_busi_fields f where  " +
-		"	f.busi_id in (select b.bdi_id from sdt_bdi_busi b where b.bdi_id = ?) " +
-		" and f.name = ? "
+		var countSql = " select count(*) as counts from sdt_bdi_busi_fields f where  " +
+			"	f.busi_id in (select b.bdi_id from sdt_bdi_busi b where b.bdi_id = ?) " +
+			" and f.name = ? "
 		err = o.Raw(countSql, v.BdiId, v.Name).QueryRow(&count)
 		if err != nil {
 			fmt.Println(err)
@@ -145,6 +142,15 @@ func (this *SdtBdiBusiFields) AddFields(sdtBdiBusiFieldsSlice []SdtBdiBusiFields
 			continue
 		}
 
+		busiId := new(int)
+		var bdiIdQuerrySql = " select busi.id from sdt_bdi_busi busi where busi.id in (select b.bdi_id from sdt_bdi_busi b where b.bdi_id = ?) limit 1 "
+		err = o.Raw(bdiIdQuerrySql, v.BdiId).QueryRow(&busiId)
+		if err != nil {
+			fmt.Println(err)
+			o.Rollback()
+			return err
+		}
+
 		num := new(int)
 		var selectMaxSequence = " select max(sequence) from sdt_bdi_busi_fields where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) "
 		err = o.Raw(selectMaxSequence, v.BdiId).QueryRow(&num)
@@ -154,17 +160,17 @@ func (this *SdtBdiBusiFields) AddFields(sdtBdiBusiFieldsSlice []SdtBdiBusiFields
 			return err
 		}
 
-		var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, data_type, data_length, user_code, create_time) " +
-		"values (?, ?, ?, ?, ?, ?, ?)"
+		var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, bdi_id, name, sequence, data_type, data_length, user_code, create_time) " +
+			"values (?, ?, ?, ?, ?, ?, ?, ?)"
 
 		maxSequence := 0
 		if num == nil {
 			maxSequence = 0
-		}else {
+		} else {
 			maxSequence = *num
 		}
 
-		_, err = o.Raw(insertFieldSql, v.BdiId, v.Name, maxSequence + 1, v.DataType, v.DataLength, 0, time.Now()).Exec()
+		_, err = o.Raw(insertFieldSql, busiId, v.BdiId, v.Name, maxSequence+1, v.DataType, v.DataLength, 0, time.Now()).Exec()
 		if err != nil {
 			fmt.Println(err)
 			o.Rollback()
@@ -181,19 +187,18 @@ func (this *SdtBdiBusiFields) AddConstFields() error {
 	o.Begin()
 
 	//往 sdt_bdi_busi， 新增一条虚拟表记录
-	var insertSdtBdiBusiSql =
-	"insert into sdt_bdi_busi ( " +
-	"	bdi_id, " +
-	"	datasource_id, " +
-	"	name, " +
-	"	cn_name, " +
-	"	is_process, " +
-	"	process_type, " +
-	"	params, " +
-	"	user_code, " +
-	"	create_time " +
-	") " +
-	"values (?, ?, ?, ?, ?, ?, ?, ?, ?) "
+	var insertSdtBdiBusiSql = "insert into sdt_bdi_busi ( " +
+		"	bdi_id, " +
+		"	datasource_id, " +
+		"	name, " +
+		"	cn_name, " +
+		"	is_process, " +
+		"	process_type, " +
+		"	params, " +
+		"	user_code, " +
+		"	create_time " +
+		") " +
+		"values (?, ?, ?, ?, ?, ?, ?, ?, ?) "
 
 	res, err := o.Raw(insertSdtBdiBusiSql, this.BdiId, 0, "virtual_table", "虚拟表", 0, "const", "", 0, time.Now()).Exec()
 	if err != nil {
@@ -220,14 +225,14 @@ func (this *SdtBdiBusiFields) AddConstFields() error {
 	maxSequence := 0
 	if num == nil {
 		maxSequence = 0
-	}else {
+	} else {
 		maxSequence = *num
 	}
 
 	var insertFieldSql = " insert into sdt_bdi_busi_fields(busi_id, name, sequence, comment, data_type, data_length, process_type, params, user_code, create_time) " +
 		"values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-	_, err = o.Raw(insertFieldSql, busiId, this.Name, maxSequence + 1, this.Comment, this.DataType, this.DataLength, "const",this.Params, 0, time.Now()).Exec()
+	_, err = o.Raw(insertFieldSql, busiId, this.Name, maxSequence+1, this.Comment, this.DataType, this.DataLength, "const", this.Params, 0, time.Now()).Exec()
 	if err != nil {
 		o.Rollback()
 		return err
@@ -262,13 +267,12 @@ func (this *SdtBdiBusiFields) UpdateFields() error {
 	o := orm.NewOrm()
 	o.Begin()
 
-	var updateSql =
-	" update sdt_bdi_busi_fields set " +
-	" process_type = ?, " +
-	" params = ?, " +
-	" comment = ?, " +
-	" edit_time = ? " +
-	" where id = ? "
+	var updateSql = " update sdt_bdi_busi_fields set " +
+		" process_type = ?, " +
+		" params = ?, " +
+		" comment = ?, " +
+		" edit_time = ? " +
+		" where id = ? "
 
 	_, err := o.Raw(updateSql, this.ProcessType, this.Params, this.Comment, time.Now(), this.Id).Exec()
 	if err != nil {
@@ -281,8 +285,7 @@ func (this *SdtBdiBusiFields) UpdateFields() error {
 }
 
 func (this *SdtBdiBusiFields) AddBusiAndAddField(tableTreeAttributes []TableTreeAttributes) error {
-	fmt.Println("here")
-	o := orm.NewOrm()
+	o := orm.NewOrm()``
 	o.Begin()
 
 	//num := new(int)
@@ -372,13 +375,12 @@ func (this *SdtBdiBusiFields) RowMoveUp() error {
 	o.Begin()
 
 	//先查询出 sequence 减 1 的行记录id
-	var incFieldsIdSql string =
-		" select id from sdt_bdi_busi_fields  " +
+	var incFieldsIdSql string = " select id from sdt_bdi_busi_fields  " +
 		"	where busi_id in( select id from sdt_bdi_busi where bdi_id = ? )  " +
 		"	and sequence = ? limit 1"
 
 	incFieldsId := new(int)
-	err = o.Raw(incFieldsIdSql, this.BdiId, this.Sequence - 1).QueryRow(incFieldsId)
+	err = o.Raw(incFieldsIdSql, this.BdiId, this.Sequence-1).QueryRow(incFieldsId)
 	if err != nil {
 		fmt.Println("err: ", err)
 		o.Rollback()
@@ -396,7 +398,7 @@ func (this *SdtBdiBusiFields) RowMoveUp() error {
 	}
 
 	//2. 更新上移行记录的 Sequence
-	_, err = o.Raw(updateSql, this.Sequence - 1, time.Now(), this.Id).Exec()
+	_, err = o.Raw(updateSql, this.Sequence-1, time.Now(), this.Id).Exec()
 	if err != nil {
 		fmt.Println("err: ", err)
 		o.Rollback()
@@ -414,13 +416,12 @@ func (this *SdtBdiBusiFields) RowMoveDown() error {
 	o.Begin()
 
 	//先查询出 sequence 加 1 的行记录id
-	var decFieldsIdSql string =
-		" select id from sdt_bdi_busi_fields  " +
+	var decFieldsIdSql string = " select id from sdt_bdi_busi_fields  " +
 		"	where busi_id in( select id from sdt_bdi_busi where bdi_id = ? )  " +
 		"	and sequence = ? limit 1"
 	decFieldId := new(int)
 
-	err = o.Raw(decFieldsIdSql, this.BdiId, this.Sequence + 1).QueryRow(decFieldId)
+	err = o.Raw(decFieldsIdSql, this.BdiId, this.Sequence+1).QueryRow(decFieldId)
 	if err != nil {
 		fmt.Println("err: ", err)
 		o.Rollback()
@@ -430,7 +431,7 @@ func (this *SdtBdiBusiFields) RowMoveDown() error {
 	var updateSql string = " update sdt_bdi_busi_fields set sequence = ?, edit_time = ? where id = ? "
 
 	//1. 更新下移行记录的 Sequence
-	_, err = o.Raw(updateSql, this.Sequence + 1, time.Now(), this.Id).Exec()
+	_, err = o.Raw(updateSql, this.Sequence+1, time.Now(), this.Id).Exec()
 	if err != nil {
 		fmt.Println("err: ", err)
 		o.Rollback()
@@ -449,7 +450,7 @@ func (this *SdtBdiBusiFields) RowMoveDown() error {
 	return nil
 }
 
-func (this *SdtBdiBusiFields) CheckData()(int, error) {
+func (this *SdtBdiBusiFields) CheckData() (int, error) {
 	var err error
 	o := orm.NewOrm()
 

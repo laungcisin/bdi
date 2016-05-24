@@ -4,6 +4,7 @@ import (
 	"bdi/models"
 	"log"
 	"strconv"
+	"fmt"
 )
 
 type SdtBdiResultController struct {
@@ -91,6 +92,7 @@ func (this *SdtBdiResultController) Add() {
 		return
 	}
 
+	fmt.Print(sdtBdiResult)
 	err = sdtBdiResult.Add()
 	if err != nil {
 		returnData.Success = false

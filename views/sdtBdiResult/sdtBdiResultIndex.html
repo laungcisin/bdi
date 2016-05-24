@@ -156,10 +156,10 @@
                 iconCls: 'icon-ok',
                 handler: function () {
                     //提交表单
-                    $('#addBdiBusiTableCfgForm').form('submit', {
+                    $('#addSdtBdiResultForm').form('submit', {
                         url: '/sdtBdiResult/add',
                         onSubmit: function () {
-                            return $("#addBdiBusiTableCfgForm").form("validate");
+                            return $("#addSdtBdiResultForm").form("validate");
                         },
                         //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                         success: function (data) {

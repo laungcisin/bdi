@@ -1,0 +1,126 @@
+<style>
+    .tag-editor {
+        height: 100px;
+    }
+</style>
+
+<div id="busiRuleLoading"
+     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+
+<form id="addBusiRuleProcessFieldsForm" method="post">
+    <input type="hidden" id="id" name="id"/>
+    <table>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">规则名称：</th>
+            <td>
+                <input name="name" id="name"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">运算符类型：</th>
+            <td>
+                <input name="operatorType" id="operatorType"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">运算符：</th>
+            <td>
+                <input name="operator" id="operator"/>
+            </td>
+        </tr>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">参数：</th>
+            <td>
+                <input name="params" id="params"/>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+    function show() {
+        $("#busiRuleLoading").fadeOut("normal", function () {
+            $(this).remove();
+        });
+    }
+    var delayTime;
+    $.parser.onComplete = function () {
+        if (delayTime) {
+            clearTimeout(delayTime);
+        }
+
+        delayTime = setTimeout(show, 100);
+    };
+
+    $(function () {
+        $("#id").val('{{.sdtBdiBusiRule.Id}}');
+
+        //规则名称
+        $('#name').textbox({
+            editable: true,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdiBusiRule.Name}}'
+        });
+
+        //运算符类型
+        $('#operatorType').combobox({
+            url: '/sdt/processTypeForList?mainClass=4&subClass=1',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            editable: false,
+            readonly: false,
+            required: true,
+            value: '{{.sdtBdiBusiRule.OperatorType}}',
+            onSelect: function (record) {
+                $('#operator').combobox('clear');
+                var url = "/sdt/processTypeForList?mainClass=3&subClass=" + record.id;
+                $('#operator').combobox('reload', url);
+            }
+        });
+
+        var operatorUrl = '';
+        var operatorTypeValue = '{{.sdtBdiBusiRule.OperatorType}}';
+        if(operatorTypeValue == undefined || operatorTypeValue == '') {
+            operatorUrl = '';
+        }else {
+            operatorUrl = '/sdt/processTypeForList?mainClass=3&subClass=' + operatorTypeValue;
+        }
+
+        //运算符
+        $('#operator').combobox({
+            url: operatorUrl,
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            editable: false,
+            readonly: false,
+            value: '{{.sdtBdiBusiRule.Operator}}',
+            required: true
+        });
+
+        //参数
+        $('#params').tagEditor({
+            maxTags: 100,
+            maxLength: 150,
+            removeDuplicates: false,
+            sortable: false,
+            initialTags: [],
+            placeholder: '请输入参数',
+            forceLowercase: false,
+            onChange: function (field, editor, tags) {
+            },
+            beforeTagSave: function (field, editor, tags, tag, val) {
+            },
+            beforeTagDelete: function (field, editor, tags, val) {
+            },
+            onFocus: function () {
+            }
+        });
+
+        $('#params').tagEditor('addTag', '{{.sdtBdiBusiRule.Params}}');
+    });
+</script>

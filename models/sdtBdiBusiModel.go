@@ -104,7 +104,6 @@ func (this *SdtBdiBusi) GetSdtBdiBusiById() error {
 		return err
 	}
 
-	fmt.Println(this)
 	return nil
 }
 

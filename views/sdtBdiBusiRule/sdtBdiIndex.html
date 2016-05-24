@@ -105,8 +105,6 @@
      */
     function addSdtBdiBusiRuleDialog(bdiId, bdiTypeId) {
         var tab = self.parent.$('#tabs').tabs('getSelected'); //获得当前tab
-        var href = '/sdtBdiResult/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId;
-
         $('<div></div>').dialog({
             id: 'selectBusiFieldsDialog',
             title: '选择业务字段',
@@ -114,7 +112,7 @@
             height: '450px',
             closed: false,
             cache: false,
-            href: '/sdtBdiBusiRule/columnSelectTreePage',
+            href: '/sdtBdiBusiRule/columnSelectTreePage?bdiId=' + bdiId,
             draggable: false,
             resizable: false,
             modal: true,
@@ -127,14 +125,96 @@
                 text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
-                    $("#updateBdiSetDialog").dialog('destroy');
-                    self.parent.$('#tabs').tabs('update', {
-                        tab: tab,
-                        options: {
-                            content: '<iframe scrolling="auto" frameborder="0" src="' + href + '" style="width:100%;height:100%;"></iframe>',
-                            closable: true,
-                            selected: true
+                    var resultArray = new Array();
+                    var treeObj = $('#columnSelectTree');
+                    var nodes = treeObj.tree('getChecked');
+                    for (var i = 0; i < nodes.length; i++) {
+                        if (nodes[i].attributes.isTable) {//table-节点
+                            var obj = {
+                                name: nodes[i].id,
+                                cnName: nodes[i].attributes.comment,
+                                bdiId: parseInt(bdiId),
+                                datasourceId: parseInt(treeObj.tree('getRoot').id),
+                                childColumns: new Array()
+                            };
+                            resultArray.push(obj);
+                        } else {//columns-节点
+                            //寻找父节点
+                            var found = false;
+                            var foundIndex = 0;
+
+                            var parentNode = treeObj.tree('getParent', nodes[i].target);
+                            if (parentNode != null) {
+                                for (var j = 0; j < resultArray.length; j++) {
+                                    if (parentNode.id == resultArray[j].name) {
+                                        found = true;
+                                        foundIndex = j;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!found) {
+                                var tableObj = {
+                                    name: parentNode.id,
+                                    cnName: parentNode.attributes.comment,
+                                    bdiId: parseInt(bdiId),
+                                    datasourceId: parseInt(treeObj.tree('getRoot').id),
+                                    childColumns: new Array()
+                                };
+
+                                var columnObj = {
+                                    name: nodes[i].id,
+                                    cnName: nodes[i].attributes.comment,
+                                    sequence: nodes[i].attributes.sequence,
+                                    comment: nodes[i].attributes.comment,
+                                    dataType: nodes[i].attributes.dataType,
+                                    dataLength: nodes[i].attributes.dataLength
+                                };
+
+                                tableObj.childColumns.push(columnObj);
+                                resultArray.push(tableObj);
+                            } else {
+                                var columnObj = {
+                                    name: nodes[i].id,
+                                    cnName: nodes[i].attributes.comment,
+                                    sequence: nodes[i].attributes.sequence,
+                                    comment: nodes[i].attributes.comment,
+                                    dataType: nodes[i].attributes.dataType,
+                                    dataLength: nodes[i].attributes.dataLength
+                                };
+
+                                resultArray[foundIndex].childColumns.push(columnObj);
+                            }
                         }
+                    }
+
+                    var effectRow = new Object();
+                    effectRow["inserted"] = JSON.stringify(resultArray);
+                    effectRow["updated"] = $('#selectBusiFields').combobox('getValues').toString();
+                    effectRow["bdiId"] = bdiId;
+
+                    var href = '/sdtBdiBusiRule/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId;
+
+                    $.post(
+                            '/sdtBdiBusiRule/addColumn',
+                            effectRow,
+                            function (data) {
+                                if (data.success) {
+                                    $("#updateBdiSetDialog").dialog('destroy');
+                                    self.parent.$('#tabs').tabs('update', {
+                                        tab: tab,
+                                        options: {
+                                            content: '<iframe scrolling="auto" frameborder="0" src="' + href + '" style="width:100%;height:100%;"></iframe>',
+                                            closable: true,
+                                            selected: true
+                                        }
+                                    });
+                                }
+                            },
+                            "JSON"
+                    ).error(function () {
+                        $.messager.alert("提示", "提交错误了！");
                     });
                 }
             }]

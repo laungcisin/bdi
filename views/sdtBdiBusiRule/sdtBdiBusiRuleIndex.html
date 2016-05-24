@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<table id="sdtBdiDataGrid"></table>
+<table id="sdtBdiBusiRuleDataGrid"></table>
 
 <script type="text/javascript" src="/static/js/jquery.min.js"></script>
 <script type="text/javascript" src="/static/js/easyui/jquery.easyui.min.js"></script>
@@ -22,74 +22,155 @@
 <script type="text/javascript" src="/static/js/tagEditor/jquery.tag-editor.js"></script>
 
 <script type="text/javascript">
-    var checkedIndex = undefined;
+    var checkedSdtBdiBusiRuleIndex = undefined;
+    var bdiId = '{{.bdiId}}';
 
     $(function () {
-        $('#sdtBdiDataGrid').datagrid({
+        $('#sdtBdiBusiRuleDataGrid').datagrid({
             method: 'GET',
             selectOnCheck: true,
             checkOnSelect: true,
             singleSelect: true,
             autoRowHeight: true,
             pageNumber: 1,
-            pageSize: 10,
-            pageList: [10, 30, 50],
+            pageSize: 30,
+            pageList: [30, 60, 90],
             idField: 'Id',
             pagination: true,
-            url: '/sdtBdi/bdi/all',
+            url: '/sdtBdiBusiRule/all?bdiId=' + bdiId,
             height: '390px',
-            toolbar: [],
+            toolbar: [/*{
+                text: '新增字段',
+                iconCls: 'icon-add',
+                handler: function () {
+                    bdiBusiFieldsAddDialog();
+                }
+            }*/],
             columns: [[
                 {
                     field: 'sdt_bdi_busi_rule_oid',
                     title: '选择',
                     width: '50px',
                     formatter: function (value, row, index) {
-                        return '<input type="radio" class="selectSdtBdiBusiRuleRadioClass" name="selectSdtBdiBusiRuleRadioClass" id="selectSdtBdiBusiRuleRadioClass' + index + '" value="' + row.Id + '" />';
+                        return '<input type="radio" class="selectSdtBdiBusiRuleRadioClass" name="selectSdtBdiBusiRuleRadio" id="selectSdtBdiBusiRuleRadio' + index + '" value="' + row.Id + '" />';
                     }
                 },
                 {
-                    field: 'Id', title: '指标Id', width: '50px', align: 'center', hidden: true
+                    field: 'Id', title: 'Id', width: '50px', align: 'center', hidden: true
                 },
                 {
-                    field: 'TypeName', title: '指标类型', width: '130px', align: 'center'
+                    field: 'BdiId', title: 'BdiId', width: '50px', align: 'center', hidden: true
+                },
+//                {
+//                    field: 'FieldId', title: '业务字段ID', width: '150px', align: 'left', hidden: false
+//                },
+                {
+                    field: 'Name', title: '规则名称', width: '120px', align: 'left'
                 },
                 {
-                    field: 'BdiName', title: '指标名称', width: '150px', align: 'center'
+                    field: 'OperatorTypeName', title: '运算符类型', width: '220px', align: 'left'
                 },
                 {
-                    field: 'Remarks', title: '备注', width: '150px', align: 'center'
+                    field: 'OperatorName', title: '运算符', width: '130px', align: 'center'
                 },
                 {
-                    field: 'BdiSetNames', title: '所属指标集', width: '120px', align: 'center'
+                    field: 'Params', title: '参数', width: '130px', align: 'left'
                 },
                 {
-                    field: 'sdt_bdi_opt1', title: '操作', width: '150px', align: 'center',
+                    field: 'sdt_bdi_busi_rule_opt', title: '操作', width: '150px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
-                        return '<a href="#" class="stdBdiBusiRuleClass" onclick="addSdtBdiBusiRuleDialog(' + rowData.Id + ', ' + rowData.BdiTypeId + ')">业务规则配置</a>';
+                        return '<a href="#" class="sdtBdiBusiRuleClass" onclick="processRuleDialog(' + rowData.Id + ')">配置</a>';
                     }
                 }
             ]],
             onLoadSuccess: function (data) {
-                $('.stdBdiBusiRuleClass').linkbutton({plain: true, iconCls: 'icon-add'});
+                $('.sdtBdiBusiRuleClass').linkbutton({plain: true, iconCls: 'icon-add'});
+            },
+            onClickRow: function (index, row) {
+                checkedSdtBdiBusiRuleIndex = index;
+                //加载完毕后获取所有的checkbox遍历
+                var radio = $(".selectSdtBdiBusiRuleRadioClass")[index].disabled;
+                //如果当前的单选框不可选，则不让其选中
+                if (radio != true) {
+                    //让点击的行单选按钮选中
+                    $(".selectSdtBdiBusiRuleRadioClass")[index].checked = true;
+                }
+                else {
+                    $(".selectSdtBdiBusiRuleRadioClass")[index].checked = false;
+                }
+            },
+            onDblClickRow: function (index, row) {
+                checkedSdtBdiBusiRuleIndex = index;
+                //加载完毕后获取所有的checkbox遍历
+                var radio = $(".selectSdtBdiBusiRuleRadioClass")[index].disabled;
+                //如果当前的单选框不可选，则不让其选中
+                if (radio != true) {
+                    //让点击的行单选按钮选中
+                    $(".selectSdtBdiBusiRuleRadioClass")[index].checked = true;
+                }
+                else {
+                    $(".selectSdtBdiBusiRuleRadioClass")[index].checked = false;
+                }
             }
         });
     });
 
     /**
-     * 规则配置-Dialog。
+     * 配置。
      */
-    function addSdtBdiBusiRuleDialog(bdiId, bdiTypeId) {
-        var tab = self.parent.$('#tabs').tabs('getSelected'); //获得当前tab
-        var href = '/sdtBdiResult/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId;
-
-        self.parent.$('#tabs').tabs('update', {
-            tab: tab,
-            options: {
-                content: '<iframe scrolling="auto" frameborder="0" src="' + href + '" style="width:100%;height:100%;"></iframe>',
-                closable: true,
-                selected: true
-            }
+    function processRuleDialog(busiRuleId) {
+        $('<div></div>').dialog({
+            id: 'processRuleDialog',
+            title: '业务字段加工配置',
+            width: '500px',
+            height: '390px',
+            draggable: false,
+            resizable: false,
+            closed: false,
+            cache: false,
+            href: '/sdtBdiBusiRule/processFields?busiRuleId=' + busiRuleId,
+            modal: true,
+            onLoad: function () {
+                //初始化表单数据
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '保存',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    //提交表单
+                    $('#addBusiRuleProcessFieldsForm').form('submit', {
+                        url: '/sdtBdiBusiRule/processFields/update',
+                        onSubmit: function () {
+                            return $("#addBusiRuleProcessFieldsForm").form("validate");
+                        },
+                        //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
+                        success: function (data) {
+                            //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
+                            var obj = jQuery.parseJSON(data);
+                            if (obj.success) {
+                                $.messager.alert('提示消息', obj.message);
+                                $("#processRuleDialog").dialog('destroy');
+                                $('#sdtBdiBusiRuleDataGrid').datagrid('reload');
+                                $("#sdtBdiBusiRuleDataGrid").datagrid("unselectRow", checkedSdtBdiBusiRuleIndex);
+                                checkedSdtBdiBusiRuleIndex = undefined;
+                            } else {
+                                $.messager.alert('提示消息', obj.message);
+                            }
+                        }
+                    });
+                }
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $("#processRuleDialog").dialog('destroy');
+                    $("#sdtBdiBusiRuleDataGrid").datagrid("unselectRow", checkedSdtBdiBusiRuleIndex);
+                    checkedSdtBdiBusiRuleIndex = undefined;
+                }
+            }]
         });
     }
 </script>

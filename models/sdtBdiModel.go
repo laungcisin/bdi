@@ -164,7 +164,6 @@ func (this *SdtBdi) Update() error {
 	o := orm.NewOrm()
 	o.Begin()
 
-	fmt.Println("SdtBdi: ", this)
 	var deleteSdtBdiSetRelBdiSql = " delete from sdt_bdi_set_bdi where bdi_id = ? "
 	var updateSdtBdiSql = "update sdt_bdi " +
 		"set  " +

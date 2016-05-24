@@ -364,8 +364,8 @@ func (this *SdtBdiBusiFieldsController) RowMoveDown() {
 func (this *SdtBdiBusiFieldsController) CheckData() {
 	//var err error
 	returnData := struct {
-		Success bool   `json:"success"`
-		Count   int    `json:"count"`
+		Success bool `json:"success"`
+		Count   int  `json:"count"`
 	}{}
 
 	bdiId, _ := this.GetInt("bdiId")
@@ -393,4 +393,38 @@ func (this *SdtBdiBusiFieldsController) ColumnSelectTreePage() {
 	bdiId, _ := this.GetInt("bdiId")
 	this.Data["bdiId"] = bdiId
 	this.TplName = "sdtBdiBusiFields/columnTreeDialog.html"
+}
+
+func (this *SdtBdiBusiFieldsController) SdtBdiBusiFieldsForList() {
+	type DataType struct {
+		Id   int    `json:"id"`
+		Text string `json:"text"`
+	}
+
+	returnData := []DataType{}
+
+	bdiId, _ := this.GetInt("bdiId")
+	var o orm.Ormer
+	o = orm.NewOrm()
+
+	var maps []orm.Params
+	_, err := o.Raw(" select f.id as Id, f.name as Text from sdt_bdi_busi_fields f where f.bdi_id = ? and is_result_column = 1 ", bdiId).Values(&maps)
+
+	if err != nil {
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	for _, v := range maps {
+		dataType := new(DataType)
+		id, _ := strconv.Atoi(v["Id"].(string))
+		dataType.Id = id
+		dataType.Text = v["Text"].(string)
+		returnData = append(returnData, *dataType)
+	}
+
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
 }

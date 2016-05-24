@@ -263,3 +263,38 @@ func (this *SdtPublicDisplayDataController) StatDimForList() {
 	this.ServeJSON()
 	return
 }
+
+func (this *SdtPublicDisplayDataController) ProcessTypeForList() {
+	mainClass, _ := this.GetInt("mainClass")
+	subClass, _ := this.GetInt("subClass")
+
+	type DataType struct {
+		Id   string `json:"id"`
+		Text string `json:"text"`
+	}
+
+	returnData := []DataType{}
+
+	var o orm.Ormer
+	o = orm.NewOrm()
+
+	var maps []orm.Params
+	_, err := o.Raw(" select t.process_type as Id, t.process_name as Text from sdt_bdi_process_type t where t.main_class = ? and t.sub_class = ? ", mainClass, subClass).Values(&maps)
+
+	if err != nil {
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	for _, v := range maps {
+		dataType := new(DataType)
+		dataType.Id = v["Id"].(string)
+		dataType.Text = v["Text"].(string)
+		returnData = append(returnData, *dataType)
+	}
+
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}

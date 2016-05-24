@@ -93,8 +93,6 @@ func (this *SdtBdiRuleController) Add() {
 		return
 	}
 
-	fmt.Println("sdtBdiRule: ", sdtBdiRule)
-
 	err = sdtBdiRule.Add()
 	if err != nil {
 		fmt.Println("err: ", err)

@@ -36,14 +36,14 @@
 
     $(function () {
         $('#selectBusiFields').combobox({
-            url: '/sdt/sdtBdiSetForList',
+            url: '/sdtBdiBusiFields/sdtBdiBusiFieldsForList?bdiId={{.bdiId}}',
             editable: false,
-            required: true,
             method: 'get',
             valueField: 'id',
             textField: 'text',
             panelHeight: 'auto',
-            multiple: true,
+            multiple: true
+            /*,
             formatter: function (row) {
                 var opts = $(this).combobox('options');
                 return '<input type="checkbox" class="combobox-checkbox">' + row[opts.textField]
@@ -77,7 +77,11 @@
                 var el = opts.finder.getEl(this, row[opts.valueField]);
                 el.find('input.combobox-checkbox')._propAttr('checked', false);
             }
+            */
         });
+
+        debugger;
+        var data = $('#selectBusiFields').combobox('getData');
 
         $('#columnSelectTree').tree({
             //获取数据URL
@@ -93,6 +97,8 @@
             },
             //选择树节点触发事件
             onSelect: function (node) {
+                debugger;
+                $('#columnSelectTree').tree('check', node.target);
             },
             onBeforeExpand: function (node) {
                 debugger;
@@ -102,6 +108,7 @@
                 $('#columnSelectTree').tree("options").url = node.attributes.url + paramStr;
             },
             onCheck: function (node, checked) {
+                debugger;
             }
         });
     });

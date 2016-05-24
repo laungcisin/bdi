@@ -21,6 +21,7 @@ const (
 	UrlForTable      = "/datasource/tableNode"
 	UrlForColumn     = "/datasource/columnNode"
 )
+
 type DatasourceTree struct {
 	Id      string `json:"id"`
 	Pid     string `json:"pid"`
@@ -32,7 +33,6 @@ type DatasourceTree struct {
 	Attributes DatasourceTreeAttributes `json:"attributes"`
 	Children   []Tree                   `json:"children"`
 }
-
 
 type Datasource struct {
 	Id       int    `form:"id"`       //主键
@@ -80,6 +80,7 @@ type TableTreeAttributes struct {
 }
 
 type ColumnTreeAttributes struct {
+	BdiId      int    `form:"bdiId"`
 	Name       string `form:"name"`
 	CnName     string `form:"cnName"`
 	Sequence   int    `form:"sequence"`
@@ -316,7 +317,7 @@ func (this *Datasource) GetAllTableForTree(ip string, port string, username stri
 
 		if showLeafLevel == 3 {
 			treeNode.State = "open"
-		}else {
+		} else {
 			treeNode.State = "closed"
 		}
 
