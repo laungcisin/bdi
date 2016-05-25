@@ -212,7 +212,34 @@
                     $('#addBusiProcessFieldsForm').form('submit', {
                         url: '/sdtBdiBusiFields/processFields/add',
                         onSubmit: function () {
-                            return $("#addBusiProcessFieldsForm").form("validate");
+                            if($("#addBusiProcessFieldsForm").form("validate")) {
+                                debugger;
+                                var processTypeValue =  $('#processType').combobox('getValue');
+                                if(processTypeValue == 'sum' || processTypeValue == 'avg' ) {
+                                    var valueArray = $('#params').tagEditor('getTags')[0].tags;
+                                    var patten = /^-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/;
+                                    var flag = false;
+                                    for(var i = 0; i < valueArray.length; i++) {
+                                        if(patten.test(valueArray[i])) {
+                                            flag = true;
+                                            $("#dataType").val('double');
+                                            $("#dataLength").val('9,2');
+                                        }
+                                    }
+
+                                    if(!flag) {
+                                        $("#dataType").val('int');
+                                        $("#dataLength").val('9,2');
+                                    }
+                                }else if (processTypeValue == 'max' || processTypeValue == 'min' || processTypeValue == 'count' ) {
+                                    $("#dataType").val('int');
+                                    $("#dataLength").val('0');
+                                }
+
+                                return true;
+                            }else {
+                                return false;
+                            }
                         },
                         //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                         success: function (data) {

@@ -271,10 +271,12 @@ func (this *SdtBdiBusiFields) UpdateFields() error {
 		" process_type = ?, " +
 		" params = ?, " +
 		" comment = ?, " +
-		" edit_time = ? " +
+		" edit_time = ?, " +
+		" data_type = ?, " +
+		" data_length = ? " +
 		" where id = ? "
 
-	_, err := o.Raw(updateSql, this.ProcessType, this.Params, this.Comment, time.Now(), this.Id).Exec()
+	_, err := o.Raw(updateSql, this.ProcessType, this.Params, this.Comment, time.Now(), this.DataType, this.DataLength, this.Id).Exec()
 	if err != nil {
 		fmt.Println(err)
 		o.Rollback()
@@ -489,7 +491,7 @@ func (this *SdtBdiBusiFields)Synchronize() error {
 		"	data_type, " +
 		"	data_length, " +
 		"	create_time " +
-		" )select " +
+		" ) select t.* from (select " +
 		"	r.id as result_id, " +
 		"	lower(f.name) as name, " +
 		"	f.sequence, " +
@@ -504,7 +506,17 @@ func (this *SdtBdiBusiFields)Synchronize() error {
 		" where " +
 		"	f.bdi_id = ? " +
 		" and f.bdi_id = b.id " +
-		" and r.bdi_id = b.id order by f.sequence "
+		" and r.bdi_id = b.id order by f.sequence) as t " +
+		" where" +
+		"	not exists (" +
+		"		select" +
+		"			f.id" +
+		"		from" +
+		"			sdt_bdi_result_fields f" +
+		"		where" +
+		"			f.result_id = t.result_id" +
+		"		and lower(trim(f. name)) = lower(trim(t. name))" +
+		"	)"
 	_, err = o.Raw(insertString, this.BdiId).Exec()
 	if err != nil {
 		fmt.Println(err)

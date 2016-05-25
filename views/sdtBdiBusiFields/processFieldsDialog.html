@@ -8,6 +8,9 @@
 
 <form id="addBusiProcessFieldsForm" method="post">
     <input type="hidden" id="busiFieldsId" name="busiFieldsId"/>
+    <input type="hidden" id="dataType" name="dataType"/>
+    <input type="hidden" id="dataLength" name="dataLength"/>
+
     <table>
         <tr>
             <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">处理方式：</th>
@@ -54,6 +57,8 @@
      */
     function initAddSdtBdiBusiFieldsDialog() {
         $("#busiFieldsId").val('{{.sdtBdiBusiFields.Id}}');
+        $("#dataType").val('{{.sdtBdiBusiFields.DataType}}');
+        $("#dataLength").val('{{.sdtBdiBusiFields.DataLength}}');
 
         $('#params').tagEditor({
             maxTags: 100,
@@ -61,6 +66,7 @@
             removeDuplicates: false,
             sortable: false,
             initialTags: [],
+            forceLowercase: false,
             placeholder: '请输入条件表达式',
             onChange: function (field, editor, tags) {
             },
