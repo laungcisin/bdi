@@ -1,9 +1,3 @@
-<style>
-    .tag-editor {
-        height: 60px;
-    }
-</style>
-
 <div id="busiDetailConfigLoading"
      style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
@@ -18,18 +12,31 @@
                 <input name="processType" id="processType"/>
             </td>
         </tr>
-        <!--
         <tr>
-            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">处理参数：</th>
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">已选表：</th>
             <td>
-                <input name="params" id="params" style="height: 60px;"/>
+                <input name="selectedTables" id="selectedTables"/>
             </td>
         </tr>
-        -->
+
         <tr>
-            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">表处理字段：</th>
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">选择方式：</th>
             <td>
-                <ul id="busiColumnsTree"></ul>
+                <input type="radio" name="checkType" checked value="0"/> 表
+                <input type="radio" name="checkType" value="1"/> 字段
+            </td>
+        </tr>
+
+        <tr id="tableDiv">
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">表：</th>
+            <td>
+                <ul id="busiTablesTree" style="height: 100px;"></ul>
+            </td>
+        </tr>
+        <tr id="columnsDiv" style="height: 100px;display:none;">
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">字段：</th>
+            <td>
+                <ul id="busiColumnsTree" style="height: 100px;"></ul>
             </td>
         </tr>
     </table>
@@ -51,10 +58,18 @@
     };
 
     $(function () {
+        $(":radio").click(function () {
+            if ($(this).val() == 0) {
+                $("#tableDiv").show();
+                $("#columnsDiv").hide();
+            } else if ($(this).val() == 1) {
+                $("#tableDiv").hide();
+                $("#columnsDiv").show();
+            }
+        });
+
         initAddSdtBdiBusiDetailConfigDialog();
     });
-
-    var showLeafLevel = 4;
 
     /**
      * 初始化新增窗口。
@@ -73,34 +88,53 @@
             width: '280px',
             editable: false,
             readonly: false,
-            required: true,
             value: '{{.sdtBdiBusi.ProcessType}}',
             onChange: function (newValue, oldValue) {
             }
         });
 
-//        $('#params').tagEditor({
-//            maxTags: 100,
-//            maxLength: 150,
-//            width: '280px',
-//            removeDuplicates: false,
-//            sortable: false,
-//            initialTags: [],
-//            placeholder: '请输入条件表达式',
-//            onChange: function (field, editor, tags) {
-//            },
-//            beforeTagSave: function (field, editor, tags, tag, val) {
-//            },
-//            beforeTagDelete: function (field, editor, tags, val) {
-//            },
-//            onFocus: function () {
-//            }
-//        });
-//        $('#params').tagEditor('addTag', '{{.sdtBdiBusi.Name}}');
+        // 已选表
+        $('#selectedTables').combobox({
+            url: '/sdtBdiBusi/selectedTables?bdiId={{.bdiId}}&busiId={{.sdtBdiBusi.Id}}',
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            width: '280px',
+            multiple: true,
+            editable: false,
+            readonly: false,
+            onChange: function (newValue, oldValue) {
+            }
+        });
+
+        $('#busiTablesTree').tree({
+            //获取数据URL
+            url: '/datasource/datasourceNode?showLeafLevel=3',
+            width: '300px',
+            panelHeight: '360px',
+            panelMaxHeight: '450px',
+            onlyLeafCheck: true,
+            lines: true,
+            multiple: true,
+            checkbox: function (node) {
+                return node.attributes.isChecked;
+            },
+            //选择树节点触发事件
+            onSelect: function (node) {
+                $('#busiTablesTree').tree('check', node.target);
+            },
+            onBeforeExpand: function (node) {
+                var paramStr = "?param=" + node.id + "&ip=" + node.attributes.ip + "&port=" + node.attributes.port +
+                        "&username=" + node.attributes.username + "&password=" + node.attributes.password + "&tableName=" + node.attributes.tableName + "&schemaName=" + node.attributes.schemaName +
+                        "&showLeafLevel=3";
+                $('#busiTablesTree').tree("options").url = node.attributes.url + paramStr;
+            }
+        });
 
         $('#busiColumnsTree').tree({
             //获取数据URL
-            url: '/datasource/datasourceNode?showLeafLevel=' + showLeafLevel,
+            url: '/datasource/datasourceNode?showLeafLevel=4',
             width: '300px',
             panelHeight: '360px',
             panelMaxHeight: '450px',
@@ -115,10 +149,9 @@
                 $('#busiColumnsTree').tree('check', node.target);
             },
             onBeforeExpand: function (node) {
-                debugger;
                 var paramStr = "?param=" + node.id + "&ip=" + node.attributes.ip + "&port=" + node.attributes.port +
                         "&username=" + node.attributes.username + "&password=" + node.attributes.password + "&tableName=" + node.attributes.tableName + "&schemaName=" + node.attributes.schemaName +
-                        "&showLeafLevel=" + showLeafLevel;
+                        "&showLeafLevel=4";
                 $('#busiColumnsTree').tree("options").url = node.attributes.url + paramStr;
             }
         });

@@ -18,6 +18,7 @@ type SdtBdiBusiConfig struct {
 	ProcessDataType   string `form:"processDataType"`   //
 	ProcessDataLength string `form:"processDataLength"` //
 	ProcessType       string `form:"processType"`       //处理类型
+	Operators         string `form:"operators"`         //操作符
 	Params            string `form:"params"`            //参数
 
 	UserCode   string    `form:"userCode"`   //创建人ID
@@ -25,9 +26,8 @@ type SdtBdiBusiConfig struct {
 	EditTime   time.Time `form:"editTime"`   //修改时间
 
 	//以下字段为datagrid展示
-	BdiId int `form:"bdiId"` //
+	BdiId    int `form:"bdiId"` //
 	BusiName string
-
 }
 
 func (u *SdtBdiBusiConfig) TableName() string {
@@ -63,7 +63,7 @@ func (this *SdtBdiBusiConfig) GetAllSdtBdiBusiConfig(rows int, page int) ([]SdtB
 	}
 
 	num := new(int)
-	var countSql = 	" select count(*) as counts " +
+	var countSql = " select count(*) as counts " +
 		" from " +
 		"	sdt_bdi_busi_config config, " +
 		"	sdt_bdi_busi busi, " +
@@ -84,7 +84,7 @@ func (this *SdtBdiBusiConfig) GetAllSdtBdiBusiConfig(rows int, page int) ([]SdtB
 }
 
 /**
-*/
+ */
 func (this *SdtBdiBusiConfig) GetSdtBdiBusiConfigById() error {
 	o := orm.NewOrm()
 	var querySql = " select * from sdt_bdi_busi_config where id = ? "
@@ -98,16 +98,19 @@ func (this *SdtBdiBusiConfig) GetSdtBdiBusiConfigById() error {
 	return nil
 }
 
-func (this *SdtBdiBusiConfig)Update() error {
+func (this *SdtBdiBusiConfig) Update() error {
 	var err error
 	o := orm.NewOrm()
 	o.Begin()
 
-	var updateString =
-		" update sdt_bdi_busi_config set   " +
+	var updateString = " update sdt_bdi_busi_config set   " +
 		" name = ?, " +
 		" cn_name = ?, " +
 		" is_process = 1, " +
+		" process_column = ?, " +
+		" process_data_type = ?, " +
+		" process_data_length = ?, " +
+		" operators = ?, " +
 		" select_star = ?, " +
 		" as_name = ?, " +
 		" process_type = ?, " +
@@ -115,8 +118,9 @@ func (this *SdtBdiBusiConfig)Update() error {
 		" user_code = ?, " +
 		" edit_time = ? " +
 		" where id = ? "
-	_, err = o.Raw(updateString, this.Name, this.CnName, this.SelectStar, this.AsName, this.ProcessType, this.Params, 0,
-			time.Now(), this.Id).Exec()
+	_, err = o.Raw(updateString, this.Name, this.CnName,this.ProcessColumn, this.ProcessDataType,
+			this.ProcessDataLength, this.Operators, this.SelectStar, this.AsName, this.ProcessType, this.Params, 0,
+		time.Now(), this.Id).Exec()
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("更新数据出错！")
@@ -128,13 +132,12 @@ func (this *SdtBdiBusiConfig)Update() error {
 	return nil
 }
 
-func (this *SdtBdiBusiConfig)Synchronize() error {
+func (this *SdtBdiBusiConfig) Synchronize() error {
 	var err error
 	o := orm.NewOrm()
 	o.Begin()
 
-	var insertString =
-		" insert into sdt_bdi_busi_fields ( " +
+	var insertString = " insert into sdt_bdi_busi_fields ( " +
 		"	busi_id, " +
 		"       bdi_id, " +
 		"	name, " +

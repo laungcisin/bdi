@@ -113,121 +113,128 @@
      * 更新指标计算业务表-Dialog。
      */
     function updateSdtBdiBusiDialog(busiId) {
-        debugger;
-        var row = $("#sdtBdiBusiDataGrid").datagrid("getSelected");
-        if (row) {
-            $('<div></div>').dialog({
-                id: 'updateSdtBdiBusiDialog',
-                title: '更新指标计算业务表',
-                width: '1000px',
-                height: '500px',
-                closed: false,
-                cache: false,
-                draggable: false,
-                resizable: false,
-                href: '/sdtBdiBusi/detailConfigPage?bdiId=' + bdiId + "&id=" + row.Id,
-                modal: true,
-                onLoad: function () {
-                },
-                onClose: function () {
-                    $(this).dialog('destroy');
-                },
-                buttons: [{
-                    text: '下一步',
-                    iconCls: 'icon-ok',
-                    handler: function () {
-                        debugger;
-//                        var value = $('#params').tagEditor('getTags')[0].tags;
-                        var resultArray = new Array();
-                        var treeObj = $('#busiColumnsTree');
-                        var nodes = treeObj.tree('getChecked');
-                        for (var i = 0; i < nodes.length; i++) {
-                            if (nodes[i].attributes.isTable) {//table-节点
-                                var obj = {
+//        debugger;
+//        var row = $("#sdtBdiBusiDataGrid").datagrid("getSelected");
+//        if (row) {
+        $('<div></div>').dialog({
+            id: 'updateSdtBdiBusiDialog',
+            title: '更新指标计算业务表',
+            width: '1000px',
+            height: '500px',
+            closed: false,
+            cache: false,
+            draggable: false,
+            resizable: false,
+            href: '/sdtBdiBusi/detailConfigPage?bdiId=' + bdiId + "&id=" + busiId,
+            modal: true,
+            onLoad: function () {
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '下一步',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    debugger;
+                    var resultArray = new Array();
+                    var treeObj;
+                    var nodes;
+
+                    if ($(this).val() == 0) {//表
+                        treeObj = $('#busiTablesTree');
+                        nodes = treeObj.tree('getChecked');
+                    } else {//字段
+                        treeObj = $('#busiColumnsTree');
+                        nodes = treeObj.tree('getChecked');
+                    }
+
+                    for (var i = 0; i < nodes.length; i++) {
+                        if (nodes[i].attributes.isTable) {//table-节点
+                            var obj = {
+                                checkType: parseInt($("input[name='checkType']:checked").val()),
+                                processType: $('#processType').combobox('getValue'),
+                                busiId: busiId,
+                                name: nodes[i].id,
+                                cnName: nodes[i].attributes.comment,
+                                bdiId: parseInt(bdiId),
+                                datasourceId: parseInt(treeObj.tree('getRoot').id),
+                                childColumns: new Array()
+                            };
+                            resultArray.push(obj);
+                        } else {//columns-节点
+                            //寻找父节点
+                            var found = false;
+                            var foundIndex = 0;
+
+                            var parentNode = treeObj.tree('getParent', nodes[i].target);
+                            if (parentNode != null) {
+                                for (var j = 0; j < resultArray.length; j++) {
+                                    if (parentNode.id == resultArray[j].name) {
+                                        found = true;
+                                        foundIndex = j;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!found) {
+                                var tableObj = {
+                                    checkType: parseInt($("input[name='checkType']:checked").val()),
                                     processType: $('#processType').combobox('getValue'),
                                     busiId: busiId,
-//                                    params: value.toString(),
-                                    name: nodes[i].id,
-                                    cnName: nodes[i].attributes.comment,
+                                    name: parentNode.id,
+                                    cnName: parentNode.attributes.comment,
                                     bdiId: parseInt(bdiId),
                                     datasourceId: parseInt(treeObj.tree('getRoot').id),
                                     childColumns: new Array()
                                 };
-                                resultArray.push(obj);
-                            } else {//columns-节点
-                                //寻找父节点
-                                var found = false;
-                                var foundIndex = 0;
 
-                                var parentNode = treeObj.tree('getParent', nodes[i].target);
-                                if (parentNode != null) {
-                                    for (var j = 0; j < resultArray.length; j++) {
-                                        if (parentNode.id == resultArray[j].name) {
-                                            found = true;
-                                            foundIndex = j;
-                                            break;
-                                        }
-                                    }
-                                }
+                                var columnObj = {
+                                    name: nodes[i].id,
+                                    cnName: nodes[i].attributes.comment,
+                                    sequence: nodes[i].attributes.sequence,
+                                    comment: nodes[i].attributes.comment,
+                                    dataType: nodes[i].attributes.dataType,
+                                    dataLength: nodes[i].attributes.dataLength
+                                };
 
-                                if (!found) {
-                                    var tableObj = {
-                                        processType: $('#processType').combobox('getValue'),
-                                        busiId: busiId,
-//                                        params: value.toString(),
-                                        name: parentNode.id,
-                                        cnName: parentNode.attributes.comment,
-                                        bdiId: parseInt(bdiId),
-                                        datasourceId: parseInt(treeObj.tree('getRoot').id),
-                                        childColumns: new Array()
-                                    };
+                                tableObj.childColumns.push(columnObj);
+                                resultArray.push(tableObj);
+                            } else {
+                                var columnObj = {
+                                    name: nodes[i].id,
+                                    cnName: nodes[i].attributes.comment,
+                                    sequence: nodes[i].attributes.sequence,
+                                    comment: nodes[i].attributes.comment,
+                                    dataType: nodes[i].attributes.dataType,
+                                    dataLength: nodes[i].attributes.dataLength
+                                };
 
-                                    var columnObj = {
-                                        name: nodes[i].id,
-                                        cnName: nodes[i].attributes.comment,
-                                        sequence: nodes[i].attributes.sequence,
-                                        comment: nodes[i].attributes.comment,
-                                        dataType: nodes[i].attributes.dataType,
-                                        dataLength: nodes[i].attributes.dataLength
-                                    };
-
-                                    tableObj.childColumns.push(columnObj);
-                                    resultArray.push(tableObj);
-                                } else {
-                                    var columnObj = {
-                                        name: nodes[i].id,
-                                        cnName: nodes[i].attributes.comment,
-                                        sequence: nodes[i].attributes.sequence,
-                                        comment: nodes[i].attributes.comment,
-                                        dataType: nodes[i].attributes.dataType,
-                                        dataLength: nodes[i].attributes.dataLength
-                                    };
-
-                                    resultArray[foundIndex].childColumns.push(columnObj);
-                                }
+                                resultArray[foundIndex].childColumns.push(columnObj);
                             }
                         }
+                    }
 
-//                        console.info(JSON.stringify(resultArray));
-
-                        $.ajax({
-                            url: "/sdtBdiBusi/update",
-                            async: false,
-                            cache: false,
-                            type: 'POST',
-                            data: JSON.stringify(resultArray),
-                            dataType: 'json',
-                            error: function (data) {
-                                $.messager.alert('提示消息', data.message);
-                            },
-                            success: function (data) {
-                                if (data.success) {
-                                    //成功选择后，sdt_bdi_busi_config-详细配置Dialog
-                                    $("#updateSdtBdiBusiDialog").dialog('destroy');
-                                    addBdiBusiConfigDetailDialog();
-                                }
+//                    console.info(JSON.stringify(resultArray));
+                    $.ajax({
+                        url: "/sdtBdiBusi/update",
+                        async: false,
+                        cache: false,
+                        type: 'POST',
+                        data: JSON.stringify(resultArray),
+                        dataType: 'json',
+                        error: function (data) {
+                            $.messager.alert('提示消息', data.message);
+                        },
+                        success: function (data) {
+                            if (data.success) {
+                                //成功选择后，sdt_bdi_busi_config-详细配置Dialog
+                                $("#updateSdtBdiBusiDialog").dialog('destroy');
+                                addBdiBusiConfigDetailDialog();
                             }
-                        });
+                        }
+                    });
 
 //                        //提交表单
 //                        $('#updateSdtBdiBusiForm').form('submit', {
@@ -249,23 +256,23 @@
 //                                }
 //                            }
 //                        });
-                    }
-                }, {
-                    text: '取消',
-                    iconCls: 'icon-cancel',
-                    handler: function () {
-                        $("#updateSdtBdiBusiDialog").dialog('destroy');
-                    }
-                }]
-            });
-        } else {
-            $.messager.show({
-                title: '提示信息',
-                msg: '请选择一条记录进行编辑！',
-                timeout: 1000,
-                showType: 'slide'
-            });
-        }
+                }
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $("#updateSdtBdiBusiDialog").dialog('destroy');
+                }
+            }]
+        });
+//        } else {
+//            $.messager.show({
+//                title: '提示信息',
+//                msg: '请选择一条记录进行编辑！',
+//                timeout: 1000,
+//                showType: 'slide'
+//            });
+//        }
     }
 
     /**

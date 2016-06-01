@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego/orm"
 	"bdi/models"
+	"encoding/json"
 	"fmt"
+	"github.com/astaxie/beego/orm"
 	"log"
 	"strconv"
-	"encoding/json"
 )
 
 type SdtBdiBusiController struct {
@@ -262,6 +262,42 @@ func (this *SdtBdiBusiController) UpdateDetailConfig() {
 
 	returnData.Success = true
 	returnData.Message = "数据更新成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
+func (this *SdtBdiBusiController) SelectedTables() {
+	type DataType struct {
+		Id       string `json:"id"`
+		Text     string `json:"text"`
+		Selected bool   `json:"selected"`
+	}
+
+	bdiId, _ := this.GetInt("bdiId")
+	busiId := this.GetString("busiId")
+	returnData := make([]DataType, 0)
+	o := orm.NewOrm()
+
+	var maps []orm.Params = make([]orm.Params, 0)
+	var queryString = " select b.id as Id, b.name as Text from sdt_bdi_busi b where b.bdi_id = ? " +
+		" and b.name <> (select t.name from sdt_bdi_busi t where t.id = ? limit 1)"
+	_, err := o.Raw(queryString, bdiId, busiId).Values(&maps)
+
+	if err != nil {
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	for _, v := range maps {
+		dataType := new(DataType)
+		dataType.Id = v["Id"].(string)
+		dataType.Text = v["Text"].(string)
+		dataType.Selected = true
+		returnData = append(returnData, *dataType)
+	}
+
 	this.Data[JSON_STRING] = returnData
 	this.ServeJSON()
 	return

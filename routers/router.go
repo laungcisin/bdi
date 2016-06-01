@@ -84,6 +84,8 @@ func init() {
 	beego.Router("/sdtBdiBusi/updatePage", &controllers.SdtBdiBusiController{}, "*:UpdatePage") //更新页面
 	beego.Router("/sdtBdiBusi/update", &controllers.SdtBdiBusiController{}, "*:Update")         //更新内容
 
+	beego.Router("/sdtBdiBusi/selectedTables", &controllers.SdtBdiBusiController{}, "*:SelectedTables")
+
 	beego.Router("/sdtBdiBusi/detailConfigPage", &controllers.SdtBdiBusiController{}, "*:DetailConfigPage") //详细配置
 	beego.Router("/sdtBdiBusi/processType", &controllers.SdtBdiBusiController{}, "*:ProcessType")
 	beego.Router("/sdtBdiBusi/detailConfig/update", &controllers.SdtBdiBusiController{}, "*:UpdateDetailConfig") //详细配置

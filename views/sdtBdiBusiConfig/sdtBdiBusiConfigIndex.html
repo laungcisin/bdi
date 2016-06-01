@@ -20,7 +20,7 @@
             height: '390px',
             toolbar: [{
                 iconCls: 'icon-edit',
-                text: '编辑',
+                text: '加工处理',
                 plain: 'true',
                 onClick: function () {
                     updateSdtBdiBusiConfigDialog();
@@ -152,12 +152,19 @@
                             url: '/sdtBdiBusiConfig/update',
                             onSubmit: function () {
                                 if($("#updateSdtBdiBusiConfigForm").form("validate")) {
-                                    var value = $('#paramsTag').tagEditor('getTags')[0].tags;
-                                    if(value == '') {
+                                    var paramsValue = $('#paramsTag').tagEditor('getTags')[0].tags;
+                                    if(paramsValue == '') {
                                         $.messager.alert('提示消息', '请输入参数！');
                                         return false;
                                     }
-                                    $('#params').val(value);
+                                    $('#params').val(paramsValue);
+
+                                    var operatorsValue = $('#operatorsTag').tagEditor('getTags')[0].tags;
+                                    if(operatorsValue == '') {
+                                        $.messager.alert('提示消息', '请输入参数！');
+                                        return false;
+                                    }
+                                    $('#operators').val(operatorsValue);
                                     return true;
                                 }
 

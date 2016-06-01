@@ -6,6 +6,7 @@ import (
 	// "strconv"
 	// "strings"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -29,9 +30,10 @@ type SdtBdiBusi struct {
 }
 
 type BusiTreeAttributes struct {
-	BusiId       int                 `form:"busiId"`
+	BusiId       int                    `form:"busiId"`
 	Params       string                 `form:"params"`
 	ProcessType  string                 `form:"processType"`
+	CheckType    int                    `form:"checkType"`
 	Name         string                 `form:"name"`
 	CnName       string                 `form:"cnName"`
 	BdiId        int                    `form:"bdiId"`
@@ -100,6 +102,7 @@ func (this *SdtBdiBusi) GetSdtBdiBusiById() error {
 
 	err := o.Raw(querySql, this.Id).QueryRow(this)
 	if err != nil {
+		fmt.Println(err)
 		log.Fatal("查询表：" + this.TableName() + "出错！")
 		return err
 	}
@@ -129,6 +132,7 @@ func (this *SdtBdiBusi) Add() error {
 	return nil
 }
 
+// checkType - 0: 表, checkType - 1: 字段。
 func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes) error {
 	var err error
 	var latestBusiId int64
@@ -141,26 +145,40 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes) error {
 		" edit_time = ? " +
 		" where id = ?"
 
-	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, cn_name, create_time) values (?, ?, ?, ?, ?)"
-	var insertBusiConfigSql =  " insert into sdt_bdi_busi_config(busi_id, cn_name, process_column, process_data_type, process_data_length, user_code, create_time) " +
-	" values(?, ?, ?, ?, ?, ?, ?) "
+	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, as_name, cn_name, create_time) values (?, ?, ?, ?, ?)"
+	var insertBusiConfigSql = " insert into sdt_bdi_busi_config(busi_id, cn_name, process_column, process_data_type, process_data_length, user_code, create_time) " +
+		" values(?, ?, ?, ?, ?, ?, ?) "
 
 	for _, tableValue := range busiTreeAttributes {
-		_, err = o.Raw(updateSql, tableValue.ProcessType, 0, time.Now(), tableValue.BusiId).Exec()
+		_, err = o.Raw(updateSql, 1, 0, time.Now(), tableValue.BusiId).Exec()
 		if err != nil {
 			fmt.Println(err)
 			o.Rollback()
 			return err
 		}
 
+		if tableValue.CheckType == 0 { //表
+			_, err = o.Raw(" insert into sdt_bdi_busi_config(busi_id, name, cn_name, user_code, create_time) "+
+				" values(?, ?, ?, ?, ?) ",
+				tableValue.BusiId, tableValue.Name+" "+this.tableAliasName(tableValue.Name), tableValue.CnName, 0, time.Now()).Exec()
+
+			if err != nil {
+				fmt.Println(err)
+				o.Rollback()
+				return err
+			}
+			continue
+		}
+
 		var sdtBdiBusiSlice []SdtBdiBusi = make([]SdtBdiBusi, 0)
 		var querySql = " select * from sdt_bdi_busi b where b.bdi_id = ? and b.name = ? "
 		_, err = o.Raw(querySql, tableValue.BdiId, tableValue.Name).QueryRows(&sdtBdiBusiSlice)
 		if err == nil {
-			if len(sdtBdiBusiSlice) > 0 { //有记录
+			if len(sdtBdiBusiSlice) > 0 {
+				//有记录
 				latestBusiId = int64(tableValue.BusiId)
-			}else {
-				tableResult, err := o.Raw(insertBusiSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, tableValue.CnName, time.Now()).Exec()
+			} else { //没有记录
+				tableResult, err := o.Raw(insertBusiSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, this.tableAliasName(tableValue.Name), tableValue.CnName, time.Now()).Exec()
 				if err != nil {
 					fmt.Println(err)
 					o.Rollback()
@@ -214,7 +232,7 @@ func (this *SdtBdiBusi) AddBusiAndAddBusiConfig(tableTreeAttributes []TableTreeA
 	o := orm.NewOrm()
 	o.Begin()
 
-	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, cn_name, create_time) values (?, ?, ?, ?, ?)"
+	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, as_name, cn_name, create_time) values (?, ?, ?, ?, ?, ?)"
 
 	for _, tableValue := range tableTreeAttributes {
 		var querySql = " select count(*) as counts from sdt_bdi_busi b where b.bdi_id = ? and b.name = ? "
@@ -230,7 +248,7 @@ func (this *SdtBdiBusi) AddBusiAndAddBusiConfig(tableTreeAttributes []TableTreeA
 			return err
 		}
 
-		_, err = o.Raw(insertBusiSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, tableValue.CnName, time.Now()).Exec()
+		_, err = o.Raw(insertBusiSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, this.tableAliasName(tableValue.Name), tableValue.CnName, time.Now()).Exec()
 		if err != nil {
 			fmt.Println(err)
 			o.Rollback()
@@ -248,13 +266,13 @@ func (this *SdtBdiBusi) UpdateDetailConfig() error {
 	o.Begin()
 
 	var updateSql = "update sdt_bdi_busi " +
-	" set  " +
-	" is_process = ?, " +
-	" process_type = ?, " +
-	" params = ?, " +
-	" user_code = ?, " +
-	" edit_time = ? " +
-	" where id = ?"
+		" set  " +
+		" is_process = ?, " +
+		" process_type = ?, " +
+		" params = ?, " +
+		" user_code = ?, " +
+		" edit_time = ? " +
+		" where id = ?"
 
 	_, err := o.Raw(updateSql, this.IsProcess, this.ProcessType, this.Params, '0', time.Now(), this.Id).Exec()
 	if err != nil {
@@ -264,4 +282,18 @@ func (this *SdtBdiBusi) UpdateDetailConfig() error {
 	}
 	o.Commit()
 	return nil
+}
+
+//给表取别名
+func (this *SdtBdiBusi) tableAliasName(tableName string) string {
+	//给表取别名
+	var asName string = ""
+	tablesNameArray := strings.Split(tableName, "_")
+	for _, v := range tablesNameArray {
+		if len(v) >= 1 {
+			asName = asName + string(strings.TrimSpace(v)[0])
+		}
+	}
+
+	return asName
 }
