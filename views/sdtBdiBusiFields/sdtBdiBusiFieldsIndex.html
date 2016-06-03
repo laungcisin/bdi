@@ -25,13 +25,13 @@
                     bdiBusiFieldsAddDialog();
                 }
             }/*, '-', {
-                iconCls: 'icon-edit',
-                text: '编辑',
-                plain: 'true',
-                onClick: function () {
-//                    updateSdtBdiBusiDialog();
-                }
-            }*/],
+             iconCls: 'icon-edit',
+             text: '编辑',
+             plain: 'true',
+             onClick: function () {
+             //                    updateSdtBdiBusiDialog();
+             }
+             }*/],
             columns: [[
 //                {
 //                    field: 'sdt_bdi_busi_oid',
@@ -53,24 +53,24 @@
                 {
                     field: 'BdiId', title: 'BdiId', width: '50px', align: 'center', hidden: true
                 },
+//                {
+//                    field: 'BdiName', title: '指标名称', width: '120px', align: 'left'
+//                },
                 {
-                    field: 'BdiName', title: '指标名称', width: '120px', align: 'left'
+                    field: 'Name', title: '字段名称', width: '160px', align: 'left'
                 },
                 {
-                    field: 'Name', title: '字段名称', width: '220px', align: 'left'
+                    field: 'Sequence', title: '字段序号', width: '100px', align: 'center'
                 },
-                {
-                    field: 'Sequence', title: '字段序号', width: '130px', align: 'center'
-                },
-                {
-                    field: 'Comment', title: '字段注释', width: '130px', align: 'left'
-                },
-                {
-                    field: 'DataType', title: '字段类型', width: '130px', align: 'left'
-                },
-                {
-                    field: 'DataLength', title: '字段长度', width: '130px', align: 'left'
-                },
+//                {
+//                    field: 'Comment', title: '字段注释', width: '130px', align: 'left'
+//                },
+//                {
+//                    field: 'DataType', title: '字段类型', width: '130px', align: 'left'
+//                },
+//                {
+//                    field: 'DataLength', title: '字段长度', width: '130px', align: 'left'
+//                },
                 {
                     field: 'sdt_bdi_busi_fields_opt1', title: '操作', width: '150px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
@@ -88,9 +88,9 @@
 //                            var c = '<button onclick="cancelRow(this)">取消</button>';
 //                            return s + c;
 //                        } else {
-                            var e = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, true)">上</button>';
-                            var d = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, false)">下</button>';
-                            return e + d;
+                        var e = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, true)">上</button>';
+                        var d = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, false)">下</button>';
+                        return e + d;
 //                        }
                     }
                 }
@@ -190,8 +190,8 @@
         $('<div></div>').dialog({
             id: 'processFieldsDialog',
             title: '业务字段加工配置',
-            width: '500px',
-            height: '300px',
+            width: '700px',
+            height: '500px',
             draggable: false,
             resizable: false,
             closed: false,
@@ -199,7 +199,6 @@
             href: '/sdtBdiBusiFields/processFields?busiFieldsId=' + busiFieldsId,
             modal: true,
             onLoad: function () {
-                //初始化表单数据
             },
             onClose: function () {
                 $(this).dialog('destroy');
@@ -212,32 +211,41 @@
                     $('#addBusiProcessFieldsForm').form('submit', {
                         url: '/sdtBdiBusiFields/processFields/add',
                         onSubmit: function () {
-                            if($("#addBusiProcessFieldsForm").form("validate")) {
+                            if ($("#addBusiProcessFieldsForm").form("validate")) {
                                 debugger;
-                                var processTypeValue =  $('#processType').combobox('getValue');
-                                if(processTypeValue == 'sum' || processTypeValue == 'avg' ) {
-                                    var valueArray = $('#params').tagEditor('getTags')[0].tags;
-                                    var patten = /^-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/;
-                                    var flag = false;
-                                    for(var i = 0; i < valueArray.length; i++) {
-                                        if(patten.test(valueArray[i])) {
-                                            flag = true;
-                                            $("#dataType").val('double');
-                                            $("#dataLength").val('9,2');
-                                        }
-                                    }
-
-                                    if(!flag) {
-                                        $("#dataType").val('int');
-                                        $("#dataLength").val('9,2');
-                                    }
-                                }else if (processTypeValue == 'max' || processTypeValue == 'min' || processTypeValue == 'count' ) {
-                                    $("#dataType").val('int');
-                                    $("#dataLength").val('0');
+                                var processTypeArray = $('#processTypeCombobox').combobox('getValues');
+                                var paramsValue = '';
+                                for (var i = 0; i < processTypeArray.length; i++) {
+                                    paramsValue += $("#paramsTag_" + processTypeArray[i]).tagEditor('getTags')[0].tags + "|~,";
                                 }
 
+                                $("#params").val(paramsValue.substring(0, paramsValue.length - 3));
+                                $("#processType").val(processTypeArray.join("|"));
+
                                 return true;
-                            }else {
+
+
+//                                if(processTypeValue == 'sum' || processTypeValue == 'avg' ) {
+//                                    var valueArray = $('#params').tagEditor('getTags')[0].tags;
+//                                    var patten = /^-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/;
+//                                    var flag = false;
+//                                    for(var i = 0; i < valueArray.length; i++) {
+//                                        if(patten.test(valueArray[i])) {
+//                                            flag = true;
+//                                            $("#dataType").val('double');
+//                                            $("#dataLength").val('9,2');
+//                                        }
+//                                    }
+//
+//                                    if(!flag) {
+//                                        $("#dataType").val('int');
+//                                        $("#dataLength").val('9,2');
+//                                    }
+//                                }else if (processTypeValue == 'max' || processTypeValue == 'min' || processTypeValue == 'count' ) {
+//                                    $("#dataType").val('int');
+//                                    $("#dataLength").val('0');
+//                                }
+                            } else {
                                 return false;
                             }
                         },

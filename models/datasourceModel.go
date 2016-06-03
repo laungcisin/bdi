@@ -64,6 +64,7 @@ type DatasourceTreeAttributes struct {
 	SchemaName string `json:"schemaName"`
 	IsChecked  bool   `json:"isChecked"` //设置选择表和表字段
 
+	ColumnType string `json:"columnType"`
 	Sequence   int    `json:"sequence"`
 	Comment    string `json:"comment"`
 	DataType   string `json:"dataType"`
@@ -363,6 +364,7 @@ func (this *Datasource) GetAllColumnForTree(ip string, port string, username str
 		"	c.ordinal_position as sequence, " +
 		"	c.column_comment as comment, " +
 		"	c.data_type as data_type, " +
+		"	c.column_type as column_type, " +
 		"	c.character_maximum_length as data_length " +
 		"from   information_schema.columns c " +
 		"	where c.table_schema = ? and c.table_name = ? "
@@ -379,9 +381,10 @@ func (this *Datasource) GetAllColumnForTree(ip string, port string, username str
 		var sequence int
 		var comment string
 		var dataType string
+		var columnType string
 		var dataLength sql.NullInt64
 
-		err := rows.Scan(&id, &text, &sequence, &comment, &dataType, &dataLength)
+		err := rows.Scan(&id, &text, &sequence, &comment, &dataType, &columnType, &dataLength)
 
 		if err != nil {
 			return newTreeDataSlice, err
@@ -404,6 +407,7 @@ func (this *Datasource) GetAllColumnForTree(ip string, port string, username str
 		datasourceTreeAttributes.Sequence = sequence
 		datasourceTreeAttributes.Comment = comment
 		datasourceTreeAttributes.DataType = dataType
+		datasourceTreeAttributes.ColumnType = columnType
 		datasourceTreeAttributes.IsTable = false
 		if dataLength.Valid {
 			datasourceTreeAttributes.DataLength = dataLength.Int64

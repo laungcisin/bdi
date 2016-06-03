@@ -139,9 +139,23 @@ func (this *SdtBdiBusiController) Update() {
 		Message string `json:"message"`
 	}{}
 
-	var ob []models.BusiTreeAttributes
-	err = json.Unmarshal(this.Ctx.Input.RequestBody, &ob)
-	if err != nil {
+	busiId, _ := this.GetInt("id")
+	bdiId, _ := this.GetInt("bdiId")
+
+	addTables := this.GetString("addTables")
+	fmt.Println("addTables: ", addTables)
+	var addTableSlice []models.BusiTreeAttributes
+	if err = json.Unmarshal([]byte(addTables), &addTableSlice); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+	selectedTableIds := this.GetString("selectedTables")
+	var selectedTableSlice []string
+	if err = json.Unmarshal([]byte(selectedTableIds), &selectedTableSlice); err != nil {
 		fmt.Println(err)
 		returnData.Success = false
 		returnData.Message = "解析参数出错"
@@ -150,16 +164,10 @@ func (this *SdtBdiBusiController) Update() {
 		return
 	}
 
-	if err != nil {
-		returnData.Success = false
-		returnData.Message = "解析参数出错！"
-		this.Data[JSON_STRING] = returnData
-		this.ServeJSON()
-		return
-	}
-
+	processType := this.GetString("processType")
 	sdtBdiBusi := new(models.SdtBdiBusi)
-	err = sdtBdiBusi.Update(ob)
+	sdtBdiBusi.ProcessType = processType
+	err = sdtBdiBusi.Update(addTableSlice, selectedTableSlice, busiId, bdiId)
 	if err != nil {
 		returnData.Success = false
 		returnData.Message = "数据更新出错！"

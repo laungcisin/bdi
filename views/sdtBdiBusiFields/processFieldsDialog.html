@@ -4,30 +4,27 @@
     }
 </style>
 
-<div id="busiFieldsLoading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+<div id="busiFieldsLoading"
+     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
 <form id="addBusiProcessFieldsForm" method="post">
     <input type="hidden" id="busiFieldsId" name="busiFieldsId"/>
     <input type="hidden" id="dataType" name="dataType"/>
     <input type="hidden" id="dataLength" name="dataLength"/>
+    <input type="hidden" id="processType" name="processType"/>
+    <input type="hidden" id="params" name="params"/>
 
-    <table>
+    <table id="tb">
         <tr>
-            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">处理方式：</th>
+            <th style="width: 260px;text-align: right; padding: 5px 5px 5px 5px;">处理方式：</th>
             <td>
-                <input name="processType" id="processType"/>
+                <input name="processTypeCombobox" id="processTypeCombobox"/>
             </td>
         </tr>
         <tr>
-            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">处理参数：</th>
+            <th style="width: 260px;text-align: right; padding: 5px 5px 5px 5px;">字段别名：</th>
             <td>
-                <input name="params" id="params" style="height: 60px;"/>
-            </td>
-        </tr>
-        <tr>
-            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">字段注释：</th>
-            <td>
-                <input name="comment" id="comment"/>
+                <input name="asName" id="asName"/>
             </td>
         </tr>
     </table>
@@ -60,28 +57,8 @@
         $("#dataType").val('{{.sdtBdiBusiFields.DataType}}');
         $("#dataLength").val('{{.sdtBdiBusiFields.DataLength}}');
 
-        $('#params').tagEditor({
-            maxTags: 100,
-            maxLength: 150,
-            removeDuplicates: false,
-            sortable: false,
-            initialTags: [],
-            forceLowercase: false,
-            placeholder: '请输入条件表达式',
-            onChange: function (field, editor, tags) {
-            },
-            beforeTagSave: function (field, editor, tags, tag, val) {
-            },
-            beforeTagDelete: function (field, editor, tags, val) {
-            },
-            onFocus: function () {
-            }
-        });
-
-        $('#params').tagEditor('addTag', '{{.sdtBdiBusiFields.Params}}');
-
-        //数据源
-        $('#processType').combobox({
+        //处理类型
+        $('#processTypeCombobox').combobox({
             url: '/sdtBdiBusiFields/processType',
             valueField: 'id',
             textField: 'text',
@@ -89,15 +66,102 @@
             panelMaxHeight: '200px',
             editable: false,
             readonly: false,
-            required: true,
-            value: '{{.sdtBdiBusiFields.ProcessType}}'
+            multiple: true,
+            value: '{{.sdtBdiBusiFields.ProcessType}}',
+            onChange: function (newValue, oldValue) {
+            },
+            onSelect: function (record) {
+                var htmlModal = '<tr id="' + record.id + '"><td style="width: 260px;text-align: right; padding: 5px 5px 5px 5px;">处理参数(' + record.text + ')：</td>' +
+                        '<td style="width: 300px;"><input name="paramsTag_' + record.id + '" id="paramsTag_' + record.id + '"/></td>' +
+                        '<td><a id="selectParamsButton_' + record.id + '" href="#">选择参数</a></td>' +
+                        '</tr>';
+                var tr = $("#tb").append(htmlModal);
+
+                debugger;
+
+                var tagId = '#paramsTag_' + record.id;
+                $(tagId).tagEditor({
+                    maxTags: 100,
+                    maxLength: 150,
+                    removeDuplicates: false,
+                    sortable: false,
+                    initialTags: [],
+                    forceLowercase: false,
+                    placeholder: '请输入条件表达式',
+                    onChange: function (field, editor, tags) {
+                    },
+                    beforeTagSave: function (field, editor, tags, tag, val) {
+                    },
+                    beforeTagDelete: function (field, editor, tags, val) {
+                    },
+                    onFocus: function () {
+                    }
+                });
+
+                $('#selectParamsButton_' + record.id).linkbutton({
+                    iconCls: 'icon-search',
+                    onClick: function () {
+                        debugger;
+                        $('<div></div>').dialog({
+                            id: 'selectParamsDialog_' + record.id,
+                            title: '选择表字段',
+                            width: '500px',
+                            height: '300px',
+                            closed: false,
+                            cache: false,
+                            draggable: false,
+                            resizable: false,
+                            href: '/sdtBdiBusiFields/columnSelectTreePage',
+                            modal: true,
+                            onLoad: function () {
+                            },
+                            onClose: function () {
+                                $(this).dialog('destroy');
+                            },
+                            buttons: [{
+                                text: '保存',
+                                iconCls: 'icon-ok',
+                                handler: function () {
+                                    var selectNode = $('#columnSelectTree').tree('getChecked');
+                                    if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
+                                        $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                                        return;
+                                    }
+
+                                    var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+                                    var resArray = tName.split("_");
+                                    var tableAliasTemp = '';
+                                    for (var i = 0; i < resArray.length; i++) {
+                                        tableAliasTemp += resArray[i].substr(0, 1);
+                                    }
+
+                                    for (var i = 0; i < selectNode.length; i++) {
+                                        $(tagId).tagEditor('addTag', tableAliasTemp + "." + selectNode[i].id);
+                                    }
+                                    $('#selectParamsDialog_' + record.id).dialog('destroy');
+                                }
+                            }, {
+                                text: '取消',
+                                iconCls: 'icon-cancel',
+                                handler: function () {
+                                    $('#selectParamsDialog_' + record.id).dialog('destroy');
+                                }
+                            }]
+                        });
+                    }
+                });
+
+            },
+            onUnselect: function (record) {
+                $("#" + record.id).remove();
+            }
         });
 
-        $('#comment').textbox({
+        //字段别名
+        $('#asName').textbox({
             editable: true,
             readonly: false,
-            required: true,
-            value: '{{.sdtBdiBusiFields.Comment}}'
+            value: '{{.sdtBdiBusiFields.AsName}}'
         });
     }
 </script>

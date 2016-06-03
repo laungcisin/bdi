@@ -4,6 +4,7 @@ import (
 	"bdi/models"
 	"fmt"
 	"strconv"
+	"encoding/json"
 )
 
 type SdtBdiBusiConfigController struct {
@@ -102,8 +103,6 @@ func (this *SdtBdiBusiConfigController) Update() {
 		return
 	}
 
-	fmt.Println("sdtBdiBusiConfig: ", sdtBdiBusiConfig)
-
 	err = sdtBdiBusiConfig.Update()
 	if err != nil {
 		returnData.Success = false
@@ -151,4 +150,77 @@ func (this *SdtBdiBusiConfigController) Synchronize() {
 	this.Data[JSON_STRING] = returnData
 	this.ServeJSON()
 	return
+}
+
+//行上移
+func (this *SdtBdiBusiConfigController) RowMoveUp() {
+	var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiBusiConfig := new(models.SdtBdiBusiConfig)
+	updated := this.GetString("updated")
+
+	if err = json.Unmarshal([]byte(updated), sdtBdiBusiConfig); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	if err = sdtBdiBusiConfig.RowMoveUp(); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "数据更新失败"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据更新成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
+
+//行下移
+func (this *SdtBdiBusiConfigController) RowMoveDown() {
+	var err error
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiBusiConfig := new(models.SdtBdiBusiConfig)
+	updated := this.GetString("updated")
+
+	if err = json.Unmarshal([]byte(updated), sdtBdiBusiConfig); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	if err = sdtBdiBusiConfig.RowMoveDown(); err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "数据更新失败"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据更新成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+
 }

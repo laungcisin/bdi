@@ -125,6 +125,7 @@
                 text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
+                    debugger;
                     var resultArray = new Array();
                     var treeObj = $('#columnSelectTree');
                     var nodes = treeObj.tree('getChecked');
@@ -169,7 +170,7 @@
                                     sequence: nodes[i].attributes.sequence,
                                     comment: nodes[i].attributes.comment,
                                     dataType: nodes[i].attributes.dataType,
-                                    dataLength: nodes[i].attributes.dataLength
+                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g,''))
                                 };
 
                                 tableObj.childColumns.push(columnObj);
@@ -181,7 +182,7 @@
                                     sequence: nodes[i].attributes.sequence,
                                     comment: nodes[i].attributes.comment,
                                     dataType: nodes[i].attributes.dataType,
-                                    dataLength: nodes[i].attributes.dataLength
+                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g,''))
                                 };
 
                                 resultArray[foundIndex].childColumns.push(columnObj);

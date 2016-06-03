@@ -15,26 +15,26 @@
         <tr>
             <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">已选表：</th>
             <td>
-                <input name="selectedTables" id="selectedTables"/>
+                <input name="selectedTablesCombobox" id="selectedTablesCombobox"/>
             </td>
         </tr>
 
         <tr>
-            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">选择方式：</th>
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">业务配置：</th>
             <td>
-                <input type="radio" name="checkType" checked value="0"/> 表
-                <input type="radio" name="checkType" value="1"/> 字段
+                <input type="radio" name="checkType" checked value="0"/> 业务表
+                <input type="radio" name="checkType" value="1"/> 业务字段
             </td>
         </tr>
 
         <tr id="tableDiv">
-            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">表：</th>
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">业务表：</th>
             <td>
                 <ul id="busiTablesTree" style="height: 100px;"></ul>
             </td>
         </tr>
         <tr id="columnsDiv" style="height: 100px;display:none;">
-            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">字段：</th>
+            <th style="width: 140px;text-align: right; padding: 5px 5px 5px 5px;">业务字段：</th>
             <td>
                 <ul id="busiColumnsTree" style="height: 100px;"></ul>
             </td>
@@ -75,8 +75,8 @@
      * 初始化新增窗口。
      */
     function initAddSdtBdiBusiDetailConfigDialog() {
-        $("#id").val('{{.id}}');
-        $("#bdiId").val('{{.bdiId}}');
+        $("#id").val('{{.sdtBdiBusi.Id}}');
+        $("#bdiId").val('{{.sdtBdiBusi.BdiId}}');
 
         //busi处理类型
         $('#processType').combobox({
@@ -88,14 +88,15 @@
             width: '280px',
             editable: false,
             readonly: false,
+            required: true,
             value: '{{.sdtBdiBusi.ProcessType}}',
             onChange: function (newValue, oldValue) {
             }
         });
 
         // 已选表
-        $('#selectedTables').combobox({
-            url: '/sdtBdiBusi/selectedTables?bdiId={{.bdiId}}&busiId={{.sdtBdiBusi.Id}}',
+        $('#selectedTablesCombobox').combobox({
+            url: '/sdtBdiBusi/selectedTables?bdiId={{.sdtBdiBusi.BdiId}}&busiId={{.sdtBdiBusi.Id}}',
             valueField: 'id',
             textField: 'text',
             panelHeight: 'auto',

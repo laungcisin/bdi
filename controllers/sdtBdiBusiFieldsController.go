@@ -82,7 +82,7 @@ func (this *SdtBdiBusiFieldsController) AddFields() {
 	}{}
 
 	sdtBdiBusiFields := new(models.SdtBdiBusiFields)
-	var ob []models.SdtBdiBusiFields
+	var ob []models.TableTreeAttributes
 	err = json.Unmarshal(this.Ctx.Input.RequestBody, &ob)
 	if err != nil {
 		fmt.Println(err)
@@ -228,43 +228,6 @@ func (this *SdtBdiBusiFieldsController) AddPage() {
 	bdiId, _ := this.GetInt("bdiId")
 	this.Data["bdiId"] = bdiId
 	this.TplName = "sdtBdiBusiFields/addDialog.html"
-}
-
-//新增
-func (this *SdtBdiBusiFieldsController) Add() {
-	var err error
-	returnData := struct {
-		Success bool   `json:"success"`
-		Message string `json:"message"`
-	}{}
-
-	var ob []models.TableTreeAttributes
-	err = json.Unmarshal(this.Ctx.Input.RequestBody, &ob)
-	if err != nil {
-		fmt.Println(err)
-		returnData.Success = false
-		returnData.Message = "解析参数出错"
-		this.Data[JSON_STRING] = returnData
-		this.ServeJSON()
-		return
-	}
-
-	sdtBdiBusi := new(models.SdtBdiBusi)
-	err = sdtBdiBusi.AddBusiAndAddBusiConfig(ob)
-	if err != nil {
-		fmt.Println(err)
-		returnData.Success = false
-		returnData.Message = "保存数据出错"
-		this.Data[JSON_STRING] = returnData
-		this.ServeJSON()
-		return
-	}
-
-	returnData.Success = true
-	returnData.Message = "新增数据成功！"
-	this.Data[JSON_STRING] = returnData
-	this.ServeJSON()
-	return
 }
 
 // 更新Dialog

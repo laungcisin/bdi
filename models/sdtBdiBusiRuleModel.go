@@ -174,7 +174,13 @@ func (this *SdtBdiBusiRule) AddColumn(bdiId int, fieldsIds []string, tableTreeAt
 			var lastFieldsId int64 = 0
 
 			if *count < 1 { //没有，新增
-				res, err := o.Raw(insertFieldSql, latestBusiId, bdiId, fieldValue.Name, maxSequence, fieldValue.DataType, fieldValue.DataLength, 0, time.Now()).Exec()
+				var dataLength string
+				if fieldValue.DataLength < 1 {
+					dataLength = ""
+				}else {
+					dataLength = string(fieldValue.DataLength)
+				}
+				res, err := o.Raw(insertFieldSql, latestBusiId, bdiId, fieldValue.Name, maxSequence, fieldValue.DataType, dataLength, 0, time.Now()).Exec()
 				if err != nil {
 					fmt.Println(err)
 					o.Rollback()
@@ -215,7 +221,10 @@ func (this *SdtBdiBusiRule) AddColumn(bdiId int, fieldsIds []string, tableTreeAt
 			if fieldsId < 1 {
 				continue
 			}
-			_, err = o.Raw(" insert into sdt_bdi_busi_rule(bdi_id, field_id, user_code, create_time)values(?, ?, ?, ?) ", bdiId, fieldsId, 0, time.Now()).Exec()
+
+			var insertSql = " insert into sdt_bdi_busi_rule (bdi_id, field_id, name, user_code, create_time) " +
+			" select f.bdi_id, f.id, f.comment, 1, now() from sdt_bdi_busi_fields f where f.id = ? limit 1 "
+			_, err = o.Raw(insertSql, fieldsId).Exec()
 			if err != nil {
 				fmt.Println(err)
 				o.Rollback()

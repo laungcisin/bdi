@@ -27,23 +27,37 @@
                 }
             }],
             columns: [[
+//                {
+//                    field: 'sdt_bdi_busi_config_oid',
+//                    title: '选择',
+//                    width: '50px',
+//                    align: 'center',
+//                    formatter: function (value, row, index) {
+//                        return '<input type="radio" class="selectSdtBdiBusiConfigRadioClass" name="selectSdtBdiBusiConfigRadio" id="selectSdtBdiBusiConfigRadio' + index + '" value="' + row.Id + '" />';
+//                    }
+//                },
                 {
-                    field: 'sdt_bdi_busi_config_oid',
-                    title: '选择',
-                    width: '50px',
+                    field: 'busi_config_ctr',
+                    title: '操作',
+                    width: '100px',
                     align: 'center',
                     formatter: function (value, row, index) {
-                        return '<input type="radio" class="selectSdtBdiBusiConfigRadioClass" name="selectSdtBdiBusiConfigRadio" id="selectSdtBdiBusiConfigRadio' + index + '" value="' + row.Id + '" />';
+                        var e = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, true)">上</button>';
+                        var d = '<button style="padding:0 5px 0 5px;" onclick="move(event, this, false)">下</button>';
+                        return e + d;
                     }
                 },
                 {
                     field: 'Id', title: 'Id', width: '50px', align: 'center', hidden: true
                 },
+//                {
+//                    field: 'BusiId', title: '业务表ID', width: '80px', align: 'center', hidden: false
+//                },
                 {
-                    field: 'BusiId', title: '业务表ID', width: '80px', align: 'center', hidden: false
+                    field: 'Sequence', title: '序号', width: '80px', align: 'center'
                 },
                 {
-                    field: 'BusiName', title: '业务表名字', width: '160px', align: 'center'
+                    field: 'BusiName', title: '业务表名字', width: '160px', align: 'left'
                 },
                 {
                     field: 'Name', title: '配置业务表名', width: '150px', align: 'left'
@@ -51,21 +65,6 @@
                 {
                     field: 'CnName', title: '配置业务表中文名', width: '150px', align: 'left'
                 },
-                /*
-                {
-                    field: 'IsProcess',
-                    title: '是否经过处理',
-                    width: '150px',
-                    align: 'center',
-                    formatter: function (value, row, index) {
-                        if (value == '0') {
-                            return '否';
-                        } else {
-                            return '是';
-                        }
-                    }
-                },
-                */
                 {
                     field: 'SelectStar', title: '选择字段', width: '150px', align: 'left'
                 },
@@ -76,10 +75,10 @@
                     field: 'AsName', title: '别名', width: '150px', align: 'left'
                 },
                 {
-                    field: 'ProcessDataType', title: '数据类型', width: '100px', align: 'center'
+                    field: 'ProcessDataType', title: '数据类型', width: '100px', align: 'left'
                 },
                 {
-                    field: 'ProcessDataLength', title: '数据长度', width: '100px', align: 'center'
+                    field: 'ProcessDataLength', title: '数据长度', width: '100px', align: 'left'
                 },
                 {
                     field: 'ProcessType', title: '处理类型', width: '110px', align: 'center'
@@ -151,19 +150,19 @@
                         $('#updateSdtBdiBusiConfigForm').form('submit', {
                             url: '/sdtBdiBusiConfig/update',
                             onSubmit: function () {
-                                if($("#updateSdtBdiBusiConfigForm").form("validate")) {
+                                if ($("#updateSdtBdiBusiConfigForm").form("validate")) {
                                     var paramsValue = $('#paramsTag').tagEditor('getTags')[0].tags;
-                                    if(paramsValue == '') {
+                                    if (paramsValue == '') {
                                         $.messager.alert('提示消息', '请输入参数！');
                                         return false;
                                     }
                                     $('#params').val(paramsValue);
 
                                     var operatorsValue = $('#operatorsTag').tagEditor('getTags')[0].tags;
-                                    if(operatorsValue == '') {
-                                        $.messager.alert('提示消息', '请输入参数！');
-                                        return false;
-                                    }
+//                                    if (operatorsValue == '') {
+//                                        $.messager.alert('提示消息', '请输入参数！');
+//                                        return false;
+//                                    }
                                     $('#operators').val(operatorsValue);
                                     return true;
                                 }
@@ -201,6 +200,69 @@
                 timeout: 1000,
                 showType: 'slide'
             });
+        }
+    }
+
+    //上下行移动
+    function move(e, target, isUp) {
+        var rows = $('#sdtBdiBusiConfigDataGrid').datagrid('getRows');
+
+        //另一种方式取DataGrid索引
+        var $view = $(target).closest('div.datagrid-view');
+        var index = $(target).closest('tr.datagrid-row').attr('datagrid-row-index');
+        var $row = $view.find('tr[datagrid-row-index=' + index + ']');
+
+        if (isUp) {//上移
+            debugger;
+            if (index == 0) {//第一行不上移
+            } else {
+                var effectRow = new Object();
+                var obj = rows[index];
+                effectRow["updated"] = JSON.stringify(rows[index]);
+
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+                    cache: false,
+                    url: '/sdtBdiBusiConfig/rowMoveUp',
+                    data: effectRow,
+                    dataType: 'JSON',
+                    success: function (rsp) {
+                        if (rsp.success) {
+                            $('#sdtBdiBusiConfigDataGrid').datagrid('reload');
+                        }
+                    },
+                    error: function () {
+                        $.messager.alert("提示", "提交错误了！");
+                        $('#sdtBdiBusiConfigDataGrid').datagrid('reload');
+                    }
+                });
+            }
+        } else {//下移
+            debugger;
+            if (index == (rows.length - 1)) {//最后一行不下移
+            } else {
+                var effectRow = new Object();
+                effectRow["updated"] = JSON.stringify(rows[index]);
+
+                $.ajax({
+                    type: 'POST',
+                    async: false,
+                    cache: false,
+                    url: '/sdtBdiBusiConfig/rowMoveDown',
+                    data: effectRow,
+                    dataType: 'JSON',
+                    success: function (rsp) {
+                        if (rsp.success) {
+                            $('#sdtBdiBusiConfigDataGrid').datagrid('reload');
+                        }
+                    },
+                    error: function () {
+                        $.messager.alert("提示", "提交错误了！");
+                        $('#sdtBdiBusiConfigDataGrid').datagrid('reload');
+                    }
+                });
+            }
         }
     }
 </script>

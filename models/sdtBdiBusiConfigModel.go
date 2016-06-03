@@ -20,6 +20,7 @@ type SdtBdiBusiConfig struct {
 	ProcessType       string `form:"processType"`       //处理类型
 	Operators         string `form:"operators"`         //操作符
 	Params            string `form:"params"`            //参数
+	Sequence          int    `form:"sequence"`          //序号
 
 	UserCode   string    `form:"userCode"`   //创建人ID
 	CreateTime time.Time `form:"createTime"` //创建时间
@@ -52,7 +53,7 @@ func (this *SdtBdiBusiConfig) GetAllSdtBdiBusiConfig(rows int, page int) ([]SdtB
 		" where " +
 		"	bdi.id = ? " +
 		" and config.busi_id = busi.id " +
-		" and busi.bdi_id = bdi.id " +
+		" and busi.bdi_id = bdi.id order by config.sequence " +
 		"  limit ?, ? "
 
 	_, err := o.Raw(querySql, this.BdiId, (page-1)*rows, page*rows).QueryRows(&sdtBdiBusiConfigSlice)
@@ -118,8 +119,8 @@ func (this *SdtBdiBusiConfig) Update() error {
 		" user_code = ?, " +
 		" edit_time = ? " +
 		" where id = ? "
-	_, err = o.Raw(updateString, this.Name, this.CnName,this.ProcessColumn, this.ProcessDataType,
-			this.ProcessDataLength, this.Operators, this.SelectStar, this.AsName, this.ProcessType, this.Params, 0,
+	_, err = o.Raw(updateString, this.Name, this.CnName, this.ProcessColumn, this.ProcessDataType,
+		this.ProcessDataLength, this.Operators, this.SelectStar, this.AsName, this.ProcessType, this.Params, 0,
 		time.Now(), this.Id).Exec()
 	if err != nil {
 		fmt.Println(err)
@@ -163,13 +164,98 @@ func (this *SdtBdiBusiConfig) Synchronize() error {
 		"		sdt_bdi_busi busi " +
 		"	where " +
 		"		busi.bdi_id = ? " +
-		"	and busi.id = cfg.busi_id " +
+		" 	and cfg.as_name is not null and LENGTH(TRIM(cfg.as_name)) > 0 " +
+	"	and busi.id = cfg.busi_id " +
 		"	group by cfg.as_name " +
 		") as t where not exists ( select f.busi_id from sdt_bdi_busi_fields f where f.busi_id = t.busi_id and f.name = t.name) "
 	_, err = o.Raw(insertString, this.BdiId).Exec()
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("更新数据出错！")
+		o.Rollback()
+		return err
+	}
+
+	o.Commit()
+	return nil
+}
+
+//行上移
+func (this *SdtBdiBusiConfig) RowMoveUp() error {
+	var err error
+	o := orm.NewOrm()
+	o.Begin()
+
+	//先查询出 sequence 减 1 的行记录id
+	var incFieldsIdSql string =
+		" select c.id from sdt_bdi_busi_config c where c.busi_id in (select b2.id from sdt_bdi_busi b2 where b2.bdi_id = " +
+		"	(select b1.bdi_id from sdt_bdi_busi b1, sdt_bdi_busi_config c where b1.id = c.busi_id and c.id = ? limit 1)) " +
+		"	 and c.sequence = (select t.sequence - 1 from sdt_bdi_busi_config t where id = ? limit 1) limit 1 "
+
+	incFieldsId := new(int)
+	err = o.Raw(incFieldsIdSql, this.Id, this.Id).QueryRow(incFieldsId)
+	if err != nil {
+		fmt.Println("err1: ", err)
+		o.Rollback()
+		return err
+	}
+
+	var updateSql string = " update sdt_bdi_busi_config set sequence = ?, edit_time = ? where id = ? "
+
+	//1. 更新下移行记录的 Sequence
+	_, err = o.Raw(updateSql, this.Sequence, time.Now(), incFieldsId).Exec()
+	if err != nil {
+		fmt.Println("err2: ", err)
+		o.Rollback()
+		return err
+	}
+
+	//2. 更新上移行记录的 Sequence
+	_, err = o.Raw(updateSql, this.Sequence-1, time.Now(), this.Id).Exec()
+	if err != nil {
+		fmt.Println("err3: ", err)
+		o.Rollback()
+		return err
+	}
+
+	o.Commit()
+	return nil
+}
+
+//行下移
+func (this *SdtBdiBusiConfig) RowMoveDown() error {
+	var err error
+	o := orm.NewOrm()
+	o.Begin()
+
+	//先查询出 sequence 加 1 的行记录id
+	var decFieldsIdSql string =
+	" select c.id from sdt_bdi_busi_config c where c.busi_id in (select b2.id from sdt_bdi_busi b2 where b2.bdi_id = " +
+	" (select b1.bdi_id from sdt_bdi_busi b1, sdt_bdi_busi_config c where b1.id = c.busi_id and c.id = ? limit 1)) " +
+	"	 and c.sequence = (select t.sequence + 1 from sdt_bdi_busi_config t where id = ? limit 1) limit 1 "
+	decFieldId := new(int)
+
+	err = o.Raw(decFieldsIdSql, this.Id, this.Id).QueryRow(decFieldId)
+	if err != nil {
+		fmt.Println("err: ", err)
+		o.Rollback()
+		return err
+	}
+
+	var updateSql string = " update sdt_bdi_busi_config set sequence = ?, edit_time = ? where id = ? "
+
+	//1. 更新下移行记录的 Sequence
+	_, err = o.Raw(updateSql, this.Sequence+1, time.Now(), this.Id).Exec()
+	if err != nil {
+		fmt.Println("err: ", err)
+		o.Rollback()
+		return err
+	}
+
+	//2. 更新上移行记录的 Sequence
+	_, err = o.Raw(updateSql, this.Sequence, time.Now(), decFieldId).Exec()
+	if err != nil {
+		fmt.Println("err: ", err)
 		o.Rollback()
 		return err
 	}

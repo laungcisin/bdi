@@ -133,40 +133,104 @@ func (this *SdtBdiBusi) Add() error {
 }
 
 // checkType - 0: 表, checkType - 1: 字段。
-func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes) error {
+func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selectedTableSlice []string, busiId int, bdiId int) error {
 	var err error
 	var latestBusiId int64
 	o := orm.NewOrm()
 	o.Begin()
 
-	var updateSql = "update sdt_bdi_busi set  " +
-		" process_type = ?, " +
-		" user_code = ?, " +
-		" edit_time = ? " +
-		" where id = ?"
-
-	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, as_name, cn_name, create_time) values (?, ?, ?, ?, ?)"
-	var insertBusiConfigSql = " insert into sdt_bdi_busi_config(busi_id, cn_name, process_column, process_data_type, process_data_length, user_code, create_time) " +
-		" values(?, ?, ?, ?, ?, ?, ?) "
-
-	for _, tableValue := range busiTreeAttributes {
-		_, err = o.Raw(updateSql, 1, 0, time.Now(), tableValue.BusiId).Exec()
+	for _, v := range selectedTableSlice{
+		num := new(int)
+		err = o.Raw(" select count(*) as counts from sdt_bdi_busi_config c, sdt_bdi_busi b " +
+			" where c.name = concat(b.name, ' ', b.as_name) and b.id = ? ", v).QueryRow(&num)
 		if err != nil {
 			fmt.Println(err)
 			o.Rollback()
 			return err
 		}
 
+		if *num < 1{
+			//新增前获取最大 sequence
+			num := new(int)
+			err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
+			if err != nil {
+				o.Rollback()
+				return err
+			}
+
+			maxSequence := 0
+			if num == nil {
+				maxSequence = 0
+			} else {
+				maxSequence = *num
+			}
+
+			var insertSql string = " insert into sdt_bdi_busi_config(busi_id, name, sequence, cn_name, user_code, create_time) " +
+			" select b.id as busi_id, concat(b.name, ' ', b.as_name) as name, ?, b.cn_name, 0, now() from sdt_bdi_busi b where b.id = ? "
+
+			_, err = o.Raw(insertSql, maxSequence + 1, v).Exec()
+			if err != nil {
+				fmt.Println(err)
+				o.Rollback()
+				return err
+			}
+
+		}
+	}
+
+	var updateSql = "update sdt_bdi_busi set  " +
+		" is_process = ?, " +
+		" process_type = ?, " +
+		" user_code = ?, " +
+		" edit_time = ? " +
+		" where id = ?"
+
+	_, err = o.Raw(updateSql, 1, this.ProcessType, 1, time.Now(), busiId).Exec()
+	if err != nil {
+		fmt.Println(err)
+		o.Rollback()
+		return err
+	}
+
+	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, as_name, cn_name, create_time) values (?, ?, ?, ?, ?)"
+	for _, tableValue := range busiTreeAttributes {
 		if tableValue.CheckType == 0 { //表
-			_, err = o.Raw(" insert into sdt_bdi_busi_config(busi_id, name, cn_name, user_code, create_time) "+
-				" values(?, ?, ?, ?, ?) ",
-				tableValue.BusiId, tableValue.Name+" "+this.tableAliasName(tableValue.Name), tableValue.CnName, 0, time.Now()).Exec()
+			num := new(int)
+			err = o.Raw(" select count(*) as counts from sdt_bdi_busi_config c where locate(?, c.name) > 0 ", tableValue.Name).QueryRow(&num)
 
 			if err != nil {
 				fmt.Println(err)
 				o.Rollback()
 				return err
 			}
+
+			if *num < 1 {
+				//新增前获取最大 sequence
+				num := new(int)
+				err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
+				if err != nil {
+					o.Rollback()
+					return err
+				}
+
+				maxSequence := 0
+				if num == nil {
+					maxSequence = 0
+				} else {
+					maxSequence = *num
+				}
+
+				_, err = o.Raw(" insert into sdt_bdi_busi_config(busi_id, name, sequence, cn_name, user_code, create_time) "+
+				" values(?, ?, ?, ?, ?, ?) ",
+					tableValue.BusiId, tableValue.Name+" "+this.tableAliasName(tableValue.Name), maxSequence + 1, tableValue.CnName, 0, time.Now()).Exec()
+
+				if err != nil {
+					fmt.Println(err)
+					o.Rollback()
+					return err
+				}
+			}
+
 			continue
 		}
 
@@ -213,8 +277,23 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes) error {
 				return err
 			}
 
-			_, err = o.Raw(insertBusiConfigSql, latestBusiId, fieldValue.Comment, fieldValue.Name, fieldValue.DataType,
-				fieldValue.DataLength, 0, time.Now()).Exec()
+			//新增前获取最大 sequence
+			err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
+			if err != nil {
+				o.Rollback()
+				return err
+			}
+
+			maxSequence := 0
+			if num == nil {
+				maxSequence = 0
+			} else {
+				maxSequence = *num
+			}
+
+			_, err = o.Raw(" insert into sdt_bdi_busi_config(busi_id, cn_name, sequence, process_column, process_data_type, process_data_length, user_code, create_time) " +
+			" values(?, ?, ?, ?, ?, ?, ?, ?) ", latestBusiId, fieldValue.Comment, maxSequence + 1, fieldValue.Name, fieldValue.DataType,
+				fieldValue.DataLength, 1, time.Now()).Exec()
 
 			if err != nil {
 				fmt.Println(err)

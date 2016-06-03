@@ -17,57 +17,57 @@
 
     <table>
         <tr>
-            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">配置业务表名：</th>
+            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">配置业务表名：</td>
             <td>
                 <input name="name" id="name" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">配置业务表中文名：</th>
+            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">配置业务表中文名：</td>
             <td>
                 <input name="cnName" id="cnName" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">选择字段：</th>
+            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">选择字段：</td>
             <td>
                 <input name="selectStar" id="selectStar" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">别名：</th>
+            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">别名：</td>
             <td>
                 <input name="asName" id="asName" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">处理字段：</th>
+            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">处理字段：</td>
             <td>
                 <input name="processColumn" id="processColumn" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">处理类型：</th>
+            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">处理类型：</td>
             <td>
                 <input name="processType" id="processType" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">操作符：</th>
-            <td>
+            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">操作符：</td>
+            <td style="width: 300px">
                 <input name="operatorsTag" id="operatorsTag" style="width: 220px"/>
             </td>
-            <th></th>
+            <td></td>
             <td>
                 <a id="selectOperatorsButton" href="#">选择操作符</a>
             </td>
         </tr>
         <tr>
-            <th style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">参数：</th>
-            <td>
+            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">参数：</td>
+            <td style="width: 300px">
                 <input name="paramsTag" id="paramsTag" style="width: 220px"/>
             </td>
-            <th></th>
+            <td></td>
             <td>
                 <a id="selectParamsButton" href="#">选择参数</a>
             </td>
@@ -102,6 +102,8 @@
      */
     function initUpdateSdtBdiBusiDialog() {
         $("#id").val('{{.sdtBdiBusiConfig.Id}}');
+        $("#processDataType").val('{{.sdtBdiBusiConfig.ProcessDataType}}');
+        $("#processDataLength").val('{{.sdtBdiBusiConfig.ProcessDataLength}}');
 
         var tableName = '{{.sdtBdiBusiConfig.Name}}';
         var tableAlias = tableName.split(" ")[1];
@@ -210,13 +212,20 @@
                                     return;
                                 }
 
+                                var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+                                var resArray = tName.split("_");
+                                var tableAliasTemp = '';
+                                for (var i = 0; i < resArray.length; i++) {
+                                    tableAliasTemp += resArray[i].substr(0, 1);
+                                }
+
                                 var columnNames = "";
                                 var dataTypes = '';
                                 var dataLengths = '';
                                 for (var i = 0; i < selectNode.length; i++) {
-                                    columnNames = columnNames + tableAlias + "." + selectNode[i].id + ", ";
+                                    columnNames = columnNames + tableAliasTemp + "." + selectNode[i].id + ", ";
                                     dataTypes = dataTypes + selectNode[i].attributes.dataType + ", ";
-                                    dataLengths = dataLengths + selectNode[i].attributes.dataLength + ", ";
+                                    dataLengths = dataLengths + selectNode[i].attributes.columnType.replace(/\D/g,'') + ", ";
                                 }
 
                                 $(e.data.target).textbox('setValue', columnNames.substring(0, columnNames.length - 2));
@@ -304,17 +313,23 @@
                         iconCls: 'icon-ok',
                         handler: function () {
                             debugger;
-                            var selectNode = $('#columnSelectTree').tree('getSelected');
+                            var selectNode = $('#columnSelectTree').tree('getChecked');
                             if (selectNode == undefined || selectNode == null) {
-                                $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                                $.messager.alert('提示信息', '请选择表字段!', 'info');
                                 return;
                             }
 
-                            if ((selectNode.attributes.isTable == false && selectNode.attributes.tableName == '') || selectNode.attributes.isTable) {
-                                $.messager.alert('提示信息', '只能选择表字段!', 'info');
-                                return;
+                            var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+                            var resArray = tName.split("_");
+                            var tableAliasTemp = '';
+                            for (var i = 0; i < resArray.length; i++) {
+                                tableAliasTemp += resArray[i].substr(0, 1);
                             }
-                            $('#paramsTag').tagEditor('addTag', tableAlias + "." + selectNode.id);
+
+                            for (var i = 0; i < selectNode.length; i++) {
+                                $('#paramsTag').tagEditor('addTag', tableAliasTemp + "." + selectNode[i].id);
+                            }
+
                             $("#selectParamsSelectDialog").dialog('destroy');
                         }
                     }, {

@@ -96,6 +96,8 @@ func init() {
 	beego.Router("/sdtBdiBusiConfig/updatePage", &controllers.SdtBdiBusiConfigController{}, "*:UpdatePage")           //更新页面
 	beego.Router("/sdtBdiBusiConfig/update", &controllers.SdtBdiBusiConfigController{}, "*:Update")                   //更新内容
 	beego.Router("/sdtBdiBusiConfig/content/synchronize", &controllers.SdtBdiBusiConfigController{}, "*:Synchronize") //同步内容
+	beego.Router("/sdtBdiBusiConfig/rowMoveUp", &controllers.SdtBdiBusiConfigController{}, "*:RowMoveUp")             //行上移
+	beego.Router("/sdtBdiBusiConfig/rowMoveDown", &controllers.SdtBdiBusiConfigController{}, "*:RowMoveDown")         //行下移
 
 	beego.Router("/sdtBdiBusiFields/index", &controllers.SdtBdiBusiFieldsController{}, "*:Index")                               //列表首页
 	beego.Router("/sdtBdiBusiFields/all", &controllers.SdtBdiBusiFieldsController{}, "*:All")                                   //列出所有数据

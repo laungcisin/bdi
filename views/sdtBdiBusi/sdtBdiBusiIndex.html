@@ -18,20 +18,7 @@
             pagination: true,
             url: '/sdtBdiBusi/all?bdiId=' + bdiId,
             height: '390px',
-            toolbar: [/*{
-             text: '新增',
-             iconCls: 'icon-add',
-             handler: function () {
-             addSdtBdiBusiDialog();
-             }
-             }, '-', {
-             iconCls: 'icon-edit',
-             text: '编辑',
-             plain: 'true',
-             onClick: function () {
-             updateSdtBdiBusiDialog();
-             }
-             }*/],
+            toolbar: [],
             columns: [[
                 {
                     field: 'sdt_bdi_busi_oid',
@@ -59,7 +46,7 @@
                 {
                     field: 'sdt_bdi_busi_opt1', title: '操作', width: '150px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
-                        return '<a href="#" class="sdtBdiBusiClass" onclick="updateSdtBdiBusiDialog(' + rowData.Id + ')">加工</a>';
+                        return '<a href="#" class="sdtBdiBusiClass" onclick="updateSdtBdiBusiDialog(' + rowData.Id + ')">加工处理</a>';
                     }
                 }
             ]],
@@ -113,9 +100,6 @@
      * 更新指标计算业务表-Dialog。
      */
     function updateSdtBdiBusiDialog(busiId) {
-//        debugger;
-//        var row = $("#sdtBdiBusiDataGrid").datagrid("getSelected");
-//        if (row) {
         $('<div></div>').dialog({
             id: 'updateSdtBdiBusiDialog',
             title: '更新指标计算业务表',
@@ -141,10 +125,10 @@
                     var treeObj;
                     var nodes;
 
-                    if ($(this).val() == 0) {//表
+                    if ($("input[name='checkType']:checked").val() == 0) {//业务表
                         treeObj = $('#busiTablesTree');
                         nodes = treeObj.tree('getChecked');
-                    } else {//字段
+                    } else {//业务字段
                         treeObj = $('#busiColumnsTree');
                         nodes = treeObj.tree('getChecked');
                     }
@@ -196,7 +180,7 @@
                                     sequence: nodes[i].attributes.sequence,
                                     comment: nodes[i].attributes.comment,
                                     dataType: nodes[i].attributes.dataType,
-                                    dataLength: nodes[i].attributes.dataLength
+                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g, ''))
                                 };
 
                                 tableObj.childColumns.push(columnObj);
@@ -208,7 +192,7 @@
                                     sequence: nodes[i].attributes.sequence,
                                     comment: nodes[i].attributes.comment,
                                     dataType: nodes[i].attributes.dataType,
-                                    dataLength: nodes[i].attributes.dataLength
+                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g, ''))
                                 };
 
                                 resultArray[foundIndex].childColumns.push(columnObj);
@@ -216,46 +200,47 @@
                         }
                     }
 
-//                    console.info(JSON.stringify(resultArray));
-                    $.ajax({
-                        url: "/sdtBdiBusi/update",
-                        async: false,
-                        cache: false,
-                        type: 'POST',
-                        data: JSON.stringify(resultArray),
-                        dataType: 'json',
-                        error: function (data) {
-                            $.messager.alert('提示消息', data.message);
-                        },
-                        success: function (data) {
-                            if (data.success) {
-                                //成功选择后，sdt_bdi_busi_config-详细配置Dialog
-                                $("#updateSdtBdiBusiDialog").dialog('destroy');
-                                addBdiBusiConfigDetailDialog();
-                            }
-                        }
+                    debugger;
+                    var effectRow = new Object();
+                    effectRow["selectedTables"] = JSON.stringify($('#selectedTablesCombobox').combobox('getValues'));
+                    effectRow["id"] = $("#id").val();
+                    effectRow["bdiId"] = $("#bdiId").val();
+                    effectRow["addTables"] = JSON.stringify(resultArray);
+                    effectRow["processType"] = $('#processType').combobox('getValue');
+
+                    $.post(
+                            "/sdtBdiBusi/update",
+                            effectRow,
+                            function (data) {
+                                if (data.success) {
+                                    //成功选择后，sdt_bdi_busi_config-详细配置Dialog
+                                    $("#updateSdtBdiBusiDialog").dialog('destroy');
+                                    addBdiBusiConfigDetailDialog();
+                                }
+                            },
+                            "JSON"
+                    ).error(function () {
+                        $.messager.alert("提示", "提交错误了！");
                     });
 
-//                        //提交表单
-//                        $('#updateSdtBdiBusiForm').form('submit', {
-//                            url: '/sdtBdiBusi/update',
-//                            onSubmit: function () {
-//                                return $("#updateSdtBdiBusiForm").form("validate");
-//                            },
-//                            //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
-//                            success: function (data) {
-//                                //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
-//                                var obj = jQuery.parseJSON(data);
-//                                if (obj.success) {
-//                                    $.messager.alert('提示消息', obj.message);
-//                                    $('#sdtBdiBusiDataGrid').datagrid('reload');
-//                                    $("#updateSdtBdiBusiDialog").dialog('destroy');
-//                                    $("#sdtBdiBusiDataGrid").datagrid("unselectRow", checkedSdtBdiBusiIndex);
-//                                } else {
-//                                    $.messager.alert('提示消息', obj.message);
-//                                }
+//                    $.ajax({
+//                        url: "/sdtBdiBusi/update",
+//                        async: false,
+//                        cache: false,
+//                        type: 'POST',
+//                        data: effectRow,
+//                        dataType: 'json',
+//                        error: function (data) {
+//                            $.messager.alert('提示消息', data.message);
+//                        },
+//                        success: function (data) {
+//                            if (data.success) {
+//                                //成功选择后，sdt_bdi_busi_config-详细配置Dialog
+//                                $("#updateSdtBdiBusiDialog").dialog('destroy');
+//                                addBdiBusiConfigDetailDialog();
 //                            }
-//                        });
+//                        }
+//                    });
                 }
             }, {
                 text: '取消',
@@ -265,14 +250,6 @@
                 }
             }]
         });
-//        } else {
-//            $.messager.show({
-//                title: '提示信息',
-//                msg: '请选择一条记录进行编辑！',
-//                timeout: 1000,
-//                showType: 'slide'
-//            });
-//        }
     }
 
     /**
