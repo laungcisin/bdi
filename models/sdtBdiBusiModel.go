@@ -278,7 +278,7 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 			}
 
 			//新增前获取最大 sequence
-			err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
+			err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
 			if err != nil {
 				o.Rollback()
 				return err
