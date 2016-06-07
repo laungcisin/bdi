@@ -46,9 +46,9 @@ func (this *SdtBdiResult) GetAllSdtBdiResult(rows int, page int) ([]SdtBdiResult
 	}
 
 	num := new(int)
-	var countSql = "select count(*) as counts from sdt_bdi_result "
+	var countSql = "select count(*) as counts from sdt_bdi_result where bdi_id = ? "
 
-	err = o.Raw(countSql).QueryRow(&num)
+	err = o.Raw(countSql, this.BdiId).QueryRow(&num)
 	if err != nil {
 		log.Fatal("查询表：" + this.GetTableName() + "出错！")
 		return nil, 0, err

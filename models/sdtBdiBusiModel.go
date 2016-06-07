@@ -152,7 +152,7 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 		if *num < 1{
 			//新增前获取最大 sequence
 			num := new(int)
-			err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
+			err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
 			if err != nil {
 				o.Rollback()
 				return err
@@ -166,9 +166,9 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 			}
 
 			var insertSql string = " insert into sdt_bdi_busi_config(busi_id, name, sequence, cn_name, user_code, create_time) " +
-			" select b.id as busi_id, concat(b.name, ' ', b.as_name) as name, ?, b.cn_name, 0, now() from sdt_bdi_busi b where b.id = ? "
+			" select ? as busi_id, concat(b.name, ' ', b.as_name) as name, ?, b.cn_name, 0, now() from sdt_bdi_busi b where b.id = ? "
 
-			_, err = o.Raw(insertSql, maxSequence + 1, v).Exec()
+			_, err = o.Raw(insertSql, maxSequence + 1, busiId, v).Exec()
 			if err != nil {
 				fmt.Println(err)
 				o.Rollback()
@@ -207,7 +207,7 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 			if *num < 1 {
 				//新增前获取最大 sequence
 				num := new(int)
-				err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
+				err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
 				if err != nil {
 					o.Rollback()
 					return err

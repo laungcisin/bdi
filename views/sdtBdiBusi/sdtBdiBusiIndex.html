@@ -162,6 +162,14 @@
                                 }
                             }
 
+                            debugger;
+                            var tName = nodes[i].attributes.tableName;
+                            var resArray = tName.split("_");
+                            var tableAliasTemp = '';
+                            for (var j = 0; j < resArray.length; j++) {
+                                tableAliasTemp += resArray[j].substr(0, 1);
+                            }
+
                             if (!found) {
                                 var tableObj = {
                                     checkType: parseInt($("input[name='checkType']:checked").val()),
@@ -175,7 +183,7 @@
                                 };
 
                                 var columnObj = {
-                                    name: nodes[i].id,
+                                    name: tableAliasTemp + "." + nodes[i].id,
                                     cnName: nodes[i].attributes.comment,
                                     sequence: nodes[i].attributes.sequence,
                                     comment: nodes[i].attributes.comment,
@@ -187,7 +195,7 @@
                                 resultArray.push(tableObj);
                             } else {
                                 var columnObj = {
-                                    name: nodes[i].id,
+                                    name: tableAliasTemp + "." + nodes[i].id,
                                     cnName: nodes[i].attributes.comment,
                                     sequence: nodes[i].attributes.sequence,
                                     comment: nodes[i].attributes.comment,

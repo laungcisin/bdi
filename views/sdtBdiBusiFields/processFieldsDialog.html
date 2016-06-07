@@ -57,6 +57,9 @@
         $("#dataType").val('{{.sdtBdiBusiFields.DataType}}');
         $("#dataLength").val('{{.sdtBdiBusiFields.DataLength}}');
 
+        var processTypeValue = '{{.sdtBdiBusiFields.ProcessType}}';
+        var processTypeValueArray = processTypeValue.trim().split("|");
+
         //处理类型
         $('#processTypeCombobox').combobox({
             url: '/sdtBdiBusiFields/processType',
@@ -67,7 +70,7 @@
             editable: false,
             readonly: false,
             multiple: true,
-            value: '{{.sdtBdiBusiFields.ProcessType}}',
+            value: processTypeValueArray,
             onChange: function (newValue, oldValue) {
             },
             onSelect: function (record) {
@@ -87,7 +90,7 @@
                     sortable: false,
                     initialTags: [],
                     forceLowercase: false,
-                    placeholder: '请输入条件表达式',
+                    placeholder: '输入完请按Enter结束',
                     onChange: function (field, editor, tags) {
                     },
                     beforeTagSave: function (field, editor, tags, tag, val) {
@@ -154,6 +157,9 @@
             },
             onUnselect: function (record) {
                 $("#" + record.id).remove();
+            },
+            onLoadSuccess: function () {
+                initTagEditor(processTypeValueArray, '{{.sdtBdiBusiFields.Params}}');//初始化-tagEditor
             }
         });
 
@@ -163,5 +169,117 @@
             readonly: false,
             value: '{{.sdtBdiBusiFields.AsName}}'
         });
+    }
+
+    function initTagEditor(processValueArr, paramsValue) {
+        debugger;
+
+        var processValueArray = new Array();
+        var index = 0;
+        for (var i = 0; i < processValueArr.length; i++) {
+            if (processValueArr[i] == "") {
+                continue;
+            }
+
+            processValueArray[index++] = processValueArr[i];
+        }
+
+        var paramsArray = paramsValue.split("|");
+        var data = $('#processTypeCombobox').combobox('getData');
+        var text = '';
+        for (var i = 0; i < processValueArray.length; i++) {
+            debugger;
+            if (processValueArray[i] == "") {
+                continue;
+            }
+
+            for (var j = 0; j < data.length; j++) {
+                if (data[j].id == processValueArray[i]) {
+                    text = data[j].text;
+                    break;
+                }
+            }
+
+            var htmlModal = '<tr id="' + processValueArray[i] + '">' +
+                    '<td style="width: 260px;text-align: right; padding: 5px 5px 5px 5px;">处理参数(' + text + ')：</td>' +
+                    '<td style="width: 300px;"><input name="paramsTag_' + processValueArray[i] + '" id="paramsTag_' + processValueArray[i] + '"/></td>' +
+                    '<td><a id="selectParamsButton_' + processValueArray[i] + '" href="#">选择参数</a></td>' +
+                    '</tr>';
+            var tr = $("#tb").append(htmlModal);
+
+            var tagId = '#paramsTag_' + processValueArray[i];
+            $(tagId).tagEditor({
+                maxTags: 100,
+                maxLength: 150,
+                removeDuplicates: false,
+                sortable: false,
+                initialTags: [],
+                forceLowercase: false,
+                placeholder: '输入完请按Enter结束',
+                onChange: function (field, editor, tags) {
+                },
+                beforeTagSave: function (field, editor, tags, tag, val) {
+                },
+                beforeTagDelete: function (field, editor, tags, val) {
+                },
+                onFocus: function () {
+                }
+            });
+
+            $(tagId).tagEditor('addTag', paramsArray[i].replace("~", ""));
+
+            $('#selectParamsButton_' + processValueArray[i]).linkbutton({
+                iconCls: 'icon-search',
+                onClick: function () {
+                    debugger;
+                    $('<div></div>').dialog({
+                        id: 'selectParamsDialog_' + processValueArray[i],
+                        title: '选择表字段',
+                        width: '500px',
+                        height: '300px',
+                        closed: false,
+                        cache: false,
+                        draggable: false,
+                        resizable: false,
+                        href: '/sdtBdiBusiFields/columnSelectTreePage',
+                        modal: true,
+                        onLoad: function () {
+                        },
+                        onClose: function () {
+                            $(this).dialog('destroy');
+                        },
+                        buttons: [{
+                            text: '保存',
+                            iconCls: 'icon-ok',
+                            handler: function () {
+                                var selectNode = $('#columnSelectTree').tree('getChecked');
+                                if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
+                                    $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                                    return;
+                                }
+
+                                var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+                                var resArray = tName.split("_");
+                                var tableAliasTemp = '';
+                                for (var j = 0; i < resArray.length; j++) {
+                                    tableAliasTemp += resArray[j].substr(0, 1);
+                                }
+
+                                for (var j = 0; j < selectNode.length; j++) {
+                                    $(tagId).tagEditor('addTag', tableAliasTemp + "." + selectNode[j].id);
+                                }
+                                $('#selectParamsDialog_' + processValueArray[i]).dialog('destroy');
+                            }
+                        }, {
+                            text: '取消',
+                            iconCls: 'icon-cancel',
+                            handler: function () {
+                                $('#selectParamsDialog_' + processValueArray[i]).dialog('destroy');
+                            }
+                        }]
+                    });
+                }
+            });
+        }
     }
 </script>

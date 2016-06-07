@@ -146,7 +146,7 @@ func (this *SdtBdiBusiRule) AddColumn(bdiId int, fieldsIds []string, tableTreeAt
 
 		for _, fieldValue := range tableValue.ChildColumns {
 			num := new(int)
-			var selectMaxSequence = " select max(sequence) from sdt_bdi_busi_fields where busi_id in ( select busi_id from sdt_bdi_busi where bdi_id = ?) "
+			var selectMaxSequence = " select max(sequence) from sdt_bdi_busi_fields where busi_id in ( select id from sdt_bdi_busi where bdi_id = ?) "
 			err = o.Raw(selectMaxSequence, bdiId).QueryRow(&num)
 			if err != nil {
 				fmt.Println(err)

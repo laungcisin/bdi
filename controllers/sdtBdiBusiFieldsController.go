@@ -207,6 +207,8 @@ func (this *SdtBdiBusiFieldsController) ProcessFieldsAdd() {
 
 	busiFieldsId, _ := this.GetInt("busiFieldsId")
 	sdtBdiBusiFields.Id = busiFieldsId
+	fmt.Println("sdtBdiBusiFields: ", sdtBdiBusiFields)
+
 	err = sdtBdiBusiFields.UpdateFields()
 	if err != nil {
 		returnData.Success = false

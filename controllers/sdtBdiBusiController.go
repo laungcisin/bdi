@@ -143,7 +143,6 @@ func (this *SdtBdiBusiController) Update() {
 	bdiId, _ := this.GetInt("bdiId")
 
 	addTables := this.GetString("addTables")
-	fmt.Println("addTables: ", addTables)
 	var addTableSlice []models.BusiTreeAttributes
 	if err = json.Unmarshal([]byte(addTables), &addTableSlice); err != nil {
 		fmt.Println(err)
