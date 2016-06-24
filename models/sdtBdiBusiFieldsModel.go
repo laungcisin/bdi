@@ -595,3 +595,42 @@ func (this *SdtBdiBusiFields) tableAliasName(tableName string) string {
 
 	return asName
 }
+
+func (this *SdtBdiBusiFields) Delete() error {
+	var err error
+	o := orm.NewOrm()
+	o.Begin()
+
+	var deleteSql = " delete from sdt_bdi_busi_fields where id = ? "
+	var updateSql =
+		" update sdt_bdi_busi_fields " +
+		" set sequence = sequence - 1 " +
+		" where " +
+		"	bdi_id = ( " +
+		"		select bdi_id " +
+		"		from (" +
+		"			select bdi_id from sdt_bdi_busi_fields where id = ? limit 1 " +
+		"		) as a " +
+		"	) " +
+		" and sequence > ( " +
+		"	select sequence " +
+		"	from ( " +
+		"			select sequence from sdt_bdi_busi_fields where id = ? limit 1 " +
+		"		) as b " +
+		")"
+
+	_, err = o.Raw(updateSql, this.Id, this.Id).Exec()
+	if err != nil {
+		o.Rollback()
+		return err
+	}
+
+	_, err = o.Raw(deleteSql, this.Id).Exec()
+	if err != nil {
+		o.Rollback()
+		return err
+	}
+
+	o.Commit()
+	return nil
+}

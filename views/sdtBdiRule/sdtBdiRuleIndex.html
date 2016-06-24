@@ -39,7 +39,6 @@
                     title: '选择',
                     width: '50px',
                     formatter: function (value, row, index) {
-                        debugger;
                         return '<input type="radio" class="bdiRuleIdRadio" id="bdiRuleIdRadio"' + index + ' value="' + row.Id + '" />';
                     }
                 },
@@ -66,7 +65,6 @@
                 }
             ]],
             onClickRow: function (index, row) {
-                debugger;
                 //加载完毕后获取所有的checkbox遍历
                 var radio = $("input[type='radio'].bdiRuleIdRadio")[index].disabled;
                 //如果当前的单选框不可选，则不让其选中
@@ -127,7 +125,6 @@
                         url: '/sdtBdiRule/add',
                         onSubmit: function () {
                             if ($("#addBdiRuleForm").form("validate")) {
-                                debugger;
                                 var conditionTagsArray = $('#demo1').tagEditor('getTags')[0].tags;
                                 var operationTagsArray = $('#demo2').tagEditor('getTags')[0].tags;
                                 $("#conditions").val(conditionTagsArray.join(' '));
@@ -185,12 +182,10 @@
                     text: '保存',
                     iconCls: 'icon-ok',
                     handler: function () {
-                        debugger;
                         //提交表单
                         $('#updateBdiSetForm').form('submit', {
                             url: '/sdtBdiSet/update',
                             onSubmit: function () {
-                                debugger;
                                 if ($("#updateBdiSetForm").form("validate")) {
                                     var res = $("#bdiDomainIdsCombobox").combobox('getValues');
                                     $("#bdiDomainIds").val(res.toString());
@@ -201,7 +196,6 @@
                             },
                             //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                             success: function (data) {
-                                debugger;
                                 //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
                                 var obj = jQuery.parseJSON(data);
                                 if (obj.success) {

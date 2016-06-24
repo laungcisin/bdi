@@ -127,7 +127,6 @@
             panelMaxHeight: '450px',
             //选择树节点触发事件
             onSelect: function (node) {
-                debugger;
                 var tree = $(this).tree;//返回树对象
                 var isLeaf = tree('isLeaf', node.target);//选中的节点是否为叶子节点,如果不是叶子节点,清除选中
 
@@ -138,7 +137,6 @@
                 }
             },
             onBeforeExpand: function (node) {
-                debugger;
                 var paramStr = "?param=" + node.text + "&ip=" + node.attributes.ip + "&port=" + node.attributes.port +
                         "&username=" + node.attributes.username + "&password=" + node.attributes.password + "&tableName=" + node.attributes.tableName + "&schemaName=" + node.attributes.schemaName;
                 $('#datasourceTree1').combotree("tree").tree("options").url = node.attributes.url + paramStr;

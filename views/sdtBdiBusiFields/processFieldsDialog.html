@@ -80,8 +80,6 @@
                         '</tr>';
                 var tr = $("#tb").append(htmlModal);
 
-                debugger;
-
                 var tagId = '#paramsTag_' + record.id;
                 $(tagId).tagEditor({
                     maxTags: 100,
@@ -104,7 +102,6 @@
                 $('#selectParamsButton_' + record.id).linkbutton({
                     iconCls: 'icon-search',
                     onClick: function () {
-                        debugger;
                         $('<div></div>').dialog({
                             id: 'selectParamsDialog_' + record.id,
                             title: '选择表字段',
@@ -172,8 +169,6 @@
     }
 
     function initTagEditor(processValueArr, paramsValue) {
-        debugger;
-
         var processValueArray = new Array();
         var index = 0;
         for (var i = 0; i < processValueArr.length; i++) {
@@ -188,7 +183,6 @@
         var data = $('#processTypeCombobox').combobox('getData');
         var text = '';
         for (var i = 0; i < processValueArray.length; i++) {
-            debugger;
             if (processValueArray[i] == "") {
                 continue;
             }
@@ -231,7 +225,6 @@
             $('#selectParamsButton_' + processValueArray[i]).linkbutton({
                 iconCls: 'icon-search',
                 onClick: function () {
-                    debugger;
                     $('<div></div>').dialog({
                         id: 'selectParamsDialog_' + processValueArray[i],
                         title: '选择表字段',

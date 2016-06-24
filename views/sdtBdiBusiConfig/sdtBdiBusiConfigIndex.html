@@ -213,7 +213,6 @@
         var $row = $view.find('tr[datagrid-row-index=' + index + ']');
 
         if (isUp) {//上移
-            debugger;
             if (index == 0) {//第一行不上移
             } else {
                 var effectRow = new Object();
@@ -239,7 +238,6 @@
                 });
             }
         } else {//下移
-            debugger;
             if (index == (rows.length - 1)) {//最后一行不下移
             } else {
                 var effectRow = new Object();

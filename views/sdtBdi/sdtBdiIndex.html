@@ -6,7 +6,6 @@
     <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
     <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
     <link rel="stylesheet" type="text/css" href="/static/css/easyui/demo.css">
-
     <link rel="stylesheet" type="text/css" href="/static/css/tagEditor/jquery.tag-editor.css">
 </head>
 <body>
@@ -65,13 +64,13 @@
                     field: 'Id', title: '指标Id', width: '50px', align: 'center', hidden: true
                 },
                 {
-                    field: 'TypeName', title: '指标类型', width: '130px', align: 'center'
+                    field: 'TypeName', title: '指标类型', width: '100px', halign: 'center', align:'center'
                 },
                 {
                     field: 'BdiName', title: '指标名称', width: '150px', align: 'center'
                 },
                 {
-                    field: 'Remarks', title: '备注', width: '150px', align: 'center'
+                    field: 'Remarks', title: '备注', width: '300px', halign: 'center', align:'left'
                 },
                 {
                     field: 'BdiSetNames', title: '所属指标集', width: '120px', align: 'center'
@@ -133,7 +132,6 @@
      * 指标计算-Dialog。
      */
     function addSdtBdiCfgDialog(bdiId, bdiTypeId) {
-        debugger;
         var tab = self.parent.$('#tabs').tabs('getSelected'); //获得当前tab
         var href = '/sdtBdiResult/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId;
 
@@ -145,7 +143,6 @@
                 selected: true
             }
         });
-//        debugger;
 //        $('<div></div>').dialog({
 //            id: 'addSdtBdiCfgDialog',
 //            title: '指标结果表配置',
@@ -171,7 +168,6 @@
 
     //    //Kpi配置
     //    function bdiAddSdtBdiCfgKpiDialog(bdiId) {
-    //        debugger;
     //        $('<div></div>').dialog({
     //            id: 'bdiAddSdtBdiCfgKpi',
     //            title: '配置Kpi',
@@ -224,10 +220,16 @@
         $('<div></div>').dialog({
             id: 'addSdtBidDialog',
             title: '新增指标',
-            width: '500px',
+            width: '700px',
             height: '300px',
             closed: false,
             cache: false,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            closable: true,
+            draggable: false,
+            resizable: false,
             href: '/sdtBdi/addPage',
             modal: true,
             onLoad: function () {
@@ -283,7 +285,7 @@
             $('<div></div>').dialog({
                 id: 'updateSdtBidDialog',
                 title: '修改指标内容',
-                width: '500px',
+                width: '700px',
                 height: '300px',
                 closed: false,
                 cache: false,
@@ -301,12 +303,10 @@
                     text: '保存',
                     iconCls: 'icon-ok',
                     handler: function () {
-                        debugger;
                         //提交表单
                         $('#updateBdiForm').form('submit', {
                             url: '/sdtBdi/update',
                             onSubmit: function () {
-                                debugger;
                                 if ($("#updateBdiForm").form("validate")) {
                                     var res = $("#bdiSetIdsCombobox").combobox('getValues');
                                     $("#bdiSetIds").val(res.toString());
@@ -317,7 +317,6 @@
                             },
                             //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                             success: function (data) {
-                                debugger;
                                 //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
                                 var obj = jQuery.parseJSON(data);
                                 if (obj.success) {

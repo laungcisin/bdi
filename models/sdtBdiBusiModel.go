@@ -11,20 +11,20 @@ import (
 )
 
 type SdtBdiBusi struct {
-	Id           int    `form:"id"`           //主键
-	BdiId        int    `form:"bdiId"`        //指标id
-	DatasourceId int    `form:"datasourceId"` //数据源id
-	Name         string `form:"name"`         //业务表名
-	CnName       string `form:"CnName"`       //业务中文名
-	IsProcess    int    `form:"isProcess"`    //是否经过处理
-	ProcessType  string `form:"processType"`  //处理类型
-	Params       string `form:"params"`       //参数
+	Id             int    `form:"id"`            //主键
+	BdiId          int    `form:"bdiId"`         //指标id
+	DatasourceId   int    `form:"datasourceId"`  //数据源id
+	Name           string `form:"name"`          //业务表名
+	CnName         string `form:"CnName"`        //业务中文名
+	IsProcess      int    `form:"isProcess"`     //是否经过处理
+	ProcessType    string `form:"processType"`   //处理类型
+	Params         string `form:"params"`        //参数
 
-	UserCode   string    `form:"userCode"`   //创建人ID
-	CreateTime time.Time `form:"createTime"` //创建时间
-	EditTime   time.Time `form:"editTime"`   //修改时间
+	UserCode       string    `form:"userCode"`   //创建人ID
+	CreateTime     time.Time `form:"createTime"` //创建时间
+	EditTime       time.Time `form:"editTime"`   //修改时间
 
-	//以下字段为datagrid展示
+						     //以下字段为datagrid展示
 	BdiName        string
 	DatasourceName string
 }
@@ -53,20 +53,20 @@ func (this *SdtBdiBusi) GetAllSdtBdiBusi(rows int, page int) ([]SdtBdiBusi, int,
 	var SdtBdiBusiSlice []SdtBdiBusi = make([]SdtBdiBusi, 0)
 
 	var querySql = " select " +
-		"	busi.*, " +
-		"   	bdi.bdi_name as bdi_name, " +
-		"	d.name as datasource_name " +
-		" from " +
-		"	sdt_bdi_busi busi, " +
-		"	sdt_bdi bdi, " +
-		"	sdt_bdi_datasource d " +
-		" where " +
-		" 	busi.bdi_id = ? " +
-		"	and busi.bdi_id = bdi.id " +
-		" 	and busi.datasource_id = d.id " +
-		"  limit ?, ? "
+	"	busi.*, " +
+	"   	bdi.bdi_name as bdi_name, " +
+	"	d.name as datasource_name " +
+	" from " +
+	"	sdt_bdi_busi busi, " +
+	"	sdt_bdi bdi, " +
+	"	sdt_bdi_datasource d " +
+	" where " +
+	" 	busi.bdi_id = ? " +
+	"	and busi.bdi_id = bdi.id " +
+	" 	and busi.datasource_id = d.id " +
+	"  limit ?, ? "
 
-	_, err := o.Raw(querySql, this.BdiId, (page-1)*rows, page*rows).QueryRows(&SdtBdiBusiSlice)
+	_, err := o.Raw(querySql, this.BdiId, (page - 1) * rows, page * rows).QueryRows(&SdtBdiBusiSlice)
 	if err != nil {
 		log.Fatal("查询表：" + this.TableName() + "出错！")
 		return nil, 0, err
@@ -74,15 +74,15 @@ func (this *SdtBdiBusi) GetAllSdtBdiBusi(rows int, page int) ([]SdtBdiBusi, int,
 
 	num := new(int)
 	var countSql = "select " +
-		"	count(*) as counts " +
-		" from " +
-		"	sdt_bdi_busi busi, " +
-		"	sdt_bdi bdi, " +
-		"	sdt_bdi_datasource d " +
-		" where " +
-		" 	busi.bdi_id = ? " +
-		"	and busi.bdi_id = bdi.id " +
-		" 	and busi.datasource_id = d.id "
+	"	count(*) as counts " +
+	" from " +
+	"	sdt_bdi_busi busi, " +
+	"	sdt_bdi bdi, " +
+	"	sdt_bdi_datasource d " +
+	" where " +
+	" 	busi.bdi_id = ? " +
+	"	and busi.bdi_id = bdi.id " +
+	" 	and busi.datasource_id = d.id "
 
 	err = o.Raw(countSql, this.BdiId).QueryRow(&num)
 	if err != nil {
@@ -115,13 +115,13 @@ func (this *SdtBdiBusi) Add() error {
 	o.Begin()
 
 	var insertSdtBdiBusiSql = "insert into sdt_bdi_busi ( " +
-		"	bdi_id, " +
-		"	datasource_id, " +
-		"	name, " +
-		"	user_code, " +
-		"	create_time " +
-		") " +
-		"values (?, ?, ?, ?, ?) "
+	"	bdi_id, " +
+	"	datasource_id, " +
+	"	name, " +
+	"	user_code, " +
+	"	create_time " +
+	") " +
+	"values (?, ?, ?, ?, ?) "
 
 	_, err := o.Raw(insertSdtBdiBusiSql, this.BdiId, this.DatasourceId, this.Name, 0, time.Now()).Exec()
 	if err != nil {
@@ -139,17 +139,24 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 	o := orm.NewOrm()
 	o.Begin()
 
-	for _, v := range selectedTableSlice{
+	fmt.Println("selectedTableSlice: ", selectedTableSlice)
+	fmt.Println("busiId: ", busiId)
+
+
+	for _, v := range selectedTableSlice {
 		num := new(int)
 		err = o.Raw(" select count(*) as counts from sdt_bdi_busi_config c, sdt_bdi_busi b " +
-			" where c.name = concat(b.name, ' ', b.as_name) and b.id = ? ", v).QueryRow(&num)
+		" where c.name = concat(b.name, ' ', b.as_name) and c.busi_id = ? and b.id = ? ", busiId, v).QueryRow(&num)
 		if err != nil {
 			fmt.Println(err)
 			o.Rollback()
 			return err
 		}
 
-		if *num < 1{
+		fmt.Println("num: ", *num)
+
+
+		if *num < 1 {
 			//新增前获取最大 sequence
 			num := new(int)
 			err = o.Raw(" select max(sequence) from sdt_bdi_busi_config where busi_id in ( select id from sdt_bdi_busi where bdi_id = ?) ", bdiId).QueryRow(&num)
@@ -165,10 +172,12 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 				maxSequence = *num
 			}
 
+			fmt.Println("maxSequence111: ", maxSequence + 1)
+
 			var insertSql string = " insert into sdt_bdi_busi_config(busi_id, name, sequence, cn_name, user_code, create_time) " +
 			" select ? as busi_id, concat(b.name, ' ', b.as_name) as name, ?, b.cn_name, 0, now() from sdt_bdi_busi b where b.id = ? "
 
-			_, err = o.Raw(insertSql, maxSequence + 1, busiId, v).Exec()
+			_, err = o.Raw(insertSql, busiId, maxSequence + 1, v).Exec()
 			if err != nil {
 				fmt.Println(err)
 				o.Rollback()
@@ -179,11 +188,11 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 	}
 
 	var updateSql = "update sdt_bdi_busi set  " +
-		" is_process = ?, " +
-		" process_type = ?, " +
-		" user_code = ?, " +
-		" edit_time = ? " +
-		" where id = ?"
+	" is_process = ?, " +
+	" process_type = ?, " +
+	" user_code = ?, " +
+	" edit_time = ? " +
+	" where id = ?"
 
 	_, err = o.Raw(updateSql, 1, this.ProcessType, 1, time.Now(), busiId).Exec()
 	if err != nil {
@@ -194,7 +203,8 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 
 	var insertBusiSql = " insert into sdt_bdi_busi(bdi_id, datasource_id, name, as_name, cn_name, create_time) values (?, ?, ?, ?, ?)"
 	for _, tableValue := range busiTreeAttributes {
-		if tableValue.CheckType == 0 { //表
+		if tableValue.CheckType == 0 {
+			//表
 			num := new(int)
 			err = o.Raw(" select count(*) as counts from sdt_bdi_busi_config c where locate(?, c.name) > 0 ", tableValue.Name).QueryRow(&num)
 
@@ -220,9 +230,9 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 					maxSequence = *num
 				}
 
-				_, err = o.Raw(" insert into sdt_bdi_busi_config(busi_id, name, sequence, cn_name, user_code, create_time) "+
+				_, err = o.Raw(" insert into sdt_bdi_busi_config(busi_id, name, sequence, cn_name, user_code, create_time) " +
 				" values(?, ?, ?, ?, ?, ?) ",
-					tableValue.BusiId, tableValue.Name+" "+this.tableAliasName(tableValue.Name), maxSequence + 1, tableValue.CnName, 0, time.Now()).Exec()
+					tableValue.BusiId, tableValue.Name + " " + this.tableAliasName(tableValue.Name), maxSequence + 1, tableValue.CnName, 0, time.Now()).Exec()
 
 				if err != nil {
 					fmt.Println(err)
@@ -241,7 +251,8 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 			if len(sdtBdiBusiSlice) > 0 {
 				//有记录
 				latestBusiId = int64(tableValue.BusiId)
-			} else { //没有记录
+			} else {
+				//没有记录
 				tableResult, err := o.Raw(insertBusiSql, tableValue.BdiId, tableValue.DatasourceId, tableValue.Name, this.tableAliasName(tableValue.Name), tableValue.CnName, time.Now()).Exec()
 				if err != nil {
 					fmt.Println(err)
@@ -345,13 +356,13 @@ func (this *SdtBdiBusi) UpdateDetailConfig() error {
 	o.Begin()
 
 	var updateSql = "update sdt_bdi_busi " +
-		" set  " +
-		" is_process = ?, " +
-		" process_type = ?, " +
-		" params = ?, " +
-		" user_code = ?, " +
-		" edit_time = ? " +
-		" where id = ?"
+	" set  " +
+	" is_process = ?, " +
+	" process_type = ?, " +
+	" params = ?, " +
+	" user_code = ?, " +
+	" edit_time = ? " +
+	" where id = ?"
 
 	_, err := o.Raw(updateSql, this.IsProcess, this.ProcessType, this.Params, '0', time.Now(), this.Id).Exec()
 	if err != nil {
@@ -375,4 +386,19 @@ func (this *SdtBdiBusi) tableAliasName(tableName string) string {
 	}
 
 	return asName
+}
+
+func (this *SdtBdiBusi) Delete() error {
+	o := orm.NewOrm()
+	o.Begin()
+
+	var deleteSql = " delete from sdt_bdi_busi where id = ? "
+
+	_, err := o.Raw(deleteSql, this.Id).Exec()
+	if err != nil {
+		o.Rollback()
+		return err
+	}
+	o.Commit()
+	return nil
 }

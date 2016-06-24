@@ -48,10 +48,17 @@
                     formatter: function (value, rowData, rowIndex) {
                         return '<a href="#" class="sdtBdiBusiClass" onclick="updateSdtBdiBusiDialog(' + rowData.Id + ')">加工处理</a>';
                     }
+                },
+                {
+                    field: 'sdt_bdi_busi_delete_opt', title: '操作', width: '150px', align: 'center',
+                    formatter: function (value, rowData, rowIndex) {
+                        return '<a href="#" class="sdtBdiBusiDeleteClass" onclick="deleteSdtBdiBusiDialog(' + rowData.Id + ')">删除</a>';
+                    }
                 }
             ]],
             onLoadSuccess: function (data) {
                 $('.sdtBdiBusiClass').linkbutton({plain: true, iconCls: 'icon-add'});
+                $('.sdtBdiBusiDeleteClass').linkbutton({plain: true, iconCls: 'icon-add'});
             },
             onClickRow: function (index, row) {
                 checkedSdtBdiBusiIndex = index;
@@ -120,7 +127,6 @@
                 text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
-                    debugger;
                     var resultArray = new Array();
                     var treeObj;
                     var nodes;
@@ -162,7 +168,6 @@
                                 }
                             }
 
-                            debugger;
                             var tName = nodes[i].attributes.tableName;
                             var resArray = tName.split("_");
                             var tableAliasTemp = '';
@@ -261,31 +266,31 @@
     }
 
     /**
-     * 删除BdiSet。
+     * 删除 - SdtBdiBusi。
      */
-    //    function deleteBdiSet(bdiId) {
-    //        $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
-    //            if (r) {
-    //                $.ajax({
-    //                    url: "/sdtBdiBusi/delete",
-    //                    async: false,
-    //                    cache: false,
-    //                    type: 'POST',
-    //                    data: {bdiId: bdiId},
-    //                    dataType: 'json',
-    //                    error: function (data) {
-    //                        $.messager.alert('提示信息', data.message);
-    //                    },
-    //                    success: function (data) {
-    //                        if (data.success) {
-    //                            $.messager.alert('提示信息', data.message);
-    //                        } else {
-    //                            $.messager.alert('提示信息', data.message);
-    //                        }
-    //                        $('#sdtBdiBusiDataGrid').datagrid('reload');
-    //                    }
-    //                });
-    //            }
-    //        });
-    //    }
+    function deleteSdtBdiBusiDialog(id) {
+        $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
+            if (r) {
+                $.ajax({
+                    url: "/sdtBdiBusi/delete",
+                    async: false,
+                    cache: false,
+                    type: 'POST',
+                    data: {id: parseInt(id)},
+                    dataType: 'json',
+                    error: function (data) {
+                        $.messager.alert('提示信息', data.message);
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            $.messager.alert('提示信息', data.message);
+                        } else {
+                            $.messager.alert('提示信息', data.message);
+                        }
+                        $('#sdtBdiBusiDataGrid').datagrid('reload');
+                    }
+                });
+            }
+        });
+    }
 </script>

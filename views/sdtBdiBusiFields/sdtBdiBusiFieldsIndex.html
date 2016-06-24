@@ -93,10 +93,17 @@
                         return e + d;
 //                        }
                     }
+                },
+                {
+                    field: 'sdt_bdi_busi_fields_delete_opt', title: '操作', width: '150px', align: 'center',
+                    formatter: function (value, rowData, rowIndex) {
+                        return '<a href="#" class="sdtBdiBusiFieldsDeleteClass" onclick="deleteSdtBdiBusiField(' + rowData.Id + ')">删除</a>';
+                    }
                 }
             ]],
             onLoadSuccess: function (data) {
                 $('.sdtBdiBusiFieldsClass').linkbutton({plain: true, iconCls: 'icon-add'});
+                $('.sdtBdiBusiFieldsDeleteClass').linkbutton({plain: true, iconCls: 'icon-remove'});
             },
             onClickRow: function (index, row) {
 //                checkedSdtBdiBusiIndex = index;
@@ -212,11 +219,10 @@
                         url: '/sdtBdiBusiFields/processFields/add',
                         onSubmit: function () {
                             if ($("#addBusiProcessFieldsForm").form("validate")) {
-                                debugger;
                                 var processTypeArray = $('#processTypeCombobox').combobox('getValues');
                                 var paramsValue = '';
                                 for (var i = 0; i < processTypeArray.length; i++) {
-                                    if(processTypeArray[i] == "") {
+                                    if (processTypeArray[i] == "") {
                                         continue;
                                     }
                                     paramsValue += $("#paramsTag_" + processTypeArray[i]).tagEditor('getTags')[0].tags + "|~,";
@@ -226,7 +232,7 @@
 
                                 var processTypeValue = '';
                                 for (var i = 0; i < processTypeArray.length; i++) {
-                                    if(processTypeArray[i] == "") {
+                                    if (processTypeArray[i] == "") {
                                         continue;
                                     }
                                     processTypeValue += processTypeArray[i] + "|,";
@@ -235,16 +241,16 @@
                                 $("#processType").val(processTypeValue.substring(0, processTypeValue.length - 2));
 
                                 for (var i = 0; i < processTypeArray.length; i++) {
-                                    if(processTypeArray[i] == "") {
+                                    if (processTypeArray[i] == "") {
                                         continue;
                                     }
 
-                                    if(processTypeArray[i] == 'sum' || processTypeArray[i] == 'avg' ) {
+                                    if (processTypeArray[i] == 'sum' || processTypeArray[i] == 'avg') {
                                         var valueArray = $("#paramsTag_" + processTypeArray[i]).tagEditor('getTags')[0].tags;
                                         var patten = /^-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/;
                                         var flag = false;
-                                        for(var j = 0; j < valueArray.length; j++) {
-                                            if(patten.test(valueArray[j])) {
+                                        for (var j = 0; j < valueArray.length; j++) {
+                                            if (patten.test(valueArray[j])) {
                                                 flag = true;
                                                 $("#dataType").val('double');
                                                 $("#dataLength").val('9,2');
@@ -314,7 +320,6 @@
         var $row = $view.find('tr[datagrid-row-index=' + index + ']');
 
         if (isUp) {//上移
-            debugger;
             if (index == 0) {//第一行不上移
 //                $('#sdtBdiBusiFieldsDataGrid').datagrid('refreshRow', 0);
             } else {
@@ -341,7 +346,6 @@
                 });
             }
         } else {//下移
-            debugger;
             if (index == (rows.length - 1)) {//最后一行不下移
 //                $('#sdtBdiBusiFieldsDataGrid').datagrid('refreshRow', index);
 //                editIndex = undefined;
@@ -368,5 +372,34 @@
                 });
             }
         }
+    }
+
+    /**
+     * 删除 - SdtBdiBusiField。
+     */
+    function deleteSdtBdiBusiField(id) {
+        $.messager.confirm('确认信息', '您确认删除该行记录?', function (r) {
+            if (r) {
+                $.ajax({
+                    url: "/sdtBdiBusiFields/delete",
+                    async: false,
+                    cache: false,
+                    type: 'POST',
+                    data: {id: parseInt(id)},
+                    dataType: 'json',
+                    error: function (data) {
+                        $.messager.alert('提示信息', data.message);
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            $.messager.alert('提示信息', data.message);
+                        } else {
+                            $.messager.alert('提示信息', data.message);
+                        }
+                        $('#sdtBdiBusiFieldsDataGrid').datagrid('reload');
+                    }
+                });
+            }
+        });
     }
 </script>

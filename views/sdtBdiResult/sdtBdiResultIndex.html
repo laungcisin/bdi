@@ -276,7 +276,6 @@
                 text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
-                    debugger;
                     var resultArray = new Array();
                     var treeObj = $('#columnsTree');
                     var nodes = treeObj.tree('getChecked');
@@ -343,7 +342,6 @@
                 text: '下一步',
                 iconCls: 'icon-ok',
                 handler: function () {
-                    debugger;
                     var resultArray = new Array();
                     var treeObj = $('#columnSelectTree');
                     var nodes = treeObj.tree('getChecked');
@@ -408,7 +406,6 @@
                         }
                     }
 
-                    debugger;
                     //往 sdt_bdi_busi_fields 表插入数据。
                     $.ajax({
                         url: "/sdtBdiBusiFields/addFields/add",
@@ -460,7 +457,7 @@
             },
             buttons: [{
                 text: '配置完成',
-                iconCls: 'icon-close',
+                iconCls: 'icon-ok',
                 handler: function () {
                     //同步 sdt_bdi_busi_fields 表中的内容到 sdt_bdi_result_fields
                     $.ajax({

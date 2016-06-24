@@ -215,7 +215,6 @@
                     text: '保存',
                     iconCls: 'icon-ok',
                     handler: function () {
-                        debugger;
                         //提交表单
                         $('#updateSdtBdiBaseForm').form('submit', {
                             url: '/sdtBdiBase/update',
@@ -224,7 +223,6 @@
                             },
                             //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
                             success: function (data) {
-                                debugger;
                                 //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
                                 var obj = jQuery.parseJSON(data);
                                 if (obj.success) {

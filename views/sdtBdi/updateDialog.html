@@ -1,29 +1,31 @@
-<div id="loading" style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+<div id="loading"
+     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
 
 <form id="updateBdiForm" method="post">
     <input type="hidden" id="bdiId" name="bdiId"/>
     <input type="hidden" id="bdiSetIds" name="bdiSetIds"/>
     <table>
         <tr>
-            <th>指标类型：</th>
+            <td style="width: 200px;text-align: right; padding: 5px 5px 5px 5px;">指标类型：</td>
             <td>
                 <input name="bdiTypeId" id="bdiTypeId"/>
+                <a id="addBdiTypeButton" name="addBdiTypeButton" href="#"></a>
             </td>
         </tr>
         <tr>
-            <th>指标名称：</th>
+            <td style="width: 200px;text-align: right; padding: 5px 5px 5px 5px;">指标名称：</td>
             <td>
                 <input name="bdiName" id="bdiName"/>
             </td>
         </tr>
         <tr>
-            <th>指标备注：</th>
+            <td style="width: 200px;text-align: right; padding: 5px 5px 5px 5px;">指标备注：</td>
             <td>
-                <input name="remarks" id="remarks">
+                <textarea id="remarks" name="remarks" rows=5 class="textarea easyui-validatebox"></textarea>
             </td>
         </tr>
         <tr>
-            <th>所属指标集：</th>
+            <td style="width: 200px;text-align: right; padding: 5px 5px 5px 5px;">所属指标集：</td>
             <td>
                 <input name="bdiSetIdsCombobox" id="bdiSetIdsCombobox"/>
             </td>
@@ -77,6 +79,17 @@
             value: '{{.sdtBdi.BdiTypeId}}'
         });
 
+        //新增指标类型
+        $('#addBdiTypeButton').linkbutton({
+            width: 'auto',
+            height: 'auto',
+            text: '新增指标类型',
+            iconCls: 'icon-add',
+            onClick: function () {
+                addBdiTypeDialog();
+            }
+        });
+
         //指标集
         $('#bdiSetIdsCombobox').combobox({
             url: '/sdt/sdtBdiSetForList',
@@ -127,11 +140,64 @@
         $("#bdiSetIdsCombobox").combobox('setValues', bdiIds.split(","));
 
         //指标库备注
-        $('#remarks').textbox({
-            editable: true,
-            required: true,
-            readonly: false,
-            value: '{{.sdtBdi.Remarks}}'
+        $("#remarks").val('{{.sdtBdi.Remarks}}');
+    }
+
+    //新增指标类型
+    function addBdiTypeDialog() {
+        $('<div></div>').dialog({
+            id: 'addBdiTypeDialog',
+            title: '新增指标类型',
+            width: '500px',
+            height: '300px',
+            closed: false,
+            cache: false,
+            collapsible: false,
+            minimizable: false,
+            maximizable: false,
+            closable: true,
+            draggable: false,
+            resizable: false,
+            modal: true,
+            href: '/sdtBdiType/addPage',
+            onLoad: function () {
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '保存',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    //提交表单
+                    $('#addSdtBdiTypeForm').form('submit', {
+                        url: '/sdtBdiType/add',
+                        onSubmit: function () {
+                            return $("#addSdtBdiTypeForm").form("validate");
+                        },
+                        //注意ajax的url的后台action方法必须有返回值return "json"，而不是return null,否则下面的回调函数不起作用，sucess方法失效
+                        success: function (data) {
+                            //此处data={"success":true}实际为字符串，而不是json对象，需要用如下代码处理
+                            var obj = jQuery.parseJSON(data);
+                            if (obj.success) {
+                                $.messager.alert('提示消息', obj.message, 'info', function () {
+                                    $("#addBdiTypeDialog").dialog('destroy');
+                                    $('#bdiTypeId').combobox('clear');
+                                    $('#bdiTypeId').combobox('reload');
+                                });
+                            } else {
+                                $.messager.alert('提示消息', obj.message);
+                            }
+                        }
+                    });
+                }
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $("#addBdiTypeDialog").dialog('destroy');
+                }
+            }]
         });
     }
 </script>

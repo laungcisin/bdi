@@ -63,6 +63,11 @@ func init() {
 	beego.Router("/sdtBdi/addPage", &controllers.SdtBdiController{}, "*:AddPage")       //新增页面
 	beego.Router("/sdtBdi/add", &controllers.SdtBdiController{}, "*:Add")               //新增内容
 
+	//指标类型
+	beego.Router("/sdtBdiType/addPage", &controllers.SdtBdiTypeController{}, "*:AddPage")               //新增内容
+	beego.Router("/sdtBdiType/add", &controllers.SdtBdiTypeController{}, "*:Add")               //新增内容
+
+
 	//数据源
 	beego.Router("/datasource/index", &controllers.DatasourceController{}, "*:Index")           //列表首页
 	beego.Router("/datasource/all", &controllers.DatasourceController{}, "*:All")               //列出所有数据
@@ -83,6 +88,8 @@ func init() {
 	beego.Router("/sdtBdiBusi/add", &controllers.SdtBdiBusiController{}, "*:Add")               //新增内容
 	beego.Router("/sdtBdiBusi/updatePage", &controllers.SdtBdiBusiController{}, "*:UpdatePage") //更新页面
 	beego.Router("/sdtBdiBusi/update", &controllers.SdtBdiBusiController{}, "*:Update")         //更新内容
+	beego.Router("/sdtBdiBusi/delete", &controllers.SdtBdiBusiController{}, "*:Delete")         //删除内容
+
 
 	beego.Router("/sdtBdiBusi/selectedTables", &controllers.SdtBdiBusiController{}, "*:SelectedTables")
 
@@ -109,6 +116,8 @@ func init() {
 	beego.Router("/sdtBdiBusiFields/addConstFields/add", &controllers.SdtBdiBusiFieldsController{}, "*:AddConstFields")               //新增Const字段保存
 	beego.Router("/sdtBdiBusiFields/addFields/add", &controllers.SdtBdiBusiFieldsController{}, "*:AddFields")                         //新增字段保存
 	beego.Router("/sdtBdiBusiFields/sdtBdiBusiFieldsForList", &controllers.SdtBdiBusiFieldsController{}, "*:SdtBdiBusiFieldsForList") //新增字段保存
+	beego.Router("/sdtBdiBusiFields/delete", &controllers.SdtBdiBusiFieldsController{}, "*:Delete")         //删除内容
+
 
 	beego.Router("/sdtBdiBusiFields/rowMoveUp", &controllers.SdtBdiBusiFieldsController{}, "*:RowMoveUp")             //行上移
 	beego.Router("/sdtBdiBusiFields/rowMoveDown", &controllers.SdtBdiBusiFieldsController{}, "*:RowMoveDown")         //行下移

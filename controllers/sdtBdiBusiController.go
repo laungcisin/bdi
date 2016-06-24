@@ -189,6 +189,18 @@ func (this *SdtBdiBusiController) Delete() {
 		Message string `json:"message"`
 	}{}
 
+	sdtBdiBusi := new(models.SdtBdiBusi)
+	err := this.ParseForm(sdtBdiBusi)
+	if err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	sdtBdiBusi.Delete()
 	returnData.Success = true
 	returnData.Message = "数据删除成功！"
 	this.Data[JSON_STRING] = returnData

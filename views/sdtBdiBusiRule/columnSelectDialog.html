@@ -80,7 +80,6 @@
             */
         });
 
-        debugger;
         var data = $('#selectBusiFields').combobox('getData');
 
         $('#columnSelectTree').tree({
@@ -100,14 +99,12 @@
                 $('#columnSelectTree').tree('check', node.target);
             },
             onBeforeExpand: function (node) {
-                debugger;
                 var paramStr = "?param=" + node.id + "&ip=" + node.attributes.ip + "&port=" + node.attributes.port +
                         "&username=" + node.attributes.username + "&password=" + node.attributes.password + "&tableName=" + node.attributes.tableName + "&schemaName=" + node.attributes.schemaName +
                         "&showLeafLevel=4";
                 $('#columnSelectTree').tree("options").url = node.attributes.url + paramStr;
             },
             onCheck: function (node, checked) {
-                debugger;
             }
         });
     });

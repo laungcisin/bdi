@@ -150,7 +150,6 @@
                             text: '保存',
                             iconCls: 'icon-ok',
                             handler: function () {
-                                debugger;
                                 var selectNode = $('#columnSelectTree').tree('getSelected');
                                 if (selectNode == undefined || selectNode == null) {
                                     $.messager.alert('提示信息', '请选择一个表字段!', 'info');
@@ -205,7 +204,6 @@
                             text: '保存',
                             iconCls: 'icon-ok',
                             handler: function () {
-                                debugger;
                                 var selectNode = $('#columnSelectTree').tree('getChecked');
                                 if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
                                     $.messager.alert('提示信息', '请选择一个表字段!', 'info');
@@ -312,7 +310,6 @@
                         text: '保存',
                         iconCls: 'icon-ok',
                         handler: function () {
-                            debugger;
                             var selectNode = $('#columnSelectTree').tree('getChecked');
                             if (selectNode == undefined || selectNode == null) {
                                 $.messager.alert('提示信息', '请选择表字段!', 'info');
@@ -355,7 +352,6 @@
                 text: '保存',
                 iconCls: 'icon-ok',
                 handler: function () {
-                    debugger;
                     $('#operatorsTag').tagEditor('addTag', $('#operatorsCombobox').combobox('getValue'));
                     $("#operatorsDialog").dialog('close');
                 }

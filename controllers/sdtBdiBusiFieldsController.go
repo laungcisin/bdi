@@ -426,3 +426,37 @@ func (this *SdtBdiBusiFieldsController) Synchronize() {
 	this.ServeJSON()
 	return
 }
+
+//删除
+func (this *SdtBdiBusiFieldsController) Delete() {
+	returnData := struct {
+		Success bool   `json:"success"`
+		Message string `json:"message"`
+	}{}
+
+	sdtBdiBusiFields := new(models.SdtBdiBusiFields)
+	err := this.ParseForm(sdtBdiBusiFields)
+	if err != nil {
+		fmt.Println(err)
+		returnData.Success = false
+		returnData.Message = "解析参数出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	err = sdtBdiBusiFields.Delete()
+	if err != nil {
+		returnData.Success = false
+		returnData.Message = "数据删除出错！"
+		this.Data[JSON_STRING] = returnData
+		this.ServeJSON()
+		return
+	}
+
+	returnData.Success = true
+	returnData.Message = "数据删除成功！"
+	this.Data[JSON_STRING] = returnData
+	this.ServeJSON()
+	return
+}
