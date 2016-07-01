@@ -153,9 +153,6 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 			return err
 		}
 
-		fmt.Println("num: ", *num)
-
-
 		if *num < 1 {
 			//新增前获取最大 sequence
 			num := new(int)
@@ -174,10 +171,10 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 
 			fmt.Println("maxSequence111: ", maxSequence + 1)
 
-			var insertSql string = " insert into sdt_bdi_busi_config(busi_id, name, sequence, cn_name, user_code, create_time) " +
-			" select ? as busi_id, concat(b.name, ' ', b.as_name) as name, ?, b.cn_name, 0, now() from sdt_bdi_busi b where b.id = ? "
+			var insertSql string = " insert into sdt_bdi_busi_config(bdi_id, busi_id, name, sequence, cn_name, user_code, create_time) " +
+			" select ? as bdi_id, ? as busi_id, concat(b.name, ' ', b.as_name) as name, ?, b.cn_name, 0, now() from sdt_bdi_busi b where b.id = ? "
 
-			_, err = o.Raw(insertSql, busiId, maxSequence + 1, v).Exec()
+			_, err = o.Raw(insertSql, bdiId, busiId, maxSequence + 1, v).Exec()
 			if err != nil {
 				fmt.Println(err)
 				o.Rollback()
@@ -230,9 +227,9 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 					maxSequence = *num
 				}
 
-				_, err = o.Raw(" insert into sdt_bdi_busi_config(busi_id, name, sequence, cn_name, user_code, create_time) " +
-				" values(?, ?, ?, ?, ?, ?) ",
-					tableValue.BusiId, tableValue.Name + " " + this.tableAliasName(tableValue.Name), maxSequence + 1, tableValue.CnName, 0, time.Now()).Exec()
+				_, err = o.Raw(" insert into sdt_bdi_busi_config(bdi_id, busi_id, name, sequence, cn_name, user_code, create_time) " +
+				" values(?, ?, ?, ?, ?, ?, ?) ",
+					bdiId, tableValue.BusiId, tableValue.Name + " " + this.tableAliasName(tableValue.Name), maxSequence + 1, tableValue.CnName, 0, time.Now()).Exec()
 
 				if err != nil {
 					fmt.Println(err)
@@ -302,8 +299,8 @@ func (this *SdtBdiBusi) Update(busiTreeAttributes []BusiTreeAttributes, selected
 				maxSequence = *num
 			}
 
-			_, err = o.Raw(" insert into sdt_bdi_busi_config(busi_id, cn_name, sequence, process_column, process_data_type, process_data_length, user_code, create_time) " +
-			" values(?, ?, ?, ?, ?, ?, ?, ?) ", latestBusiId, fieldValue.Comment, maxSequence + 1, fieldValue.Name, fieldValue.DataType,
+			_, err = o.Raw(" insert into sdt_bdi_busi_config(bdi_id, busi_id, cn_name, sequence, process_column, process_data_type, process_data_length, user_code, create_time) " +
+			" values(?, ?, ?, ?, ?, ?, ?, ?, ?) ", bdiId, latestBusiId, fieldValue.Comment, maxSequence + 1, fieldValue.Name, fieldValue.DataType,
 				fieldValue.DataLength, 1, time.Now()).Exec()
 
 			if err != nil {

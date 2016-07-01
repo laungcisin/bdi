@@ -157,7 +157,8 @@ func (this *SdtBdiBusiFieldsController) ProcessType() {
 	o := orm.NewOrm()
 
 	var maps []orm.Params = make([]orm.Params, 0)
-	_, err := o.Raw(" select process_type as Id, process_name as Text from sdt_bdi_process_type ").Values(&maps)
+	_, err := o.Raw(" select process_type as Id, concat(process_name, '(', process_type, ')') as Text from sdt_bdi_process_type " +
+		" where main_class not in(4, 5) and !(main_class = 3 and sub_class = 1) ").Values(&maps)
 
 	if err != nil {
 		this.Data[JSON_STRING] = returnData
@@ -459,4 +460,9 @@ func (this *SdtBdiBusiFieldsController) Delete() {
 	this.Data[JSON_STRING] = returnData
 	this.ServeJSON()
 	return
+}
+
+
+func (this *SdtBdiBusiFieldsController) OperatorDialogPage() {
+	this.TplName = "sdtBdiBusiFields/operatorDialog.html"
 }

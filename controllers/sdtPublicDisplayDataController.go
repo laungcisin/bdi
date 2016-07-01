@@ -311,7 +311,7 @@ func (this *SdtPublicDisplayDataController) ProcessTypeForListAll() {
 	o = orm.NewOrm()
 
 	var maps []orm.Params
-	_, err := o.Raw(" select t.process_type as Id, t.process_name as Text from sdt_bdi_process_type t ").Values(&maps)
+	_, err := o.Raw(" select t.process_type as Id, concat(t.process_name, '(', t.process_type, ')') as Text from sdt_bdi_process_type t ").Values(&maps)
 
 	if err != nil {
 		this.Data[JSON_STRING] = returnData

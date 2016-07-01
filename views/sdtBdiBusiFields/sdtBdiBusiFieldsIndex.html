@@ -197,7 +197,7 @@
         $('<div></div>').dialog({
             id: 'processFieldsDialog',
             title: '业务字段加工配置',
-            width: '700px',
+            width: '1000px',
             height: '500px',
             draggable: false,
             resizable: false,
@@ -218,6 +218,7 @@
                     $('#addBusiProcessFieldsForm').form('submit', {
                         url: '/sdtBdiBusiFields/processFields/add',
                         onSubmit: function () {
+                            debugger;
                             if ($("#addBusiProcessFieldsForm").form("validate")) {
                                 var processTypeArray = $('#processTypeCombobox').combobox('getValues');
                                 var paramsValue = '';
@@ -225,9 +226,20 @@
                                     if (processTypeArray[i] == "") {
                                         continue;
                                     }
-                                    paramsValue += $("#paramsTag_" + processTypeArray[i]).tagEditor('getTags')[0].tags + "|~,";
+                                    paramsValue += $("#paramsTag_" + processTypeArray[i]).tagEditor('getTags')[0].tags;
+
+                                    // 操作符 tagEditor
+                                    var fieldOpTagValue = $('#fieldOpTag_' + processTypeArray[i]).tagEditor('getTags')[0].tags;
+                                    //数值参数
+                                    var fieldsParamsInputValue = $('#fieldsParamsInput_' + processTypeArray[i]).tagEditor('getTags')[0].tags;
+
+                                    if (fieldOpTagValue != null && fieldOpTagValue != undefined && fieldOpTagValue != ''
+                                            && fieldsParamsInputValue != null && fieldsParamsInputValue != undefined && fieldsParamsInputValue != '') {
+                                        paramsValue = paramsValue + ",[" + fieldOpTagValue + "," + fieldsParamsInputValue + "]" + "|~,";
+                                    }
                                 }
 
+                                debugger;
                                 $("#params").val(paramsValue.substring(0, paramsValue.length - 3));
 
                                 var processTypeValue = '';

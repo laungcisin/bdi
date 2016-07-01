@@ -300,7 +300,7 @@ func (this *SdtBdiBusiController) SelectedTables() {
 
 	var maps []orm.Params = make([]orm.Params, 0)
 	var queryString = " select b.id as Id, b.name as Text from sdt_bdi_busi b where b.bdi_id = ? " +
-		" and b.name <> (select t.name from sdt_bdi_busi t where t.id = ? limit 1)"
+		" and b.name <> (select t.name from sdt_bdi_busi t where t.id = ? limit 1) and b.name <> 'virtual_table' "
 	_, err := o.Raw(queryString, bdiId, busiId).Values(&maps)
 
 	if err != nil {

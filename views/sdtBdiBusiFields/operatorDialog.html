@@ -1,0 +1,60 @@
+<div id="loading"
+     style="position: absolute; z-index: 1000; top: 0px; left: 0px; width: 100%; height: 100%; background: #DDDDDB; text-align: center; padding-top: 20%;"></div>
+
+<form id="operatorForm" method="post">
+    <table>
+        <tr>
+            <th style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">操作符：</th>
+            <td>
+                <input id="operatorsCombobox" name="operatorsCombobox" style="width: 150px;">
+            </td>
+        </tr>
+    </table>
+</form>
+
+<script type="text/javascript">
+    function show() {
+        $("#loading").fadeOut("normal", function () {
+            $(this).remove();
+        });
+    }
+    var delayTime;
+    $.parser.onComplete = function () {
+        if (delayTime) {
+            clearTimeout(delayTime);
+        }
+
+        delayTime = setTimeout(show, 100);
+    };
+
+    $(function () {
+        $('#operatorsCombobox').combobox({
+            valueField: 'id',
+            textField: 'text',
+            panelHeight: 'auto',
+            panelMaxHeight: '200px',
+            editable: false,
+            readonly: false,
+            data: [{
+                "id": "=",
+                "text": "等于"
+            }, {
+                "id": ">",
+                "text": "大于"
+            }, {
+                "id": ">=",
+                "text": "大于等于"
+            }, {
+                "id": "<",
+                "text": "小于"
+            }, {
+                "id": "<=",
+                "text": "小于等于"
+            }, {
+                "id": "!=",
+                "text": "不等于"
+            }],
+            prompt: '操作符'
+        });
+    });
+</script>

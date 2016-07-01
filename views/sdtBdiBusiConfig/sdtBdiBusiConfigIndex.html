@@ -27,15 +27,15 @@
                 }
             }],
             columns: [[
-//                {
-//                    field: 'sdt_bdi_busi_config_oid',
-//                    title: '选择',
-//                    width: '50px',
-//                    align: 'center',
-//                    formatter: function (value, row, index) {
-//                        return '<input type="radio" class="selectSdtBdiBusiConfigRadioClass" name="selectSdtBdiBusiConfigRadio" id="selectSdtBdiBusiConfigRadio' + index + '" value="' + row.Id + '" />';
-//                    }
-//                },
+                {
+                    field: 'sdt_bdi_busi_config_oid',
+                    title: '选择',
+                    width: '50px',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        return '<input type="radio" class="selectSdtBdiBusiConfigRadioClass" name="selectSdtBdiBusiConfigRadio" id="selectSdtBdiBusiConfigRadio' + index + '" value="' + row.Id + '" />';
+                    }
+                },
                 {
                     field: 'busi_config_ctr',
                     title: '操作',
@@ -54,37 +54,34 @@
 //                    field: 'BusiId', title: '业务表ID', width: '80px', align: 'center', hidden: false
 //                },
                 {
-                    field: 'Sequence', title: '序号', width: '80px', align: 'center'
+                    field: 'Sequence', title: '序号', width: '50px', align: 'center'
                 },
                 {
-                    field: 'BusiName', title: '业务表名字', width: '160px', align: 'left'
+                    field: 'Name', title: '配置业务表名', width: '260px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'Name', title: '配置业务表名', width: '150px', align: 'left'
+                    field: 'CnName', title: '配置业务表中文名', width: '180px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'CnName', title: '配置业务表中文名', width: '150px', align: 'left'
+                    field: 'SelectStar', title: '选择字段', width: '150px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'SelectStar', title: '选择字段', width: '150px', align: 'left'
+                    field: 'ProcessColumn', title: '处理字段', width: '220px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'ProcessColumn', title: '处理字段', width: '220px', align: 'left'
+                    field: 'AsName', title: '别名', width: '150px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'AsName', title: '别名', width: '150px', align: 'left'
+                    field: 'ProcessDataType', title: '数据类型', width: '100px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'ProcessDataType', title: '数据类型', width: '100px', align: 'left'
+                    field: 'ProcessDataLength', title: '数据长度', width: '100px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'ProcessDataLength', title: '数据长度', width: '100px', align: 'left'
+                    field: 'ProcessType', title: '处理类型', width: '110px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'ProcessType', title: '处理类型', width: '110px', align: 'center'
-                },
-                {
-                    field: 'Params', title: '参数', width: '180px', align: 'left'
+                    field: 'Params', title: '参数', width: '180px', align: 'left', halign: 'center'
                 }
             ]],
             onLoadSuccess: function (data) {
@@ -129,8 +126,8 @@
             $('<div></div>').dialog({
                 id: 'updateSdtBdiBusiConfigDialog',
                 title: '更新指标业务配置表',
-                width: '800px',
-                height: '500px',
+                width: '1000px',
+                height: '560px',
                 closed: false,
                 cache: false,
                 draggable: false,
@@ -151,19 +148,39 @@
                             url: '/sdtBdiBusiConfig/update',
                             onSubmit: function () {
                                 if ($("#updateSdtBdiBusiConfigForm").form("validate")) {
-                                    var paramsValue = $('#paramsTag').tagEditor('getTags')[0].tags;
-                                    if (paramsValue == '') {
-                                        $.messager.alert('提示消息', '请输入参数！');
-                                        return false;
-                                    }
-                                    $('#params').val(paramsValue);
+                                    debugger;
+                                    var processTypeValue = $("#processType").combobox("getValue");
+                                    if (processTypeValue == 'inner-join' || processTypeValue == 'left-join' || processTypeValue == 'right-join' ||
+                                            processTypeValue == 'full-join' || processTypeValue == 'cross-join') {
+                                        var processColTagValue = $('#processColTag_' + processTypeValue).tagEditor('getTags')[0].tags;
+                                        var processColOpTagValue = $('#processColOpTag_' + processTypeValue).tagEditor('getTags')[0].tags;
+                                        var processParamsTagValue = $('#processParamsTag_' + processTypeValue).tagEditor('getTags')[0].tags;
 
-                                    var operatorsValue = $('#operatorsTag').tagEditor('getTags')[0].tags;
-//                                    if (operatorsValue == '') {
-//                                        $.messager.alert('提示消息', '请输入参数！');
-//                                        return false;
-//                                    }
-                                    $('#operators').val(operatorsValue);
+                                        var whereColTagValue = $('#whereColTag_' + processTypeValue).tagEditor('getTags')[0].tags;
+                                        var whereColOpTagValue = $('#whereColOpTag_' + processTypeValue).tagEditor('getTags')[0].tags;
+                                        var whereParamsTagValue = $('#whereParamsTag_' + processTypeValue).tagEditor('getTags')[0].tags;
+
+                                        if(whereColTagValue != '') {
+                                            processColTagValue += ',[' + whereColTagValue + ']';
+                                        }
+
+                                        if(whereColOpTagValue != '') {
+                                            processColOpTagValue += ',[' + whereColOpTagValue + ']';
+                                        }
+
+                                        if(whereParamsTagValue != '') {
+                                            processParamsTagValue += ',[' + whereParamsTagValue + ']';
+                                        }
+
+                                        $("#processDataType").val($("#processDataType").val() + ($("#tempProcessDataType").val() == '' ? '' : ',[' + $("#tempProcessDataType").val() + ']'));
+                                        $("#processDataLength").val($("#processDataLength").val() + ($("#tempProcessDataLength").val() == '' ? '' : ',[' + $("#tempProcessDataLength").val() + ']'));
+
+                                    }
+
+                                    $('#processColumn').val(processColTagValue);
+                                    $('#operators').val(processColOpTagValue);
+                                    $('#params').val(processParamsTagValue);
+
                                     return true;
                                 }
 

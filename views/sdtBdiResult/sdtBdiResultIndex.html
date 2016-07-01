@@ -75,32 +75,31 @@
                     field: 'BdiTypeId', title: '指标类型Id', width: '80px', align: 'center', hidden: true
                 },
                 {
-                    field: 'BdiTypeName', title: '指标类型名称', width: '130px', align: 'center'
+                    field: 'BdiTypeName', title: '指标类型', width: '130px', align: 'center'
                 },
                 {
-                    field: 'BdiName', title: '指标名称', width: '130px', align: 'center'
+                    field: 'BdiName', title: '指标名称', width: '130px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'TableName', title: '表名', width: '220px', align: 'center'
+                    field: 'TableName', title: '表名', width: '220px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'TableLabel', title: '中文表名', width: '150px', align: 'center'
+                    field: 'TableLabel', title: '中文表名', width: '150px', align: 'left', halign: 'center'
                 },
                 {
-                    field: 'sdt_bdi_result_opt1', title: '操作', width: '150px', align: 'center',
+                    field: 'sdt_bdi_result_opt1', title: '操作', width: '320px', align: 'center',
                     formatter: function (value, rowData, rowIndex) {
-                        return '<a href="#" class="easyui-linkbutton" onclick="addBdiBusiCfgDialog(' + rowData.Id + ')">指标业务表配置</a>';
-                    }
-                },
-                {
-                    field: 'sdt_bdi_result_opt2', title: '操作', width: '150px', align: 'center',
-                    formatter: function (value, rowData, rowIndex) {
-                        return '<a href="#" class="easyui-linkbutton" onclick="columnSelectDialog(' + rowData.Id + ')">指标业务表字段配置</a>';
+                        var a = '<a href="#" class="easyui-linkbutton" onclick="addBdiBusiCfgDialog(' + rowData.Id + ')">业务表配置</a>';
+                        var b = '<a href="#" class="easyui-linkbutton" onclick="columnSelectDialog(' + rowData.Id + ')">业务表字段配置</a>';
+                        var c = '<a href="#" class="stdBdiBusiRuleClass" onclick="addSdtBdiBusiRuleDialog(' + rowData.Id + ', ' + rowData.BdiTypeId + ')">业务规则配置</a>';
+                        return a + b + c;
                     }
                 }
             ]],
             onLoadSuccess: function (data) {
                 $('.easyui-linkbutton').linkbutton({plain: true, iconCls: 'icon-add'});
+                $('.stdBdiBusiRuleClass').linkbutton({plain: true, iconCls: 'icon-add'});
+
             },
             onClickRow: function (index, row) {
                 checkedSdtBdiResultIndex = index;
@@ -386,7 +385,7 @@
                                     sequence: nodes[i].attributes.sequence,
                                     comment: nodes[i].attributes.comment,
                                     dataType: nodes[i].attributes.dataType,
-                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g,''))
+                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g, ''))
                                 };
 
                                 tableObj.childColumns.push(columnObj);
@@ -398,7 +397,7 @@
                                     sequence: nodes[i].attributes.sequence,
                                     comment: nodes[i].attributes.comment,
                                     dataType: nodes[i].attributes.dataType,
-                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g,''))
+                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g, ''))
                                 };
 
                                 resultArray[foundIndex].childColumns.push(columnObj);
@@ -417,7 +416,7 @@
                         error: function (data) {
                         },
                         success: function (data) {
-                            if(data.success) {
+                            if (data.success) {
                                 $("#columnSelectDialog").dialog('destroy');
                                 addSdtBdiFieldsCfgDialog();
                             }
@@ -558,6 +557,128 @@
                                 $("#addBdiBusiConfigDetailDialog").dialog('destroy');
                             }
                         }
+                    });
+                }
+            }]
+        });
+    }
+
+    /**
+     * 规则配置-Dialog。
+     */
+    function addSdtBdiBusiRuleDialog(bdiId, bdiTypeId) {
+        debugger;
+        var tab = self.parent.$('#tabs').tabs('getSelected'); //获得当前tab
+        $('<div></div>').dialog({
+            id: 'selectBusiFieldsDialog',
+            title: '选择业务字段',
+            width: '800px',
+            height: '450px',
+            closed: false,
+            cache: false,
+            href: '/sdtBdiBusiRule/columnSelectTreePage?bdiId=' + bdiId,
+            draggable: false,
+            resizable: false,
+            modal: true,
+            onLoad: function () {
+            },
+            onClose: function () {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '下一步',
+                iconCls: 'icon-ok',
+                handler: function () {
+                    var resultArray = new Array();
+                    var treeObj = $('#columnSelectTree');
+                    var nodes = treeObj.tree('getChecked');
+                    for (var i = 0; i < nodes.length; i++) {
+                        if (nodes[i].attributes.isTable) {//table-节点
+                            var obj = {
+                                name: nodes[i].id,
+                                cnName: nodes[i].attributes.comment,
+                                bdiId: parseInt(bdiId),
+                                datasourceId: parseInt(treeObj.tree('getRoot').id),
+                                childColumns: new Array()
+                            };
+                            resultArray.push(obj);
+                        } else {//columns-节点
+                            //寻找父节点
+                            var found = false;
+                            var foundIndex = 0;
+
+                            var parentNode = treeObj.tree('getParent', nodes[i].target);
+                            if (parentNode != null) {
+                                for (var j = 0; j < resultArray.length; j++) {
+                                    if (parentNode.id == resultArray[j].name) {
+                                        found = true;
+                                        foundIndex = j;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!found) {
+                                var tableObj = {
+                                    name: parentNode.id,
+                                    cnName: parentNode.attributes.comment,
+                                    bdiId: parseInt(bdiId),
+                                    datasourceId: parseInt(treeObj.tree('getRoot').id),
+                                    childColumns: new Array()
+                                };
+
+                                var columnObj = {
+                                    name: nodes[i].id,
+                                    cnName: nodes[i].attributes.comment,
+                                    sequence: nodes[i].attributes.sequence,
+                                    comment: nodes[i].attributes.comment,
+                                    dataType: nodes[i].attributes.dataType,
+                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g,''))
+                                };
+
+                                tableObj.childColumns.push(columnObj);
+                                resultArray.push(tableObj);
+                            } else {
+                                var columnObj = {
+                                    name: nodes[i].id,
+                                    cnName: nodes[i].attributes.comment,
+                                    sequence: nodes[i].attributes.sequence,
+                                    comment: nodes[i].attributes.comment,
+                                    dataType: nodes[i].attributes.dataType,
+                                    dataLength: parseInt(nodes[i].attributes.columnType.replace(/\D/g,''))
+                                };
+
+                                resultArray[foundIndex].childColumns.push(columnObj);
+                            }
+                        }
+                    }
+
+                    var effectRow = new Object();
+                    effectRow["inserted"] = JSON.stringify(resultArray);
+                    effectRow["updated"] = $('#selectBusiFields').combobox('getValues').toString();
+                    effectRow["bdiId"] = bdiId;
+
+                    var href = '/sdtBdiBusiRule/index?bdiId=' + bdiId + "&bdiTypeId=" + bdiTypeId;
+
+                    $.post(
+                            '/sdtBdiBusiRule/addColumn',
+                            effectRow,
+                            function (data) {
+                                if (data.success) {
+                                    $("#updateBdiSetDialog").dialog('destroy');
+                                    self.parent.$('#tabs').tabs('update', {
+                                        tab: tab,
+                                        options: {
+                                            content: '<iframe scrolling="auto" frameborder="0" src="' + href + '" style="width:100%;height:100%;"></iframe>',
+                                            closable: true,
+                                            selected: true
+                                        }
+                                    });
+                                }
+                            },
+                            "JSON"
+                    ).error(function () {
+                        $.messager.alert("提示", "提交错误了！");
                     });
                 }
             }]

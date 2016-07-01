@@ -1,7 +1,7 @@
 <style>
     .tag-editor {
-        width: 220px;
-        height: 100px;
+        width: 200px;
+        height: 80px;
     }
 </style>
 
@@ -12,72 +12,55 @@
     <input type="hidden" id="id" name="id"/>
     <input type="hidden" id="processDataType" name="processDataType"/>
     <input type="hidden" id="processDataLength" name="processDataLength"/>
+
+    <input type="hidden" id="processColumn" name="processColumn"/>
     <input type="hidden" id="operators" name="operators"/>
     <input type="hidden" id="params" name="params"/>
 
-    <table>
+    <input type="hidden" id="tempProcessDataType" name="tempProcessDataType" value=""/>
+    <input type="hidden" id="tempProcessDataLength" name="tempProcessDataLength" value=""/>
+
+    <table id="tb">
         <tr>
-            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">配置业务表名：</td>
-            <td>
+            <td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;"></td>
+            <td style="width: 150px;"></td>
+            <td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"></td>
+            <td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;"></td>
+            <td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"></td>
+            <td style="width: 150px;"></td>
+        </tr>
+        <tr>
+            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;" colspan="3">配置业务表名：</td>
+            <td colspan="3">
                 <input name="name" id="name" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">配置业务表中文名：</td>
-            <td>
+            <td colspan="3" style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">配置业务表中文名：</td>
+            <td colspan="3">
                 <input name="cnName" id="cnName" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">选择字段：</td>
-            <td>
-                <input name="selectStar" id="selectStar" style="width: 220px"/>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">别名：</td>
-            <td>
-                <input name="asName" id="asName" style="width: 220px"/>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">处理字段：</td>
-            <td>
-                <input name="processColumn" id="processColumn" style="width: 220px"/>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">处理类型：</td>
-            <td>
+            <td colspan="3" style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">处理类型：</td>
+            <td colspan="3">
                 <input name="processType" id="processType" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">操作符：</td>
-            <td style="width: 300px">
-                <input name="operatorsTag" id="operatorsTag" style="width: 220px"/>
-            </td>
-            <td></td>
-            <td>
-                <a id="selectOperatorsButton" href="#">选择操作符</a>
+            <td colspan="3" style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">选择字段：</td>
+            <td colspan="3">
+                <input name="selectStar" id="selectStar" style="width: 220px"/>
             </td>
         </tr>
         <tr>
-            <td style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">参数：</td>
-            <td style="width: 300px">
-                <input name="paramsTag" id="paramsTag" style="width: 220px"/>
-            </td>
-            <td></td>
-            <td>
-                <a id="selectParamsButton" href="#">选择参数</a>
+            <td colspan="3" style="width: 300px;text-align: right; padding: 5px 5px 5px 5px;">别名：</td>
+            <td colspan="3">
+                <input name="asName" id="asName" style="width: 220px"/>
             </td>
         </tr>
     </table>
 </form>
-
-<div id="operatorsDialog" style="display: none;">
-    操作符：<input id="operatorsCombobox" name="operatorsCombobox" style="width: 150px;">
-</div>
 
 <script type="text/javascript">
     function show() {
@@ -172,76 +155,86 @@
                         }]
                     });
                 }
+            }, {
+                iconCls: 'icon-remove',
+                handler: function (e) {
+                    $(e.data.target).textbox('clear');
+                }
             }],
             value: '{{.sdtBdiBusiConfig.SelectStar}}'
         });
 
         //处理字段
-        $('#processColumn').textbox({
-            editable: false,
-            readonly: false,
-            value: '{{.sdtBdiBusiConfig.ProcessColumn}}',
-            icons: [{
-                iconCls: 'icon-add',
-                handler: function (e) {
-                    $('<div></div>').dialog({
-                        id: 'processColumnSelectDialog',
-                        title: '选择处理字段',
-                        width: '500px',
-                        height: '300px',
-                        closed: false,
-                        cache: false,
-                        draggable: false,
-                        resizable: false,
-                        href: '/sdtBdiBusiFields/columnSelectTreePage',
-                        modal: true,
-                        onLoad: function () {
-                        },
-                        onClose: function () {
-                            $(this).dialog('destroy');
-                        },
-                        buttons: [{
-                            text: '保存',
-                            iconCls: 'icon-ok',
-                            handler: function () {
-                                var selectNode = $('#columnSelectTree').tree('getChecked');
-                                if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
-                                    $.messager.alert('提示信息', '请选择一个表字段!', 'info');
-                                    return;
-                                }
-
-                                var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
-                                var resArray = tName.split("_");
-                                var tableAliasTemp = '';
-                                for (var i = 0; i < resArray.length; i++) {
-                                    tableAliasTemp += resArray[i].substr(0, 1);
-                                }
-
-                                var columnNames = "";
-                                var dataTypes = '';
-                                var dataLengths = '';
-                                for (var i = 0; i < selectNode.length; i++) {
-                                    columnNames = columnNames + tableAliasTemp + "." + selectNode[i].id + ", ";
-                                    dataTypes = dataTypes + selectNode[i].attributes.dataType + ", ";
-                                    dataLengths = dataLengths + selectNode[i].attributes.columnType.replace(/\D/g,'') + ", ";
-                                }
-
-                                $(e.data.target).textbox('setValue', columnNames.substring(0, columnNames.length - 2));
-                                $("#processDataType").val(dataTypes.substring(0, dataTypes.length - 2));
-                                $("#processDataLength").val(dataLengths.substring(0, dataLengths.length - 2));
-                                $("#processColumnSelectDialog").dialog('destroy');
-                            }
-                        }, {
-                            text: '取消',
-                            iconCls: 'icon-cancel',
-                            handler: function () {
-                                $("#processColumnSelectDialog").dialog('destroy');
-                            }
-                        }]
-                    });
-                }
-            }]
-        });
+//        $('#processColumn').textbox({
+//            editable: false,
+//            readonly: false,
+//            value: '{{.sdtBdiBusiConfig.ProcessColumn}}',
+//            icons: [{
+//                iconCls: 'icon-add',
+//                handler: function (e) {
+//                    $('<div></div>').dialog({
+//                        id: 'processColumnSelectDialog',
+//                        title: '选择处理字段',
+//                        width: '500px',
+//                        height: '300px',
+//                        closed: false,
+//                        cache: false,
+//                        draggable: false,
+//                        resizable: false,
+//                        href: '/sdtBdiBusiFields/columnSelectTreePage',
+//                        modal: true,
+//                        onLoad: function () {
+//                        },
+//                        onClose: function () {
+//                            $(this).dialog('destroy');
+//                        },
+//                        buttons: [{
+//                            text: '保存',
+//                            iconCls: 'icon-ok',
+//                            handler: function () {
+//                                var selectNode = $('#columnSelectTree').tree('getChecked');
+//                                if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
+//                                    $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+//                                    return;
+//                                }
+//
+//                                var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+//                                var resArray = tName.split("_");
+//                                var tableAliasTemp = '';
+//                                for (var i = 0; i < resArray.length; i++) {
+//                                    tableAliasTemp += resArray[i].substr(0, 1);
+//                                }
+//
+//                                var columnNames = "";
+//                                var dataTypes = '';
+//                                var dataLengths = '';
+//                                for (var i = 0; i < selectNode.length; i++) {
+//                                    columnNames = columnNames + tableAliasTemp + "." + selectNode[i].id + ", ";
+//                                    dataTypes = dataTypes + selectNode[i].attributes.dataType + ", ";
+//                                    dataLengths = dataLengths + selectNode[i].attributes.columnType.replace(/\D/g, '') + ", ";
+//                                }
+//
+//                                $(e.data.target).textbox('setValue', columnNames.substring(0, columnNames.length - 2));
+//                                $("#processDataType").val(dataTypes.substring(0, dataTypes.length - 2));
+//                                $("#processDataLength").val(dataLengths.substring(0, dataLengths.length - 2));
+//                                $("#processColumnSelectDialog").dialog('destroy');
+//                            }
+//                        }, {
+//                            text: '取消',
+//                            iconCls: 'icon-cancel',
+//                            handler: function () {
+//                                $("#processColumnSelectDialog").dialog('destroy');
+//                            }
+//                        }]
+//                    });
+//                }
+//            }, {
+//                iconCls: 'icon-remove',
+//                handler: function (e) {
+//                    $(e.data.target).textbox('clear');
+//                }
+//            }]
+//        });
 
         //别名
         $('#asName').textbox({
@@ -259,40 +252,682 @@
             panelMaxHeight: '200px',
             editable: false,
             readonly: false,
+            required: true,
             prompt: '请选择处理类型',
-            value: '{{.sdtBdiBusiConfig.ProcessType}}'
-        });
+            value: '{{.sdtBdiBusiConfig.ProcessType}}',
+            onSelect: function (record) {
+                debugger;
+                var htmlModal = '';
+                if (record.id == 'inner-join' || record.id == 'left-join' || record.id == 'right-join' || record.id == 'full-join' || record.id == 'cross-join') {
+                    htmlModal =
+                            '<tr id="col_' + record.id + '">' +
+                            '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联字段：</td>' +
+                            '<td style="width: 150px;"><input name="processColTag_' + record.id + '" id="processColTag_' + record.id + '"/></td>' +
+                            '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processColButton_' + record.id + '" href="#">选择</a></td>' +
+                            '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">内部条件字段：</td>' +
+                            '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><input name="whereColTag_' + record.id + '" id="whereColTag_' + record.id + '"/></td>' +
+                            '<td style="width: 150px;"><a id="whereColButton_' + record.id + '" href="#">选择</a></td>' +
+                            '</tr>'
+                            +
+                            '<tr id="op_' + record.id + '">' +
+                            '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联操作符：</td>' +
+                            '<td style="width: 150px;"><input name="processColOpTag_' + record.id + '" id="processColOpTag_' + record.id + '"/></td>' +
+                            '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processColOpButton_' + record.id + '" href="#">选择</a></td>' +
+                            '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">内部条件操作符：</td>' +
+                            '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><input name="whereColOpTag_' + record.id + '" id="whereColOpTag_' + record.id + '"/></td>' +
+                            '<td style="width: 150px;"><a id="whereColOpButton_' + record.id + '" href="#">选择</a></td>' +
+                            '</tr>'
+                            +
+                            '<tr id="params_' + record.id + '">' +
+                            '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联参数：</td>' +
+                            '<td style="width: 150px;"><input name="processParamsTag_' + record.id + '" id="processParamsTag_' + record.id + '"/></td>' +
+                            '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processParamsButton_' + record.id + '" href="#">选择</a></td>' +
 
-        //操作符
-        $('#operatorsTag').tagEditor({
-            removeDuplicates: false,
-            clickDelete: true,
-            initialTags: '{{.sdtBdiBusiConfig.Operators}}'.split(","),
-            placeholder: '请输入参数'
-        });
+                            '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">内部条件参数：</td>' +
+                            '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;" colspan="2"><input name="whereParamsTag_' + record.id + '" id="whereParamsTag_' + record.id + '"/></td>' +
+                            '</tr>'
+                    ;
+                } else {
+                    htmlModal =
+                            '<tr id="col_' + record.id + '">' +
+                            '<td colspan="3" style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联字段：</td>' +
+                            '<td style="width: 150px;"><input name="processColTag_' + record.id + '" id="processColTag_' + record.id + '"/></td>' +
+                            '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processColButton_' + record.id + '" href="#">选择</a></td>' +
+                            '</tr>'
+                            +
+                            '<tr id="op_' + record.id + '">' +
+                            '<td colspan="3" style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联操作符：</td>' +
+                            '<td style="width: 150px;"><input name="processColOpTag_' + record.id + '" id="processColOpTag_' + record.id + '"/></td>' +
+                            '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processColOpButton_' + record.id + '" href="#">选择</a></td>' +
+                            '</tr>'
+                            +
+                            '<tr id="params_' + record.id + '">' +
+                            '<td colspan="3" style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联参数：</td>' +
+                            '<td style="width: 150px;"><input name="processParamsTag_' + record.id + '" id="processParamsTag_' + record.id + '"/></td>' +
+                            '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processParamsButton_' + record.id + '" href="#">选择</a></td>' +
+                            '</tr>'
+                    ;
+                }
+                var tr = $("#tb").append(htmlModal);
 
-        $('#selectOperatorsButton').linkbutton({
-            iconCls: 'icon-search',
-            onClick: function () {
-                $('#operatorsDialog').dialog('open');
+                //处理字段
+                var processColTagId = '#processColTag_' + record.id;
+                $(processColTagId).tagEditor({
+                    maxTags: 100,
+                    maxLength: 150,
+                    removeDuplicates: false,
+                    sortable: false,
+                    initialTags: [],
+                    forceLowercase: false,
+                    placeholder: '输入完请按Enter结束',
+                    onChange: function (field, editor, tags) {
+                    },
+                    beforeTagSave: function (field, editor, tags, tag, val) {
+                    },
+                    beforeTagDelete: function (field, editor, tags, val) {
+                    },
+                    onFocus: function () {
+                    }
+                });
+
+                var processColButtonId = '#processColButton_' + record.id;
+                $(processColButtonId).linkbutton({
+                    iconCls: 'icon-search',
+                    onClick: function () {
+                        $('<div></div>').dialog({
+                            id: 'selectParamsDialog_' + record.id,
+                            title: '选择处理字段',
+                            width: '500px',
+                            height: '300px',
+                            closed: false,
+                            cache: false,
+                            draggable: false,
+                            resizable: false,
+                            href: '/sdtBdiBusiFields/columnSelectTreePage',
+                            modal: true,
+                            onLoad: function () {
+                            },
+                            onClose: function () {
+                                $(this).dialog('destroy');
+                            },
+                            buttons: [{
+                                text: '保存',
+                                iconCls: 'icon-ok',
+                                handler: function () {
+                                    debugger;
+                                    //---------------------------------------------------------------------------
+                                    var selectNode = $('#columnSelectTree').tree('getChecked');
+                                    if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
+                                        $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                                        return;
+                                    }
+
+                                    var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+                                    var resArray = tName.split("_");
+                                    var tableAliasTemp = '';
+                                    for (var i = 0; i < resArray.length; i++) {
+                                        tableAliasTemp += resArray[i].substr(0, 1);
+                                    }
+
+                                    var dataTypes = '';
+                                    var dataLengths = '';
+                                    for (var i = 0; i < selectNode.length; i++) {
+                                        dataTypes = dataTypes + selectNode[i].attributes.dataType + ", ";
+                                        dataLengths = dataLengths + selectNode[i].attributes.columnType.replace(/\D/g, '') + ", ";
+                                        $(processColTagId).tagEditor('addTag', tableAliasTemp + "." + selectNode[i].id);
+                                    }
+
+                                    $("#processDataType").val(($("#processDataType").val() == '' ? '' : $("#processDataType").val() + ',') + dataTypes.substring(0, dataTypes.length - 2));
+                                    $("#processDataLength").val(($("#processDataLength").val() == '' ? '' : $("#processDataLength").val() + ',') + dataLengths.substring(0, dataLengths.length - 2));
+                                    $('#selectParamsDialog_' + record.id).dialog('destroy');
+                                }
+                            }, {
+                                text: '取消',
+                                iconCls: 'icon-cancel',
+                                handler: function () {
+                                    $('#selectParamsDialog_' + record.id).dialog('destroy');
+                                }
+                            }]
+                        });
+                    }
+                });
+
+                var processColOpTagId = '#processColOpTag_' + record.id;
+                $(processColOpTagId).tagEditor({
+                    maxTags: 100,
+                    maxLength: 150,
+                    removeDuplicates: false,
+                    sortable: false,
+                    initialTags: [],
+                    forceLowercase: false,
+                    placeholder: '输入完请按Enter结束',
+                    onChange: function (field, editor, tags) {
+                    },
+                    beforeTagSave: function (field, editor, tags, tag, val) {
+                    },
+                    beforeTagDelete: function (field, editor, tags, val) {
+                    },
+                    onFocus: function () {
+                    }
+                });
+
+                var processColOpButtonId = '#processColOpButton_' + record.id;
+                $(processColOpButtonId).linkbutton({
+                    iconCls: 'icon-search',
+                    onClick: function () {
+                        $('<div></div>').dialog({
+                            id: 'fieldOpDialog_' + record.id,
+                            title: '选择处理操作符',
+                            width: '500px',
+                            height: '300px',
+                            closed: false,
+                            cache: false,
+                            draggable: false,
+                            resizable: false,
+                            href: '/sdtBdiBusiFields/operatorDialogPage',
+                            modal: true,
+                            onLoad: function () {
+                            },
+                            onClose: function () {
+                                $(this).dialog('destroy');
+                            },
+                            buttons: [{
+                                text: '保存',
+                                iconCls: 'icon-ok',
+                                handler: function () {
+                                    $(processColOpTagId).tagEditor('addTag', $('#operatorsCombobox').combobox('getValue'));
+                                    $('#fieldOpDialog_' + record.id).dialog('destroy');
+                                }
+                            }, {
+                                text: '取消',
+                                iconCls: 'icon-cancel',
+                                handler: function () {
+                                    $('#fieldOpDialog_' + record.id).dialog('destroy');
+                                }
+                            }]
+                        });
+                    }
+                });
+
+                var processParamsTagId = '#processParamsTag_' + record.id;
+                $(processParamsTagId).tagEditor({
+                    maxTags: 100,
+                    maxLength: 150,
+                    removeDuplicates: false,
+                    sortable: false,
+                    initialTags: [],
+                    forceLowercase: false,
+                    placeholder: '输入完请按Enter结束'
+                });
+
+                var processParamsButtonId = '#processParamsButton_' + record.id;
+                $(processParamsButtonId).linkbutton({
+                    iconCls: 'icon-search',
+                    onClick: function () {
+                        $('<div></div>').dialog({
+                            id: 'selectParamsDialog_' + record.id,
+                            title: '选择处理字段',
+                            width: '500px',
+                            height: '300px',
+                            closed: false,
+                            cache: false,
+                            draggable: false,
+                            resizable: false,
+                            href: '/sdtBdiBusiFields/columnSelectTreePage',
+                            modal: true,
+                            onLoad: function () {
+                            },
+                            onClose: function () {
+                                $(this).dialog('destroy');
+                            },
+                            buttons: [{
+                                text: '保存',
+                                iconCls: 'icon-ok',
+                                handler: function () {
+                                    var selectNode = $('#columnSelectTree').tree('getChecked');
+                                    if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
+                                        $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                                        return;
+                                    }
+
+                                    var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+                                    var resArray = tName.split("_");
+                                    var tableAliasTemp = '';
+                                    for (var i = 0; i < resArray.length; i++) {
+                                        tableAliasTemp += resArray[i].substr(0, 1);
+                                    }
+
+                                    for (var i = 0; i < selectNode.length; i++) {
+                                        $(processParamsTagId).tagEditor('addTag', tableAliasTemp + "." + selectNode[i].id);
+                                    }
+                                    $('#selectParamsDialog_' + record.id).dialog('destroy');
+                                }
+                            }, {
+                                text: '取消',
+                                iconCls: 'icon-cancel',
+                                handler: function () {
+                                    $('#selectParamsDialog_' + record.id).dialog('destroy');
+                                }
+                            }]
+                        });
+                    }
+                });
+
+                //---------------------------------------------------------------------------------------
+                //条件字段
+                var whereColTagId = '#whereColTag_' + record.id;
+                $(whereColTagId).tagEditor({
+                    maxTags: 100,
+                    maxLength: 150,
+                    removeDuplicates: false,
+                    sortable: false,
+                    initialTags: [],
+                    forceLowercase: false,
+                    placeholder: '输入完请按Enter结束',
+                    onChange: function (field, editor, tags) {
+                    },
+                    beforeTagSave: function (field, editor, tags, tag, val) {
+                    },
+                    beforeTagDelete: function (field, editor, tags, val) {
+                    },
+                    onFocus: function () {
+                    }
+                });
+
+                var whereColButtonId = '#whereColButton_' + record.id;
+                $(whereColButtonId).linkbutton({
+                    iconCls: 'icon-search',
+                    onClick: function () {
+                        $('<div></div>').dialog({
+                            id: 'selectParamsDialog_' + record.id,
+                            title: '选择内部条件字段',
+                            width: '500px',
+                            height: '300px',
+                            closed: false,
+                            cache: false,
+                            draggable: false,
+                            resizable: false,
+                            href: '/sdtBdiBusiFields/columnSelectTreePage',
+                            modal: true,
+                            onLoad: function () {
+                            },
+                            onClose: function () {
+                                $(this).dialog('destroy');
+                            },
+                            buttons: [{
+                                text: '保存',
+                                iconCls: 'icon-ok',
+                                handler: function () {
+                                    var selectNode = $('#columnSelectTree').tree('getChecked');
+                                    if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
+                                        $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                                        return;
+                                    }
+
+                                    var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+                                    var resArray = tName.split("_");
+                                    var tableAliasTemp = '';
+                                    for (var i = 0; i < resArray.length; i++) {
+                                        tableAliasTemp += resArray[i].substr(0, 1);
+                                    }
+
+                                    for (var i = 0; i < selectNode.length; i++) {
+                                        $(whereColTagId).tagEditor('addTag', tableAliasTemp + "." + selectNode[i].id);
+                                    }
+
+                                    var dataTypes = '';
+                                    var dataLengths = '';
+                                    for (var i = 0; i < selectNode.length; i++) {
+                                        dataTypes = dataTypes + selectNode[i].attributes.dataType + ", ";
+                                        dataLengths = dataLengths + selectNode[i].attributes.columnType.replace(/\D/g, '') + ", ";
+                                    }
+
+                                    debugger;
+                                    $("#tempProcessDataType").val(($("#tempProcessDataType").val() == '' ? '' : $("#tempProcessDataType").val() + ',') + dataTypes.substring(0, dataTypes.length - 2));
+                                    $("#tempProcessDataLength").val(($("#tempProcessDataLength").val() == '' ? '' : $("#tempProcessDataLength").val() + ',') + dataLengths.substring(0, dataLengths.length - 2));
+                                    $('#selectParamsDialog_' + record.id).dialog('destroy');
+                                }
+                            }, {
+                                text: '取消',
+                                iconCls: 'icon-cancel',
+                                handler: function () {
+                                    $('#selectParamsDialog_' + record.id).dialog('destroy');
+                                }
+                            }]
+                        });
+                    }
+                });
+
+                var whereColOpTagId = '#whereColOpTag_' + record.id;
+                $(whereColOpTagId).tagEditor({
+                    maxTags: 100,
+                    maxLength: 150,
+                    removeDuplicates: false,
+                    sortable: false,
+                    initialTags: [],
+                    forceLowercase: false,
+                    placeholder: '输入完请按Enter结束',
+                    onChange: function (field, editor, tags) {
+                    },
+                    beforeTagSave: function (field, editor, tags, tag, val) {
+                    },
+                    beforeTagDelete: function (field, editor, tags, val) {
+                    },
+                    onFocus: function () {
+                    }
+                });
+
+                var whereColOpButtonId = '#whereColOpButton_' + record.id;
+                $(whereColOpButtonId).linkbutton({
+                    iconCls: 'icon-search',
+                    onClick: function () {
+                        $('<div></div>').dialog({
+                            id: 'fieldOpDialog_' + record.id,
+                            title: '选择条件操作符',
+                            width: '500px',
+                            height: '300px',
+                            closed: false,
+                            cache: false,
+                            draggable: false,
+                            resizable: false,
+                            href: '/sdtBdiBusiFields/operatorDialogPage',
+                            modal: true,
+                            onLoad: function () {
+                            },
+                            onClose: function () {
+                                $(this).dialog('destroy');
+                            },
+                            buttons: [{
+                                text: '保存',
+                                iconCls: 'icon-ok',
+                                handler: function () {
+                                    $(whereColOpTagId).tagEditor('addTag', $('#operatorsCombobox').combobox('getValue'));
+                                    $('#fieldOpDialog_' + record.id).dialog('destroy');
+                                }
+                            }, {
+                                text: '取消',
+                                iconCls: 'icon-cancel',
+                                handler: function () {
+                                    $('#fieldOpDialog_' + record.id).dialog('destroy');
+                                }
+                            }]
+                        });
+                    }
+                });
+
+                $('#whereParamsTag_' + record.id).tagEditor({
+                    maxTags: 100,
+                    maxLength: 150,
+                    removeDuplicates: false,
+                    sortable: false,
+                    initialTags: [],
+                    forceLowercase: false,
+                    placeholder: '输入完请按Enter结束'
+                });
+
+            },
+            onUnselect: function (record) {
+                debugger;
+                $("#col_" + record.id).remove();
+                $("#op_" + record.id).remove();
+                $("#params_" + record.id).remove();
+            },
+            onLoadSuccess: function () {
+                initTagEditor('{{.sdtBdiBusiConfig.ProcessType}}', '{{.sdtBdiBusiConfig.ProcessColumn}}', '{{.sdtBdiBusiConfig.Operators}}', '{{.sdtBdiBusiConfig.Params}}');//初始化-tagEditor
+            },
+            onChange: function (newValue, oldValue) {
+                debugger;
+                $("#col_" + oldValue).remove();
+                $("#op_" + oldValue).remove();
+                $("#params_" + oldValue).remove();
             }
         });
+    }
 
-        //参数
-        $('#paramsTag').tagEditor({
+
+    function initTagEditor(processType, processColumn, operators, params) {
+        if(processType == '') {
+            return;
+        }
+        debugger;
+        var htmlModal = '';
+        if (processType == 'inner-join' || processType == 'left-join' || processType == 'right-join' || processType == 'full-join' || processType == 'cross-join') {
+            htmlModal =
+                    '<tr id="col_' + processType + '">' +
+                    '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联字段：</td>' +
+                    '<td style="width: 150px;"><input name="processColTag_' + processType + '" id="processColTag_' + processType + '"/></td>' +
+                    '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processColButton_' + processType + '" href="#">选择</a></td>' +
+                    '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">内部条件字段：</td>' +
+                    '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><input name="whereColTag_' + processType + '" id="whereColTag_' + processType + '"/></td>' +
+                    '<td style="width: 150px;"><a id="whereColButton_' + processType + '" href="#">选择</a></td>' +
+                    '</tr>'
+                    +
+                    '<tr id="op_' + processType + '">' +
+                    '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联操作符：</td>' +
+                    '<td style="width: 150px;"><input name="processColOpTag_' + processType + '" id="processColOpTag_' + processType + '"/></td>' +
+                    '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processColOpButton_' + processType + '" href="#">选择</a></td>' +
+                    '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">内部条件操作符：</td>' +
+                    '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><input name="whereColOpTag_' + processType + '" id="whereColOpTag_' + processType + '"/></td>' +
+                    '<td style="width: 150px;"><a id="whereColOpButton_' + processType + '" href="#">选择</a></td>' +
+                    '</tr>'
+                    +
+                    '<tr id="params_' + processType + '">' +
+                    '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联参数：</td>' +
+                    '<td style="width: 150px;"><input name="processParamsTag_' + processType + '" id="processParamsTag_' + processType + '"/></td>' +
+                    '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processParamsButton_' + processType + '" href="#">选择</a></td>' +
+
+                    '<td style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">内部条件参数：</td>' +
+                    '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;" colspan="2"><input name="whereParamsTag_' + processType + '" id="whereParamsTag_' + processType + '"/></td>' +
+                    '</tr>'
+            ;
+        } else {
+            htmlModal =
+                    '<tr id="col_' + processType + '">' +
+                    '<td colspan="3" style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联字段：</td>' +
+                    '<td style="width: 150px;"><input name="processColTag_' + processType + '" id="processColTag_' + processType + '"/></td>' +
+                    '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processColButton_' + processType + '" href="#">选择</a></td>' +
+                    '</tr>'
+                    +
+                    '<tr id="op_' + processType + '">' +
+                    '<td colspan="3" style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联操作符：</td>' +
+                    '<td style="width: 150px;"><input name="processColOpTag_' + processType + '" id="processColOpTag_' + processType + '"/></td>' +
+                    '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processColOpButton_' + processType + '" href="#">选择</a></td>' +
+                    '</tr>'
+                    +
+                    '<tr id="params_' + processType + '">' +
+                    '<td colspan="3" style="width: 150px;text-align: right; padding: 5px 5px 5px 5px;">关联参数：</td>' +
+                    '<td style="width: 150px;"><input name="processParamsTag_' + processType + '" id="processParamsTag_' + processType + '"/></td>' +
+                    '<td style="width: 150px;text-align: left; padding: 5px 5px 5px 5px;"><a id="processParamsButton_' + processType + '" href="#">选择</a></td>' +
+                    '</tr>'
+            ;
+        }
+        var tr = $("#tb").append(htmlModal);
+
+        //处理字段
+        var processColTagId = '#processColTag_' + processType;
+        $(processColTagId).tagEditor({
+            maxTags: 100,
+            maxLength: 150,
             removeDuplicates: false,
-            clickDelete: true,
+            sortable: false,
+            initialTags: [],
             forceLowercase: false,
-            initialTags: '{{.sdtBdiBusiConfig.Params}}'.split(","),
-            placeholder: '请输入参数'
+            placeholder: '输入完请按Enter结束',
+            onChange: function (field, editor, tags) {
+            },
+            beforeTagSave: function (field, editor, tags, tag, val) {
+            },
+            beforeTagDelete: function (field, editor, tags, val) {
+            },
+            onFocus: function () {
+            }
         });
+        var processColumnVal = '';
+        if (processColumn.indexOf('[') != -1) {
+            processColumnVal = processColumn.substring(0, processColumn.indexOf('[') - 1);
+        } else {
+            processColumnVal = processColumn;
+        }
 
-        $('#selectParamsButton').linkbutton({
+        $(processColTagId).tagEditor('addTag', processColumnVal);
+
+        var processColButtonId = '#processColButton_' + processType;
+        $(processColButtonId).linkbutton({
             iconCls: 'icon-search',
             onClick: function () {
                 $('<div></div>').dialog({
-                    id: 'selectParamsSelectDialog',
-                    title: '选择表字段',
+                    id: 'selectParamsDialog_' + processType,
+                    title: '选择处理字段',
+                    width: '500px',
+                    height: '300px',
+                    closed: false,
+                    cache: false,
+                    draggable: false,
+                    resizable: false,
+                    href: '/sdtBdiBusiFields/columnSelectTreePage',
+                    modal: true,
+                    onLoad: function () {
+                    },
+                    onClose: function () {
+                        $(this).dialog('destroy');
+                    },
+                    buttons: [{
+                        text: '保存',
+                        iconCls: 'icon-ok',
+                        handler: function () {
+                            debugger;
+                            var selectNode = $('#columnSelectTree').tree('getChecked');
+                            if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
+                                $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                                return;
+                            }
+
+                            var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+                            var resArray = tName.split("_");
+                            var tableAliasTemp = '';
+                            for (var i = 0; i < resArray.length; i++) {
+                                tableAliasTemp += resArray[i].substr(0, 1);
+                            }
+
+                            var dataTypes = '';
+                            var dataLengths = '';
+                            for (var i = 0; i < selectNode.length; i++) {
+                                dataTypes = dataTypes + selectNode[i].attributes.dataType + ", ";
+                                dataLengths = dataLengths + selectNode[i].attributes.columnType.replace(/\D/g, '') + ", ";
+                                $(processColTagId).tagEditor('addTag', tableAliasTemp + "." + selectNode[i].id);
+                            }
+
+                            $("#processDataType").val(($("#processDataType").val() == '' ? '' : $("#processDataType").val() + ',') + dataTypes.substring(0, dataTypes.length - 2));
+                            $("#processDataLength").val(($("#processDataLength").val() == '' ? '' : $("#processDataLength").val() + ',') + dataLengths.substring(0, dataLengths.length - 2));
+                            $('#selectParamsDialog_' + processType).dialog('destroy');
+
+                        }
+                    }, {
+                        text: '取消',
+                        iconCls: 'icon-cancel',
+                        handler: function () {
+                            $('#selectParamsDialog_' + processType).dialog('destroy');
+                        }
+                    }]
+                });
+            }
+        });
+
+        var processColOpTagId = '#processColOpTag_' + processType;
+        $(processColOpTagId).tagEditor({
+            maxTags: 100,
+            maxLength: 150,
+            removeDuplicates: false,
+            sortable: false,
+            initialTags: [],
+            forceLowercase: false,
+            placeholder: '输入完请按Enter结束',
+            onChange: function (field, editor, tags) {
+            },
+            beforeTagSave: function (field, editor, tags, tag, val) {
+            },
+            beforeTagDelete: function (field, editor, tags, val) {
+            },
+            onFocus: function () {
+            }
+        });
+
+        var operatorsVal = '';
+        if (operators.indexOf('[') != -1) {
+            operatorsVal = operators.substring(0, operators.indexOf('[') - 1);
+        } else {
+            operatorsVal = operators;
+        }
+
+        $(processColOpTagId).tagEditor('addTag', operatorsVal);
+
+
+        var processColOpButtonId = '#processColOpButton_' + processType;
+        $(processColOpButtonId).linkbutton({
+            iconCls: 'icon-search',
+            onClick: function () {
+                $('<div></div>').dialog({
+                    id: 'fieldOpDialog_' + processType,
+                    title: '选择处理操作符',
+                    width: '500px',
+                    height: '300px',
+                    closed: false,
+                    cache: false,
+                    draggable: false,
+                    resizable: false,
+                    href: '/sdtBdiBusiFields/operatorDialogPage',
+                    modal: true,
+                    onLoad: function () {
+                    },
+                    onClose: function () {
+                        $(this).dialog('destroy');
+                    },
+                    buttons: [{
+                        text: '保存',
+                        iconCls: 'icon-ok',
+                        handler: function () {
+                            $(processColOpTagId).tagEditor('addTag', $('#operatorsCombobox').combobox('getValue'));
+                            $('#fieldOpDialog_' + processType).dialog('destroy');
+                        }
+                    }, {
+                        text: '取消',
+                        iconCls: 'icon-cancel',
+                        handler: function () {
+                            $('#fieldOpDialog_' + processType).dialog('destroy');
+                        }
+                    }]
+                });
+            }
+        });
+
+        var processParamsTagId = '#processParamsTag_' + processType;
+        $(processParamsTagId).tagEditor({
+            maxTags: 100,
+            maxLength: 150,
+            removeDuplicates: false,
+            sortable: false,
+            initialTags: [],
+            forceLowercase: false,
+            placeholder: '输入完请按Enter结束'
+        });
+
+
+        var paramsVal = '';
+        if (params.indexOf('[') != -1) {
+            paramsVal = params.substring(0, params.indexOf('[') - 1);
+        } else {
+            paramsVal = params;
+        }
+
+        $(processParamsTagId).tagEditor('addTag', paramsVal);
+
+        var processParamsButtonId = '#processParamsButton_' + processType;
+        $(processParamsButtonId).linkbutton({
+            iconCls: 'icon-search',
+            onClick: function () {
+                $('<div></div>').dialog({
+                    id: 'selectParamsDialog_' + processType,
+                    title: '选择处理字段',
                     width: '500px',
                     height: '300px',
                     closed: false,
@@ -311,8 +946,8 @@
                         iconCls: 'icon-ok',
                         handler: function () {
                             var selectNode = $('#columnSelectTree').tree('getChecked');
-                            if (selectNode == undefined || selectNode == null) {
-                                $.messager.alert('提示信息', '请选择表字段!', 'info');
+                            if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
+                                $.messager.alert('提示信息', '请选择一个表字段!', 'info');
                                 return;
                             }
 
@@ -324,73 +959,199 @@
                             }
 
                             for (var i = 0; i < selectNode.length; i++) {
-                                $('#paramsTag').tagEditor('addTag', tableAliasTemp + "." + selectNode[i].id);
+                                $(processParamsTagId).tagEditor('addTag', tableAliasTemp + "." + selectNode[i].id);
                             }
-
-                            $("#selectParamsSelectDialog").dialog('destroy');
+                            $('#selectParamsDialog_' + processType).dialog('destroy');
                         }
                     }, {
                         text: '取消',
                         iconCls: 'icon-cancel',
                         handler: function () {
-                            $("#selectParamsSelectDialog").dialog('destroy');
+                            $('#selectParamsDialog_' + processType).dialog('destroy');
                         }
                     }]
                 });
             }
         });
 
-        //操作符选择 Dialog
-        $('#operatorsDialog').dialog({
-            title: '操作符选择窗口',
-            width: '300px',
-            height: '200px',
-            cache: false,
-            modal: true,
-            closed: true,
-            buttons: [{
-                text: '保存',
-                iconCls: 'icon-ok',
-                handler: function () {
-                    $('#operatorsTag').tagEditor('addTag', $('#operatorsCombobox').combobox('getValue'));
-                    $("#operatorsDialog").dialog('close');
-                }
-            }, {
-                text: '取消',
-                iconCls: 'icon-cancel',
-                handler: function () {
-                    $("#operatorsDialog").dialog('close');
-                }
-            }]
+        //---------------------------------------------------------------------------------------
+        //条件字段
+        var whereColTagId = '#whereColTag_' + processType;
+        $(whereColTagId).tagEditor({
+            maxTags: 100,
+            maxLength: 150,
+            removeDuplicates: false,
+            sortable: false,
+            initialTags: [],
+            forceLowercase: false,
+            placeholder: '输入完请按Enter结束',
+            onChange: function (field, editor, tags) {
+            },
+            beforeTagSave: function (field, editor, tags, tag, val) {
+            },
+            beforeTagDelete: function (field, editor, tags, val) {
+            },
+            onFocus: function () {
+            }
         });
 
-        $('#operatorsCombobox').combobox({
-            valueField: 'id',
-            textField: 'text',
-            panelHeight: 'auto',
-            panelMaxHeight: '200px',
-            editable: false,
-            readonly: false,
-            data: [{
-                "id": "=",
-                "text": "等于"
-            }, {
-                "id": ">",
-                "text": "大于"
-            }, {
-                "id": ">=",
-                "text": "大于等于"
-            }, {
-                "id": "<",
-                "text": "小于"
-            }, {
-                "id": "<=",
-                "text": "小于等于"
-            }, {
-                "id": "!=",
-                "text": "不等于"
-            }],
-            prompt: '操作符'
+        var whereColButtonId = '#whereColButton_' + processType;
+        $(whereColButtonId).linkbutton({
+            iconCls: 'icon-search',
+            onClick: function () {
+                $('<div></div>').dialog({
+                    id: 'selectParamsDialog_' + processType,
+                    title: '选择条件字段',
+                    width: '500px',
+                    height: '300px',
+                    closed: false,
+                    cache: false,
+                    draggable: false,
+                    resizable: false,
+                    href: '/sdtBdiBusiFields/columnSelectTreePage',
+                    modal: true,
+                    onLoad: function () {
+                    },
+                    onClose: function () {
+                        $(this).dialog('destroy');
+                    },
+                    buttons: [{
+                        text: '保存',
+                        iconCls: 'icon-ok',
+                        handler: function () {
+                            var selectNode = $('#columnSelectTree').tree('getChecked');
+                            if (selectNode == undefined || selectNode == null || selectNode.length < 1) {
+                                $.messager.alert('提示信息', '请选择一个表字段!', 'info');
+                                return;
+                            }
+
+                            var tName = selectNode.length > 0 ? selectNode[0].attributes.tableName : null;
+                            var resArray = tName.split("_");
+                            var tableAliasTemp = '';
+                            for (var i = 0; i < resArray.length; i++) {
+                                tableAliasTemp += resArray[i].substr(0, 1);
+                            }
+
+                            for (var i = 0; i < selectNode.length; i++) {
+                                $(whereColTagId).tagEditor('addTag', tableAliasTemp + "." + selectNode[i].id);
+                            }
+
+                            var dataTypes = '';
+                            var dataLengths = '';
+                            for (var i = 0; i < selectNode.length; i++) {
+                                dataTypes = dataTypes + selectNode[i].attributes.dataType + ", ";
+                                dataLengths = dataLengths + selectNode[i].attributes.columnType.replace(/\D/g, '') + ", ";
+                            }
+
+                            debugger;
+                            $("#tempProcessDataType").val(($("#tempProcessDataType").val() == '' ? '' : $("#tempProcessDataType").val() + ',') + dataTypes.substring(0, dataTypes.length - 2));
+                            $("#tempProcessDataLength").val(($("#tempProcessDataLength").val() == '' ? '' : $("#tempProcessDataLength").val() + ',') + dataLengths.substring(0, dataLengths.length - 2));
+                            $('#selectParamsDialog_' + record.id).dialog('destroy');
+                        }
+                    }, {
+                        text: '取消',
+                        iconCls: 'icon-cancel',
+                        handler: function () {
+                            $('#selectParamsDialog_' + processType).dialog('destroy');
+                        }
+                    }]
+                });
+            }
         });
+
+        var whereColOpTagId = '#whereColOpTag_' + processType;
+        $(whereColOpTagId).tagEditor({
+            maxTags: 100,
+            maxLength: 150,
+            removeDuplicates: false,
+            sortable: false,
+            initialTags: [],
+            forceLowercase: false,
+            placeholder: '输入完请按Enter结束',
+            onChange: function (field, editor, tags) {
+            },
+            beforeTagSave: function (field, editor, tags, tag, val) {
+            },
+            beforeTagDelete: function (field, editor, tags, val) {
+            },
+            onFocus: function () {
+            }
+        });
+
+        var whereColOpButtonId = '#whereColOpButton_' + processType;
+        $(whereColOpButtonId).linkbutton({
+            iconCls: 'icon-search',
+            onClick: function () {
+                $('<div></div>').dialog({
+                    id: 'fieldOpDialog_' + processType,
+                    title: '选择条件操作符',
+                    width: '500px',
+                    height: '300px',
+                    closed: false,
+                    cache: false,
+                    draggable: false,
+                    resizable: false,
+                    href: '/sdtBdiBusiFields/operatorDialogPage',
+                    modal: true,
+                    onLoad: function () {
+                    },
+                    onClose: function () {
+                        $(this).dialog('destroy');
+                    },
+                    buttons: [{
+                        text: '保存',
+                        iconCls: 'icon-ok',
+                        handler: function () {
+                            $(whereColOpTagId).tagEditor('addTag', $('#operatorsCombobox').combobox('getValue'));
+                            $('#fieldOpDialog_' + processType).dialog('destroy');
+                        }
+                    }, {
+                        text: '取消',
+                        iconCls: 'icon-cancel',
+                        handler: function () {
+                            $('#fieldOpDialog_' + processType).dialog('destroy');
+                        }
+                    }]
+                });
+            }
+        });
+
+        var whereParamsTagId = '#whereParamsTag_' + processType;
+        $(whereParamsTagId).tagEditor({
+            maxTags: 100,
+            maxLength: 150,
+            removeDuplicates: false,
+            sortable: false,
+            initialTags: [],
+            forceLowercase: false,
+            placeholder: '输入完请按Enter结束'
+        });
+
+        if (processType == 'inner-join' || processType == 'left-join' || processType == 'right-join' || processType == 'full-join' || processType == 'cross-join') {
+            var processColumnVal = '';
+            if (processColumn.indexOf('[') != -1) {
+                processColumnVal = processColumn.substring(processColumn.indexOf('[') + 1, processColumn.indexOf(']'));
+            } else {
+                processColumnVal = processColumn;
+            }
+            $(whereColTagId).tagEditor('addTag', processColumnVal);
+
+            var operatorsVal = '';
+            if (operators.indexOf('[') != -1) {
+                operatorsVal = operators.substring(operators.indexOf('[') + 1, operators.indexOf(']'));
+            } else {
+                operatorsVal = operators;
+            }
+            $(whereColOpTagId).tagEditor('addTag', operatorsVal);
+
+            var paramsVal = '';
+            if (params.indexOf('[') != -1) {
+                paramsVal = params.substring(params.indexOf('[') + 1, params.indexOf(']'));
+            } else {
+                paramsVal = params;
+            }
+            $(whereParamsTagId).tagEditor('addTag', paramsVal);
+        }
     }
+
 </script>

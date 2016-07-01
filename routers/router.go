@@ -112,6 +112,10 @@ func init() {
 	beego.Router("/sdtBdiBusiFields/processFields", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessFields")
 	beego.Router("/sdtBdiBusiFields/processFields/add", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessFieldsAdd")
 	beego.Router("/sdtBdiBusiFields/processType", &controllers.SdtBdiBusiFieldsController{}, "*:ProcessType")
+
+	beego.Router("/sdtBdiBusiFields/operatorDialogPage", &controllers.SdtBdiBusiFieldsController{}, "*:OperatorDialogPage")
+
+
 	beego.Router("/sdtBdiBusiFields/addFieldsPage", &controllers.SdtBdiBusiFieldsController{}, "*:AddFieldsPage")                     //新增字段首页
 	beego.Router("/sdtBdiBusiFields/addConstFields/add", &controllers.SdtBdiBusiFieldsController{}, "*:AddConstFields")               //新增Const字段保存
 	beego.Router("/sdtBdiBusiFields/addFields/add", &controllers.SdtBdiBusiFieldsController{}, "*:AddFields")                         //新增字段保存
